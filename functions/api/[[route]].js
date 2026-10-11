@@ -10,6 +10,7 @@ const DEFAULT_CATS = [
   { id: 'comfort', name: 'مريح', desc: '٤ ركاب • عربية أحدث وأريح', extra: 10 },
   { id: 'family', name: 'عائلي', desc: '٦ ركاب • عربية كبيرة', extra: 20 }
 ];
+const DEMO_ID = 9001; // رقم ثابت للسواق التجريبي عشان ميتغيّرش بين الطلبات
 const uid = () => Date.now() * 1000 + Math.floor(Math.random() * 1000);
 
 function fresh() {
@@ -19,7 +20,7 @@ function fresh() {
     buildings: [], coords: {},
     riders: [], trips: [], payments: [], msgs: [],
     drivers: [
-      { id: uid(), name: 'سواق تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 },
+      { id: DEMO_ID, name: 'سواق تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 },
       { id: uid(), name: 'سواق تجريبي ثلاثي', phone: '01000000001', license: '123456', nid: '29001010101010', cat: 'eco', photos: {}, status: 'approved', subUntil: Date.now() + 30 * 864e5 }
     ]
   };
@@ -30,15 +31,22 @@ function normalize(DB) {
   DB.coords = DB.coords || {};
   if (!DB.settings.cats) DB.settings.cats = DEFAULT_CATS.map(c => ({ ...c }));
   DB.drivers.forEach(d => { if (!d.cat) d.cat = 'eco'; });
-  if (!DB.drivers.some(d => d.phone === '01000000002'))
-    DB.drivers.push({ id: uid(), name: 'سواق تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 });
+  // السواق التجريبي: دايمًا موجود، مقبول، واشتراكه شغّال، وID ثابت
+  const demo = DB.drivers.find(d => d.phone === '01000000002');
+  if (!demo) DB.drivers.push({ id: DEMO_ID, name: 'سواق تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 });
+  else { demo.id = DEMO_ID; demo.status = 'approved'; demo.subUntil = Math.max(demo.subUntil || 0, Date.now() + 30 * 864e5); }
   DB.buildings = (DB.buildings || []).filter(b => /^(block|u|t)[|]/.test(b));
   return DB;
 }
 
 async function load(env) {
-  const db = await env.TAWSEELA.get(KEY, 'json');
-  return normalize(db || fresh());
+  let db = await env.TAWSEELA.get(KEY, 'json');
+  if (!db) {
+    // أول مرة: احفظ البيانات الأولية عشان الـ IDs تفضل ثابتة بين الطلبات
+    db = normalize(fresh());
+    await env.TAWSEELA.put(KEY, JSON.stringify(db));
+  }
+  return normalize(db);
 }
 
 const pinOf = env => env.ADMIN_PIN || '1234';
