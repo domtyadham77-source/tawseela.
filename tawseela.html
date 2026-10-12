@@ -204,7 +204,19 @@ label.act{color:#F9A8D4}
 .nm{font-size:11px;color:#FCD34D}
 .lmz{pointer-events:all}.lmz.ctx{pointer-events:none}
 .plc{cursor:pointer}.pdot{fill:rgba(167,139,250,.28);stroke:rgba(167,139,250,.6);stroke-width:1;vector-effect:non-scaling-stroke}
+.mapnote{position:absolute;top:calc(64px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:5;background:rgba(26,16,48,.92);border:1px solid rgba(252,211,77,.45);color:#FDE68A;font:600 12px Cairo;padding:6px 12px;border-radius:99px;white-space:nowrap;pointer-events:none;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.hsheet{transition:transform .25s ease}
+.hsheet.dragging{transition:none}
+.hsheet.collapsed{transform:translateY(calc(100% - 64px))}
+.hsheet .grab{cursor:grab;touch-action:none;padding:8px 0;margin:-8px auto 6px;width:64px}
+.supbox a{display:block;color:#fff;text-decoration:none;font-weight:800;font-size:13px;line-height:1.4}
+.credit{text-align:center;font-size:11px;color:#8b7fb0;padding:14px 0 6px;letter-spacing:.4px}
 </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#7C3AED">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="توصيلة">
+<link rel="apple-touch-icon" href="/icon-192.png">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -231,7 +243,7 @@ label.act{color:#F9A8D4}
 </header>
 <main id="app"></main>
 <div id="home" class="homepg">
-  <div class="mapwrap"><svg id="map" role="img" aria-label="خريطة المدينة"></svg></div>
+  <div class="mapwrap"><svg id="map" role="img" aria-label="خريطة المدينة"></svg><div class="mapnote">⚠️ الخريطة دي تقريبية للمدينة، مش خريطة حقيقية بالمقاييس</div></div>
   <button class="fab fab-menu" onclick="openDrawer()" aria-label="القايمة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button class="fab fab-trips" onclick="openHistory()" aria-label="رحلاتي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
   <div class="hwrap">
@@ -260,6 +272,7 @@ label.act{color:#F9A8D4}
 // ---------- ثوابت ----------
 // غيّر الكود ده لكود سري بتاعك. رابط الأدمن: الرابط + هذا الكود
 const ADMIN_KEY='#admin-x7k29q';
+const SUPPORT_PHONE='01031730512'; // رقم الدعم وخدمة العملاء (هيتغيّر للرقم الحقيقي)
 const WALLET={vodafone:'فودافون كاش',orange:'أورنج كاش',etisalat:'اتصالات كاش',instapay:'إنستا باي'};
 const ST={requested:'في انتظار سواق',accepted:'السواق أكّد وجاي لك',arrived:'السواق وصل',started:'الرحلة بدأت',done:'انتهت',cancelled:'اتلغت'};
 const LIVE=['accepted','arrived','started'];
@@ -375,8 +388,17 @@ async function pull(){
   if(sending||dirty||diff())return;
   applyRemote(st);
 }
+let lastPoll=0;
+// التحديث الذكي: كل ثانية لو فيه رحلة أو شات مفتوح، وكل ثانيتين لو الموقع فاضي
+function pollEvery(){
+  const me=curRole?curRole():null;
+  const busy=!!openChat||S.trips.some(t=>(me==='rider'?t.riderId===riderId:me==='driver'?t.driverId===driverId:false)&&(t.status==='requested'||LIVE.includes(t.status)));
+  return busy?1000:2000;
+}
 async function poll(){
   if(!REMOTE||document.hidden||sending||dirty)return;
+  if(Date.now()-lastPoll<pollEvery()-50)return;
+  lastPoll=Date.now();
   if(diff()){save();return}
   try{await pull();setConn('ok')}catch(e){setConn('bad')}
 }
@@ -386,8 +408,42 @@ function commit(){save();render()}
 const NS='http://www.w3.org/2000/svg';
 let mapBuilt=false,tx=0,ty=0,sc=1,ptrs=new Map(),dragMoved=false,downPt=null,lastSig='';
 const center=k=>{const b=CITY.blocks[k];return b?[b[0]+b[2]/2,b[1]+b[3]/2]:null};
+// ترتيب القطاعات جنب بعض بالعرض: قطاع 700/800/900 ← بلوك U ← بلوك T
+let CITY_LAID=false;
+function layoutCity(){
+  if(CITY_LAID) return; CITY_LAID=true;
+  const OLD_X=10, NEW_Y=44, GAP=26;
+  let x=12;
+  const shift={};
+  for(const s2 of CITY.secs){
+    const oldY=s2.y;
+    shift[s2.k]={dx:x-OLD_X,dy:NEW_Y-oldY};
+    s2.x=x;s2.y=NEW_Y;
+    x+=s2.w+GAP;
+  }
+  for(const k in CITY.blocks){const sh=shift[k[0]];const b=CITY.blocks[k];b[0]+=sh.dx;b[1]+=sh.dy}
+  const band=y=>y<580?'A':y<1120?'B':'C';
+  for(const l of CITY.lm){const sh=shift[band(l[1])];l[0]+=sh.dx;l[1]+=sh.dy}
+  // الأماكن (الدبابيس) كمان لازم تتحرك مع القطاعات
+  for(const q of PLACES){
+    if(!q.at) continue;
+    const sh=shift[band(q.at[1])];
+    q.at=[q.at[0]+sh.dx,q.at[1]+sh.dy];
+    if(q.rect) q.rect=[q.rect[0]+sh.dx,q.rect[1]+sh.dy,q.rect[2],q.rect[3]];
+  }
+  CITY.w=x-GAP+12;
+  CITY.h=NEW_Y+Math.max(...CITY.secs.map(q=>q.h))+60;
+}
+// الخريطة ماتبعدش عن الشاشة: لو أكبر من الشاشة بتتحرك بس في حدودها، ولو أصغر بتتوسّط
+function clampT(){
+  const v=visBox();
+  const W=CITY.w*sc,H=CITY.h*sc;
+  if(W<=v.w) tx=(v.w-W)/2; else tx=Math.min(30,Math.max(v.w-W-30,tx));
+  if(H<=v.h) ty=Math.max(60,(v.h-H)/2); else ty=Math.min(60,Math.max(v.h-H-40,ty));
+}
+function hideMapNote(){const m=document.querySelector('.mapnote');if(m)m.style.display='none'}
 function buildMap(){
-  if(mapBuilt)return;mapBuilt=true;
+  if(mapBuilt)return;mapBuilt=true;layoutCity();
   const svg=$('#map');
   let h='<g id="mapg"><rect x="-300" y="-300" width="1264" height="2220" fill="#0b0617"/>';
   for(const s of CITY.secs)h+=`<rect class="secp" x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="14"/><text class="sect" x="${s.x+s.w-12}" y="${s.y-12}" text-anchor="start" direction="rtl">${s.t} (${s.k})</text>`;
@@ -404,7 +460,7 @@ function buildMap(){
     else h+=`<g class="plc" data-p="${p.id}"><circle class="pdot" cx="${p.at[0]}" cy="${p.at[1]}" r="9"/><circle cx="${p.at[0]}" cy="${p.at[1]}" r="3" fill="#C4B5FD"/><text class="lmt" x="${p.at[0]}" y="${p.at[1]+13}">${esc(p.n)}</text></g>`}
   h+='<g id="mapdyn"></g></g>';
   svg.innerHTML=h;
-  svg.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});dragMoved=false;downPt={x:e.clientX,y:e.clientY};try{svg.setPointerCapture(e.pointerId)}catch(_){}});
+  svg.addEventListener('pointerdown',e=>{hideMapNote();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});dragMoved=false;downPt={x:e.clientX,y:e.clientY};try{svg.setPointerCapture(e.pointerId)}catch(_){}});
   svg.addEventListener('pointermove',e=>{
     const p=ptrs.get(e.pointerId);if(!p)return;
     if(ptrs.size===1){tx+=e.clientX-p.x;ty+=e.clientY-p.y;if(Math.hypot(e.clientX-downPt.x,e.clientY-downPt.y)>6)dragMoved=true}
@@ -425,9 +481,9 @@ function buildMap(){
   window.addEventListener('resize',()=>{if(document.body.classList.contains('home'))refit(true)});
 }
 function zoomAt(mx,my,f){const n=Math.min(4,Math.max(.3,sc*f));f=n/sc;tx=mx-(mx-tx)*f;ty=my-(my-ty)*f;sc=n}
-function applyT(){const g=$('#mapg');if(g)g.setAttribute('transform',`translate(${tx} ${ty}) scale(${sc})`);drawDyn()}
+function applyT(){clampT();const g=$('#mapg');if(g)g.setAttribute('transform',`translate(${tx} ${ty}) scale(${sc})`);drawDyn()}
 function visBox(){const h=$('.hwrap');return{w:innerWidth,h:Math.max(220,innerHeight-(h?h.offsetHeight:300))}}
-function overview(){const v=visBox();sc=Math.min(1.2,v.w/(CITY.w+16));tx=(v.w-CITY.w*sc)/2;ty=76;applyT()}
+function overview(){const v=visBox();sc=Math.min(0.62,v.w/560);tx=10;ty=60;applyT()}
 function fitPts(pts){
   if(!pts.length)return overview();
   const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),pad=70;
@@ -629,7 +685,7 @@ function render(){
   if(role){$('#app').innerHTML='';renderHome();}
   else{
     let html=adm?adminView():tab==='driver'?driverLogin():riderLogin();
-    if(!adm)html=`<div class="stage">${scene()}<div class="stage-in">${html}</div></div>`;
+    if(!adm)html=`<div class="stage">${scene()}<div class="stage-in">${html}<div class="credit">Designed by ادهم</div></div></div>`;
     const saved=grabForm();$('#app').innerHTML=html;restoreForm(saved);
   }
   if(modalFn&&$('#modal').classList.contains('on'))$('#modalIn').innerHTML=modalFn();
@@ -645,6 +701,7 @@ function renderHome(){
     if(!t||!LIVE.includes(t.status))openChat=null;else seen[openChat]=otherCount(t.id,curRole())}
   const saved=grabForm();
   $('#hsheet').innerHTML=curRole()==='rider'?riderSheet():driverSheet();
+  $('#hsheet').insertAdjacentHTML('beforeend','<div class="credit">Designed by ادهم</div>');
   restoreForm(saved);
   requestAnimationFrame(()=>refit(false));
 }
@@ -857,7 +914,29 @@ function reqTrip(){
   S.trips.push({id:uid(),riderId,from:sel.f.label,to:sel.t.label,fromId:sel.f.id,toId:sel.t.id,cat:selCat||cats()[0].id,stops:0,status:'requested',driverId:null,eta:null,at:Date.now()});
   reqOpen=false;sel={f:null,t:null};toast('تم إرسال الطلب');commit();
 }
-function cancelTrip(id){const t=S.trips.find(x=>x.id===id);if(t&&(t.status==='requested'||t.status==='accepted')){t.status='cancelled';commit()}}
+
+const CANCEL_LOG_OK=true;
+function openCancel(tid,who){
+  const t=S.trips.find(x=>x.id===tid);if(!t)return;
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>${who==='rider'?'إلغاء الرحلة':'مش هتكمّل الرحلة دي؟'}</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">عشان نتابع، لازم تكتب اسمك وسبب الإلغاء، وهيوصل للأدمن.</p>
+    <label for="cnm">اسمك</label><input id="cnm" placeholder="اكتب اسمك" autocomplete="name">
+    <label for="cnr">سبب الإلغاء</label><textarea id="cnr" rows="3" placeholder="اكتب سبب الإلغاء" style="width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;font:400 15px Cairo;background:#0F0920;color:var(--ink)"></textarea>
+    <button class="btn red" onclick="submitCancel(${tid},'${who}')">إلغاء الرحلة وإرسال للأدمن</button>`;
+  $('#modal').classList.add('on');
+}
+function submitCancel(tid,who){
+  const name=val('cnm'),reason=val('cnr');
+  if(name.length<2) return toast('اكتب اسمك',1);
+  if(reason.length<3) return toast('اكتب سبب الإلغاء',1);
+  const t=S.trips.find(x=>x.id===tid);if(!t)return;
+  t.cancel=(t.cancel||[]).concat([{by:who,name,reason,at:Date.now()}]);
+  if(who==='rider'){ if(t.status==='requested'||t.status==='accepted') t.status='cancelled'; }
+  else { t.status='requested';t.driverId=null;t.eta=null;openChat=null; }
+  closeModal();toast('اتسجل الإلغاء');commit();
+}
+function cancelTrip(id){openCancel(id,'rider');return;const t=S.trips.find(x=>x.id===id);if(t&&(t.status==='requested'||t.status==='accepted')){t.status='cancelled';commit()}}
 function rateTrip(id,n){const t=S.trips.find(x=>x.id===id);t.rating=n;t.comment=val('cm-'+id);toast('شكرًا على تقييمك');commit()}
 
 // ---------- السواق ----------
@@ -872,7 +951,7 @@ function driverSheet(){
   const cur=driverTrip();
   const done=S.trips.filter(t=>t.driverId===d.id&&t.status==='done');
   const earn=done.reduce((a,t)=>a+price(t),0);
-  return h+`<div class="stat"><div><b>${done.length}</b>رحلات</div><div><b>${earn}</b>كاش اتحصّل</div><div><b>${fdate(d.subUntil)}</b>الاشتراك لحد</div></div>`
+  return h+`<div class="stat"><div><b>${done.length}</b>رحلات</div><div><b>${earn}</b>كاش اتحصّل</div><div class="supbox"><a href="tel:${SUPPORT_PHONE}">📞 تواصل مع الدعم</a></div></div>`
     +(cur?curTrip(cur):`<div class="card"><h2>طلبات جديدة${open.length?` (${open.length})`:''}</h2>${open.length?open.map(t=>{const r=S.riders.find(x=>x.id===t.riderId);return `<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b>
       <div class="small">${money(price(t))} • الراكب: ${esc(r?.name||'')}</div>
       <label for="eta-${t.id}">هتوصله خلال</label>
@@ -932,7 +1011,7 @@ function acceptTrip(id){
   post.push(()=>{const x=S.trips.find(y=>y.id===id);if(x&&x.driverId!==driverId){toast('الرحلة اتاخدت من سواق تاني',1);render()}});
   commit();
 }
-function releaseTrip(id){const t=S.trips.find(x=>x.id===id);t.status='requested';t.driverId=null;t.eta=null;openChat=null;commit()}
+function releaseTrip(id){openCancel(id,'driver');return;const t=S.trips.find(x=>x.id===id);t.status='requested';t.driverId=null;t.eta=null;openChat=null;commit()}
 function setStatus(id,s){const t=S.trips.find(x=>x.id===id);t.status=s;if(s==='done')t.doneAt=Date.now();commit()}
 function addStop(id){S.trips.find(x=>x.id===id).stops++;commit()}
 function driverPay(d){
@@ -958,7 +1037,7 @@ function openDrawer(){
     <span class="badge">${role==='rider'?'راكب':'سواق • '+esc(catOf(u.cat).name)}</span></div></div>
     <button class="dr-i" onclick="closeDrawer();openHistory()">رحلاتي</button>
     <button class="dr-i" onclick="closeDrawer();openSafety()">الأمان</button>
-    ${role==='driver'?`<div class="small" style="padding:8px 4px">الاشتراك لحد: ${u.subUntil?fdate(u.subUntil):'—'}</div>`:''}
+    <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
     <button class="dr-i red" onclick="logout()">تسجيل خروج</button>`;
   $('#drawer').classList.add('on');
 }
@@ -995,6 +1074,9 @@ function adminView(){
   const pays=S.payments.filter(p=>p.status==='review');
   const rev=S.payments.filter(p=>p.status==='paid').reduce((a,p)=>a+p.amount,0);
   const miss=missingBuildings();
+  const cancels=[];S.trips.forEach(t=>(t.cancel||[]).forEach(c=>cancels.push({t,c})));cancels.sort((a,b)=>b.c.at-a.c.at);
+  const cancelCard=`<div class="card"><h2>الإلغاءات (${cancels.length})</h2>${cancels.length?cancels.map(x=>`<div class="trip"><b>${esc(x.c.name)}</b> <span class="badge">${x.c.by==='rider'?'راكب':'سواق'}</span>
+    <div class="small">${esc(x.t.from)} ← ${esc(x.t.to)}</div><div class="small">السبب: ${esc(x.c.reason)}</div><div class="small">${hhmm(x.c.at)} • ${fdate(x.c.at)}</div></div>`).join(''):'<p class="small">مفيش إلغاءات.</p>'}</div>`;
   const missCard=`<div class="card"><h2>عمارات من غير مكان GPS (${miss.length})</h2><p class="small">السواق بيحفظ المكان من تليفونه لما يوصل. دي العمارات اللي لسه مش متسجلة:</p>
     <div class="bgrid">${miss.slice(0,80).map(x=>`<span class="bchip" style="cursor:default"><b>${esc(x.n)}</b><small>${x.k}</small></span>`).join('')}</div>${miss.length>80?`<p class="small">وغيرهم ${miss.length-80}</p>`:''}</div>`;
   const w=S.settings.wallets;
@@ -1012,6 +1094,7 @@ function adminView(){
     <div class="small">${s.n?`التقييم: ★ ${s.avg} (${s.n} تقييم)`:'لسه مفيش تقييمات'}</div>
     ${s.comments.map(c=>`<div class="small">«${esc(c)}»</div>`).join('')}</div>`}).join('')||'<p class="small">مفيش سواقين لسه.</p>'}</div>
   <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
+  ${cancelCard}
   ${missCard}
   <div class="card"><h2>الأسعار</h2><div class="row"><div><label for="sb">سعر الرحلة</label><input id="sb" type="number" value="${S.settings.base}"></div>
     <div><label for="ss">سعر الوقفة</label><input id="ss" type="number" value="${S.settings.stop}"></div>
@@ -1091,11 +1174,39 @@ async function init(){
     }catch(e){}
   }
   render();
-  setInterval(poll,2000);
+  setInterval(poll,1000);
 }
+
+// سحب الشيت لتحت عشان الخريطة تبقى كاملة (اسحب المقبض ⬇️)
+let shDrag=null;
+$('#hsheet').addEventListener('pointerdown',e=>{
+  const g=e.target.closest('.grab');if(!g)return;
+  const el=$('#hsheet');
+  shDrag={y0:e.clientY,was:el.classList.contains('collapsed'),el,y:0};
+  el.classList.add('dragging');
+  try{g.setPointerCapture(e.pointerId)}catch(_){}
+});
+window.addEventListener('pointermove',e=>{
+  if(!shDrag)return;
+  const h=shDrag.el.offsetHeight,base=shDrag.was?h-64:0;
+  shDrag.y=Math.max(0,Math.min(h-64,base+(e.clientY-shDrag.y0)));
+  shDrag.el.style.transform=`translateY(${shDrag.y}px)`;
+});
+window.addEventListener('pointerup',()=>{
+  if(!shDrag)return;
+  const el=shDrag.el,h=el.offsetHeight;
+  el.classList.remove('dragging');el.style.transform='';
+  el.classList.toggle('collapsed',shDrag.y>(h-64)/2);
+  shDrag=null;
+});
 window.addEventListener('hashchange',()=>{window.scrollTo(0,0);render()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
 init();
+</script>
+<script>
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});
+}
 </script>
 </body>
 </html>
