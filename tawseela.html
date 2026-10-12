@@ -211,6 +211,14 @@ label.act{color:#F9A8D4}
 .hsheet .grab{cursor:grab;touch-action:none;padding:8px 0;margin:-8px auto 6px;width:64px}
 .supbox a{display:block;color:#fff;text-decoration:none;font-weight:800;font-size:13px;line-height:1.4}
 .credit{text-align:center;font-size:11px;color:#8b7fb0;padding:14px 0 6px;letter-spacing:.4px}
+.pk-free{background:rgba(26,16,48,.8);border:1px dashed rgba(167,139,250,.5);border-radius:16px;padding:10px;margin:8px 0 10px}
+.pk-free label{margin:0 0 6px}
+.pk-actions{display:flex;gap:8px;margin:6px 0 4px}
+.pk-actions .btn{flex:1}
+.dm-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+.dm{background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:8px;text-align:center}
+.dm img{width:100%;border-radius:10px;display:block;background:#0b0617}
+.dm b{display:block;font-size:13px;margin-top:6px}
 </style>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7C3AED">
@@ -592,6 +600,13 @@ function gateChooser(p){return `<h3>${esc(p.n)}</h3><div class="small" style="te
   <button class="btn ghost" onclick="closeModal()">إغلاق</button>`}
 const pickB=(cid,n)=>selectLoc(mapField,locB(catById(cid),n));
 const pickGate=(pid,g)=>selectLoc(mapField,locP(allPlaces().find(x=>x.id===pid),String(g)));
+function togglePanel(id){const el=document.getElementById(id);const open=el.style.display==='none';el.style.display=open?'':'none';if(open){const i=el.querySelector('input');if(i)i.focus()}}
+function useFree(){
+  const v=val('pfree');
+  if(v.length<2) return toast('اكتب اسم المكان',1);
+  const name=v.slice(0,80);
+  selectLoc(PK.field,{id:'free:'+name,label:name,z:'free',free:true});
+}
 function selectLoc(field,loc){
   sel[field]=loc;closePicker();closeModal();reqOpen=true;
   const other=field==='f'?'t':'f';
@@ -609,7 +624,9 @@ function openPicker(f){
 function closePicker(){PK.on=false;$('#picker').classList.remove('on')}
 function renderPicker(){
   $('#pickerIn').innerHTML=`<div class="pk-h"><button class="x" onclick="closePicker()" aria-label="إغلاق">×</button><b>${pkTitle()}</b></div>
-    <div class="pk-s">${ICON.search}<input id="pq" type="search" placeholder="${pkPH()}" value="${esc(PK.q)}" autocomplete="off" oninput="pkSearch(this.value)"></div>
+    <div class="pk-actions"><button class="btn ghost" style="margin:0" onclick="togglePanel('pkSearchBox')">🔍 ابحث</button><button class="btn ghost" style="margin:0" onclick="togglePanel('pkFreeBox')">✏️ اكتب مكانك</button></div>
+    <div class="pk-s" id="pkSearchBox" style="display:none">${ICON.search}<input id="pq" type="search" placeholder="${pkPH()}" value="${esc(PK.q)}" autocomplete="off" oninput="pkSearch(this.value)"></div>
+    <div class="pk-free" id="pkFreeBox" style="display:none"><label for="pfree">اكتب اسم المكان لو مش موجود في القايمة</label><div class="row"><input id="pfree" placeholder="مثلاً: صيدلية الأمل" autocomplete="off"><button class="btn" style="flex:0 0 auto;margin:0" onclick="useFree()">استخدم</button></div><p class="small" style="margin:6px 0 0">المكان ده بيتحفظ في الرحلة دي بس، ومش بيتضاف للقايمة.</p></div>
     <div id="pkZones"></div><div class="pk-body" id="pkBody"></div>`;
   renderPickerBody();
 }
@@ -792,15 +809,33 @@ function regRider(){
   if(S.riders.some(x=>x.phone===p)) return toast('الرقم ده مسجّل قبل كده، ادخل بيه',1);
   const r={id:uid(),name:n,email:e,phone:p};S.riders.push(r);riderId=r.id;regMode=false;persist();commit();
 }
+// خرائط المدينة للسواق: بتتعرض بعد الدخول، والسواق يختار ينزّلها (JPG) أو يلغي
+const DRIVER_MAPS=[{k:'A',t:'قطاع 700 / 800 / 900',f:'A.jpg'},{k:'B',t:'منطقة اليو (U)',f:'B.jpg'},{k:'C',t:'منطقة ال T',f:'C.jpg'}];
+function offerDriverMaps(){
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>خرائط المدينة</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">عشان تسهّل عليك الوصول للعمارات، تقدر تنزّل الخرائط دي على تليفونك (JPG).</p>
+    <div class="dm-grid">${DRIVER_MAPS.map(m=>`<div class="dm"><img src="${m.f}" alt="${esc(m.t)}" loading="lazy"><b>${esc(m.t)}</b></div>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" onclick="closeModal()">إلغاء</button><button class="btn" onclick="downloadDriverMaps()">نزّل الخرائط</button></div>`;
+  $('#modal').classList.add('on');
+}
+function downloadDriverMaps(){
+  DRIVER_MAPS.forEach((m,i)=>setTimeout(()=>{
+    const a=document.createElement('a');a.href=m.f;a.download='tawseela-map-'+m.k+'.jpg';
+    document.body.appendChild(a);a.click();a.remove();
+  },i*600));
+  setTimeout(closeModal,DRIVER_MAPS.length*600+200);
+  toast('بتتنزّل الخرائط');
+}
 function loginDemo(){
   const d=S.drivers.find(x=>x.phone==='01000000002');
   if(!d) return toast('السواق التجريبي مش موجود',1);
-  driverId=d.id;persist();render();
+  driverId=d.id;persist();render();offerDriverMaps();
 }
 function loginDriver(){
   const d=S.drivers.find(x=>x.phone===val('lp'));
   if(!d) return toast('الرقم ده مش مسجّل',1);
-  driverId=d.id;persist();render();
+  driverId=d.id;persist();render();offerDriverMaps();
 }
 function regDriver(){
   const n=val('dn'),p=val('dp'),nid=val('dnid'),l=val('dl');
@@ -997,7 +1032,6 @@ function curTrip(t){
     <div class="ticket"><svg class="ic"><use href="#ic-pin"/></svg><div><div class="small" style="color:#fff">حصّل كاش</div><b>${price(t)}</b> جنيه</div>
       <div class="small" style="color:#fff;text-align:left">${t.stops} وقفة</div></div>
     <div class="row">${chatBtn(t,'driver','تواصل مع الراكب')}<a class="btn ghost" href="tel:${esc(r?.phone||'')}">اتصال</a></div>
-    <a class="btn" target="_blank" rel="noopener" href="${navUrl(t.fromId,t.toId,t.from,t.to)}">ابدأ الملاحة في جوجل مابس</a>
     ${t.status==='arrived'?gpsBtn(t.fromId,'الراكب'):''}${t.status==='started'?gpsBtn(t.toId,'الوجهة'):''}
     ${openChat===t.id?chatPanel(t,'driver'):''}
     ${next?`<button class="btn" onclick="setStatus(${t.id},'${next[1]}')">${next[0]}</button>`
@@ -1037,6 +1071,7 @@ function openDrawer(){
     <span class="badge">${role==='rider'?'راكب':'سواق • '+esc(catOf(u.cat).name)}</span></div></div>
     <button class="dr-i" onclick="closeDrawer();openHistory()">رحلاتي</button>
     <button class="dr-i" onclick="closeDrawer();openSafety()">الأمان</button>
+    ${role==='driver'?'<button class="dr-i" onclick="closeDrawer();downloadDriverMaps()">⬇️ نزّل خريطة المدينة</button>':''}
     <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
     <button class="dr-i red" onclick="logout()">تسجيل خروج</button>`;
   $('#drawer').classList.add('on');
