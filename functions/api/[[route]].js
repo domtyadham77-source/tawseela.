@@ -1,6 +1,7 @@
-// Cloudflare Pages Function: يشتغل على /api/* ويخزّن الداتا في KV
+// Cloudflare Pages Function: يشتغل على /api/* ويخزّن الداتا في D1 (مع ترحيل تلقائي من KV مرة واحدة)
 // الربط المطلوب في إعدادات المشروع:
-//   KV namespace binding:  TAWSEELA  ->  (اسم الـ KV اللي عملته)
+//   D1 database binding:   DB        ->  tawseela-db
+//   KV namespace binding:  TAWSEELA  ->  (للترحيل من الداتا القديمة فقط)
 //   Environment variable:  ADMIN_PIN ->  الرمز السري للأدمن (Secret)
 
 const COLL = ['riders', 'drivers', 'trips', 'payments', 'msgs'];
@@ -39,12 +40,22 @@ function normalize(DB) {
   return DB;
 }
 
+// التخزين على D1: جدول واحد بيحفظ الداتا (المفتاح + القيمة JSON)
+async function dbRead(env) {
+  const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?').bind(KEY).first();
+  return row ? JSON.parse(row.value) : null;
+}
+async function dbWrite(env, DB) {
+  await env.DB.prepare('INSERT INTO kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+    .bind(KEY, JSON.stringify(DB)).run();
+}
 async function load(env) {
-  let db = await env.TAWSEELA.get(KEY, 'json');
+  let db = await dbRead(env);
   if (!db) {
-    // أول مرة: احفظ البيانات الأولية عشان الـ IDs تفضل ثابتة بين الطلبات
-    db = normalize(fresh());
-    await env.TAWSEELA.put(KEY, JSON.stringify(db));
+    // ترحيل لمرة واحدة: لو فيه داتا قديمة في KV ننقلها لـ D1، ولو مفيش نبدأ بداتا جديدة
+    const old = env.TAWSEELA ? await env.TAWSEELA.get(KEY, 'json') : null;
+    db = normalize(old || fresh());
+    await dbWrite(env, db);
   }
   return normalize(db);
 }
@@ -75,7 +86,12 @@ function merge(DB, b, admin) {
       if (!item || typeof item.id !== 'number') continue;
       const i = DB[c].findIndex(x => x.id === item.id);
       if (c === 'drivers') {
-        if (i >= 0) { if (admin) DB.drivers[i] = item; }
+        if (i >= 0) {
+          if (admin) DB.drivers[i] = item;
+          // السواق يقدر يصحّح بياناته لو اتراجعت (مش موافق عليه)، ويرجع للمراجعة تاني
+          else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone)
+            DB.drivers[i] = { ...item, id: DB.drivers[i].id, status: 'pending', subUntil: 0, reason: undefined, faceMatch: undefined, trialMsg: false };
+        }
         else if (!DB.drivers.some(x => x.phone === item.phone || (item.nid && x.nid === item.nid)))
           DB.drivers.push(admin ? item : { ...item, status: 'pending', subUntil: 0 });
       } else if (c === 'payments') {
@@ -117,7 +133,7 @@ export async function onRequest(context) {
       const admin = isAdmin(request, env);
       const DB = await load(env);
       merge(DB, b, admin);
-      await env.TAWSEELA.put(KEY, JSON.stringify(DB));
+      await dbWrite(env, DB);
       return json(view(DB, admin));
     }
     return json({ error: 'not found' }, 404);
