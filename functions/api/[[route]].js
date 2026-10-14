@@ -63,9 +63,19 @@ async function load(env) {
 const pinOf = env => env.ADMIN_PIN || '1234';
 const isAdmin = (req, env) => req.headers.get('x-admin-pin') === pinOf(env);
 
+// الحظر: بيمنع نفس الرقم أو نفس الاسم أو نفس البطاقة لحد ما المدة تخلص (0 = نهائي)
+function isBlocked(DB, d) {
+  const now = Date.now();
+  return (DB.settings.blocks || []).some(b =>
+    (!b.until || b.until > now) && (
+      (b.phone && d.phone && b.phone === d.phone) ||
+      (b.nid && d.nid && b.nid === d.nid) ||
+      (b.name && d.name && b.name.trim() === d.name.trim())));
+}
+
 function view(DB, admin) {
   const out = JSON.parse(JSON.stringify(DB));
-  if (!admin) out.drivers = out.drivers.map(d => ({ ...d, photos: {}, nid: '' }));
+  if (!admin) out.drivers = out.drivers.filter(d => !isBlocked(DB, d)).map(d => ({ ...d, photos: {}, nid: '' }));
   return out;
 }
 
@@ -80,6 +90,7 @@ function merge(DB, b, admin) {
     }
   }
   if (admin && Array.isArray(b.buildings)) DB.buildings = b.buildings;
+  if (admin && b.removed && Array.isArray(b.removed.drivers)) DB.drivers = DB.drivers.filter(x => !b.removed.drivers.includes(x.id));
   const up = b.upserts || {};
   for (const c of COLL) {
     for (const item of up[c] || []) {
@@ -89,10 +100,10 @@ function merge(DB, b, admin) {
         if (i >= 0) {
           if (admin) DB.drivers[i] = item;
           // السواق يقدر يصحّح بياناته لو اتراجعت (مش موافق عليه)، ويرجع للمراجعة تاني
-          else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone)
+          else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item))
             DB.drivers[i] = { ...item, id: DB.drivers[i].id, status: 'pending', subUntil: 0, reason: undefined, faceMatch: undefined, trialMsg: false };
         }
-        else if (!DB.drivers.some(x => x.phone === item.phone || (item.nid && x.nid === item.nid)))
+        else if (!isBlocked(DB, item) && !DB.drivers.some(x => x.phone === item.phone || (item.nid && x.nid === item.nid)))
           DB.drivers.push(admin ? item : { ...item, status: 'pending', subUntil: 0 });
       } else if (c === 'payments') {
         if (i >= 0) { if (admin) DB.payments[i] = item; }
