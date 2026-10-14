@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script>window.FORCE_ADMIN=true;</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0A0612;--card:#1A1030;--ink:#F1ECFF;--mute:#A99CC9;--line:rgba(167,139,250,.24);--teal:#8B5CF6;--teal2:#A78BFA;--red:#F0606E;--green:#34D399}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Cairo',system-ui,sans-serif;color:var(--ink);line-height:1.6;min-height:100vh;
+  background:linear-gradient(165deg,#5B21B6 0%,#2A0F5C 22%,#12071F 55%,#05030A 100%) fixed}
+body.adm{background:linear-gradient(165deg,#1E3A8A 0%,#2A0F5C 25%,#0D0618 58%,#030208 100%) fixed}
+.bgdeco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;color:rgba(196,181,253,.07)}
+.bgdeco svg{position:absolute}
+header{position:relative;overflow:hidden;padding:16px 16px 12px}
+header .deco{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.brand,.tabs{position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}
+.sign{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#8B5CF6,#D946EF);color:#fff;padding:2px 14px 2px 12px;border-radius:99px;font-size:17px;font-weight:800;box-shadow:0 4px 16px rgba(139,92,246,.5)}
+.sign .ic{font-size:18px}
+#sub{font-weight:600;font-size:14px;color:#D8CCFF}
+.tabs{display:flex;gap:4px;margin-top:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px}
+.tabs button{flex:1;border:0;background:transparent;color:#CBBEF2;font:700 15px Cairo;padding:9px 0;border-radius:10px;cursor:pointer}
+.tabs button.on{background:rgba(255,255,255,.16);color:#fff}
+main{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:12px 16px 32px}
+.card{background:rgba(26,16,48,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:20px;padding:16px;margin-bottom:14px;border:1px solid var(--line)}
+h2{margin:0 0 10px;font-size:18px}h3{margin:14px 0 6px;font-size:15px}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 4px;color:#DCD2FF}
+input,select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;font:400 16px Cairo;background:#0F0920;color:var(--ink)}
+input::placeholder{color:#7F72A3}
+input:focus,select:focus,button:focus-visible{outline:3px solid #C4B5FD;outline-offset:1px}
+.btn{display:block;width:100%;border:0;background:linear-gradient(90deg,#7C3AED,#C026D3);color:#fff;font:700 16px Cairo;padding:12px;border-radius:12px;margin-top:14px;cursor:pointer;box-shadow:0 8px 22px rgba(124,58,237,.35)}
+.btn.red{background:#E11D48;box-shadow:none}.btn.green{background:#059669;box-shadow:none}
+.btn.ghost{background:transparent;color:#C4B5FD;border:1.5px solid rgba(167,139,250,.5);box-shadow:none}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.small{font-size:13px;color:var(--mute)}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;background:rgba(167,139,250,.2);color:#DDD1FF}
+.b-wait{background:rgba(251,191,36,.18);color:#FCD34D}.b-ok{background:rgba(52,211,153,.18);color:#6EE7B7}.b-bad{background:rgba(240,96,110,.2);color:#FDA4AF}
+.ticket{position:relative;background:linear-gradient(110deg,#7C3AED,#C026D3);color:#fff;border-radius:14px;padding:14px 18px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;overflow:hidden}
+.ticket:before,.ticket:after{content:"";position:absolute;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:#1A1030}
+.ticket:before{right:-9px}.ticket:after{left:-9px}
+.ticket b{font-size:30px;line-height:1}
+.ticket .ic{font-size:38px;opacity:.9;flex:none}
+.ic{width:1em;height:1em;fill:currentColor;vertical-align:-.12em}
+.trip{border-top:1px dashed var(--line);padding:12px 0}.trip:first-of-type{border-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{flex:1 1 45%;padding:10px;border:1.5px solid var(--line);border-radius:12px;background:#0F0920;color:var(--ink);font:600 14px Cairo;cursor:pointer}
+.chip.on{border-color:#A78BFA;background:rgba(139,92,246,.3);color:#fff}
+.photo{border:1.5px dashed var(--teal2);border-radius:12px;padding:10px;text-align:center;margin-top:6px}
+.photo img{max-width:100%;max-height:120px;border-radius:8px;display:block;margin:8px auto 0}
+.imgs{display:flex;gap:6px;margin-top:8px}.imgs img{width:32%;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.stat{display:flex;gap:8px;margin-bottom:14px}.stat div{flex:1;background:rgba(26,16,48,.78);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;font-size:13px;color:var(--mute)}.stat b{display:block;font-size:22px;color:#C4B5FD}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#fff;color:#1A1030;font-weight:700;padding:10px 18px;border-radius:12px;font-size:14px;z-index:9;max-width:90%}
+.toast.err{background:#E11D48;color:#fff}
+.note{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+@media (prefers-reduced-motion:no-preference){.toast{animation:in .2s}@keyframes in{from{opacity:0;transform:translate(-50%,8px)}}}
+svg use{fill:currentColor}
+.bgdeco{color:rgba(196,181,253,.13)}
+.stage{position:relative;min-height:100vh}
+.scene{position:absolute;inset:0 -16px;width:calc(100% + 32px);height:100%;pointer-events:none}
+.stage-in{position:relative;z-index:1;padding-top:110px}
+body.landing header{min-height:46vh;display:flex;flex-direction:column}
+.heroText{display:none;margin-top:auto;padding:24px 4px 6px;position:relative;z-index:1}
+body.landing .heroText{display:block}
+.heroText b{display:block;font-size:30px;line-height:1.35;font-weight:800;background:linear-gradient(90deg,#fff,#E9D5FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.heroText span{color:#D8CCFF;font-size:15px}
+.down{display:none;position:relative;z-index:1;align-self:center;margin:12px 0 2px;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font:700 15px Cairo;padding:9px 20px;border-radius:99px;cursor:pointer}
+body.landing .down{display:inline-flex}
+.down svg{width:18px;height:18px;animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(5px)}}
+@media (prefers-reduced-motion:reduce){.down svg{animation:none}}
+.conn{margin-inline-start:auto;font-size:12px;color:#D8CCFF;display:flex;align-items:center;gap:6px;font-weight:600}
+.conn:before{content:"";width:8px;height:8px;border-radius:50%;background:#9CA3AF}
+.conn.ok:before{background:#34D399}.conn.bad:before{background:#F0606E}
+a.btn{text-decoration:none;text-align:center}
+.confirm{background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4);color:#6EE7B7;border-radius:12px;padding:10px 12px;margin-top:8px;font-weight:700;font-size:14px}
+.chat{margin-top:10px;background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:10px}
+.msgs{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:6px 2px}
+.bub{max-width:80%;padding:7px 11px;border-radius:14px;font-size:14px;word-break:break-word}
+.bub i{display:block;font-size:10px;opacity:.65;font-style:normal;margin-top:2px}
+.bub.me{align-self:flex-start;background:linear-gradient(90deg,#7C3AED,#C026D3);color:#fff}
+.bub.ot{align-self:flex-end;background:rgba(255,255,255,.1)}
+.q{margin:8px 0}.q .chip{flex:1 1 auto;font-size:12px;padding:6px 8px}
+.ub{display:inline-block;background:#F0606E;color:#fff;border-radius:99px;font-size:12px;padding:0 7px;margin-inline-start:6px}
+.doc{display:flex;align-items:center;gap:10px;background:#0F0920;border:1.5px dashed var(--teal2);border-radius:14px;padding:8px 10px;margin-top:8px;min-height:68px}
+.doc-t{flex:1;min-width:0}.doc-t b{display:block;font-size:14px;line-height:1.35}
+.slots{display:flex;gap:6px}
+.slot{position:relative;width:46px;height:46px;border-radius:10px;border:1.5px dashed rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font:600 11px Cairo;color:var(--mute);overflow:hidden;cursor:pointer;background:rgba(255,255,255,.04);padding:0}
+.slot img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot.has img{display:block}.slot.has span{display:none}
+.slot.has{border-style:solid;border-color:#34D399}
+.plus{flex:0 0 44px;width:44px;height:44px;border-radius:50%;border:0;background:linear-gradient(135deg,#7C3AED,#C026D3);color:#fff;font:400 28px/1 Cairo;cursor:pointer;box-shadow:0 6px 16px rgba(124,58,237,.45);display:flex;align-items:center;justify-content:center;padding:0 0 3px}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:none;align-items:flex-end}
+.sheet.on{display:flex}
+.sheet-in{width:100%;max-width:640px;margin:0 auto;background:#1A1030;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:16px 16px 22px}
+.sheet-in h3{margin:0 0 4px;text-align:center;font-size:16px}
+.sheet-in .btn{margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.sheet-in .btn svg{width:20px;height:20px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.imgs{flex-wrap:wrap}.imgs img{width:calc(25% - 5px)!important}
+body.home{overflow:hidden;background:#0b0617}
+body.home header,body.home main,body.home .bgdeco{display:none!important}
+.homepg{display:none;position:fixed;inset:0;z-index:10;background:#0b0617;overflow:hidden}
+body.home .homepg{display:block}
+.mapwrap{position:absolute;inset:0}
+#map{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.secp{fill:#1d1238;stroke:#4c3a8f;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.sect{fill:#d8ccff;font:800 15px Cairo}
+.lmz{fill:rgba(167,139,250,.07);stroke:rgba(167,139,250,.4);stroke-dasharray:4 4;vector-effect:non-scaling-stroke}
+.lmt{fill:#a99cc9;font:600 9px Cairo;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.blk{cursor:pointer}
+.blk rect{fill:#3a2979;stroke:#8f73ee;stroke-width:1.2;vector-effect:non-scaling-stroke;transition:fill .2s}
+.blk text{fill:#efe7ff;font-family:Cairo;font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.blk.sf rect{fill:#0f7b5a;stroke:#34D399;stroke-width:2.5}
+.blk.st rect{fill:#a21caf;stroke:#F472B6;stroke-width:2.5}
+.blk.pu rect{stroke:#FCD34D;stroke-width:2.5}
+.route{fill:none;stroke:#F9A8D4;stroke-width:3.5;stroke-dasharray:9 8;stroke-linecap:round;vector-effect:non-scaling-stroke;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-34}}
+.pulse{fill:rgba(252,211,77,.4);transform-box:fill-box;transform-origin:center;animation:pl 1.7s ease-out infinite}
+@keyframes pl{from{transform:scale(.6);opacity:1}to{transform:scale(2.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.route,.pulse{animation:none}}
+.fab{position:absolute;z-index:6;width:50px;height:50px;border-radius:50%;border:1px solid var(--line);background:rgba(26,16,48,.94);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.45);padding:0}
+.fab svg{width:24px;height:24px}
+.fab-menu{top:calc(14px + env(safe-area-inset-top));right:14px}
+.fab-trips{top:calc(14px + env(safe-area-inset-top));left:14px}
+.hwrap{position:absolute;left:0;right:0;bottom:0;z-index:6;pointer-events:none}
+.above{position:absolute;left:0;right:0;top:-64px;display:flex;justify-content:space-between;align-items:center;padding:0 14px;pointer-events:none}
+.above>*{pointer-events:auto}
+.above .fab{position:static}
+.pill{display:flex;align-items:center;gap:8px;border-radius:99px;padding:10px 18px;background:rgba(26,16,48,.95);border:1px solid var(--line);color:#fff;font:700 15px Cairo;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+.pill svg{width:20px;height:20px;color:#8B5CF6}
+.hsheet{pointer-events:auto;max-height:66vh;overflow:auto;min-height:280px;background:linear-gradient(180deg,rgba(36,20,74,.97) 0,rgba(14,7,28,.99) 100%);border:1px solid var(--line);border-bottom:0;border-radius:26px 26px 0 0;padding:10px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -12px 34px rgba(0,0,0,.5)}
+.grab{width:44px;height:5px;border-radius:99px;background:rgba(255,255,255,.25);margin:0 auto 12px}
+.sh-t{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
+.sh-t b{font-size:18px}
+.x{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font:400 24px/1 Cairo;cursor:pointer;padding:0 0 3px}
+.where{width:100%;display:flex;align-items:center;gap:12px;background:#0F0920;border:1.5px solid rgba(167,139,250,.5);border-radius:18px;padding:16px;color:#fff;font:800 20px Cairo;cursor:pointer;text-align:start;box-shadow:0 8px 24px rgba(124,58,237,.25)}
+.where svg{width:24px;height:24px;color:#C4B5FD;flex:none}
+.shdeco{width:100%;height:auto;max-height:190px;display:block;margin-top:8px}
+.hsheet .card{background:rgba(255,255,255,.04)}
+label.act{color:#F9A8D4}
+.cats{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.cat{display:flex;align-items:center;gap:12px;width:100%;text-align:start;background:#0F0920;border:1.5px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--ink);font-family:Cairo;cursor:pointer;margin:0}
+.cat.on{border-color:#C026D3;background:rgba(192,38,211,.16)}
+.cat .ic{width:56px;height:28px;color:#C4B5FD;flex:none}
+.ct{flex:1;display:flex;flex-direction:column;line-height:1.35}.ct b{font-size:16px}
+.av{font-size:11px;color:#9ca3af}.av.y{color:#6EE7B7}
+.cp{font:800 20px Cairo;color:#fff}.cp small{font-size:12px;font-weight:600;color:var(--mute)}
+.drawer{position:fixed;inset:0;z-index:15;background:rgba(0,0,0,.55);display:none}
+.drawer.on{display:block}
+.drawer-in{position:absolute;top:0;bottom:0;right:0;width:82%;max-width:330px;background:linear-gradient(180deg,#2a1560,#0d0719);border-left:1px solid var(--line);padding:calc(24px + env(safe-area-inset-top)) 16px 20px;display:flex;flex-direction:column;gap:8px}
+.dr-h{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#C026D3);display:flex;align-items:center;justify-content:center;font:800 24px Cairo;flex:none}
+.dr-i{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;border-radius:14px;padding:13px 14px;font:700 16px Cairo;text-align:start;cursor:pointer}
+.dr-i.red{margin-top:auto;color:#FDA4AF;border-color:rgba(240,96,110,.4)}
+.sheet-in{max-height:85vh;overflow:auto}
+.hist{max-height:48vh;overflow:auto}
+.pp{display:flex;align-items:center;gap:8px;margin-top:8px}
+.pp label.pl{margin:0;flex:0 0 38px;font-size:14px;font-weight:700;color:#DCD2FF}
+.pp label.pl.act{color:#F9A8D4}
+.pp select{flex:1;min-width:0;padding:9px 10px;font-size:15px}
+.cats{gap:6px;margin-top:10px}
+.cat{padding:7px 10px;gap:10px}
+.cat .ic{width:46px;height:23px}
+.cp{font-size:18px}
+.hsheet{background:linear-gradient(180deg,rgba(36,20,74,.985) 0,rgba(14,7,28,.995) 100%);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.picker{position:fixed;inset:0;z-index:30;display:none;background:linear-gradient(180deg,#2d1766 0,#12081f 45%,#07040e 100%)}
+.picker.on{display:block}
+.pk-in{height:100%;display:flex;flex-direction:column;max-width:640px;margin:0 auto}
+.pk-h{display:flex;align-items:center;gap:10px;padding:calc(14px + env(safe-area-inset-top)) 14px 8px}
+.pk-h b{flex:1;font-size:19px}
+.pk-s{margin:4px 14px 10px;display:flex;align-items:center;gap:10px;background:#0F0920;border:1.5px solid rgba(167,139,250,.55);border-radius:16px;padding:0 14px;box-shadow:0 8px 24px rgba(124,58,237,.25)}
+.pk-s svg{width:22px;height:22px;color:#C4B5FD;flex:none}
+.pk-s input{border:0;background:transparent;padding:14px 0;font-size:17px;border-radius:0}
+.pk-s input:focus{outline:none}
+.zt{display:flex;gap:8px;padding:0 14px 8px}
+.zt button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:16px;border:1.5px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font-family:Cairo;cursor:pointer}
+.zt button b{font-size:15px}.zt button small{font-size:11px;color:var(--mute)}
+.zt button.on{border-color:#C026D3;background:linear-gradient(135deg,rgba(124,58,237,.45),rgba(192,38,211,.35))}
+.pk-body{flex:1;overflow:auto;padding:2px 14px calc(24px + env(safe-area-inset-bottom))}
+.sec-t{display:flex;align-items:center;gap:8px;margin:14px 2px 8px;font-weight:800;font-size:15px;color:#E9DEFF}
+.sec-t:before{content:"";width:4px;height:16px;border-radius:4px;background:linear-gradient(180deg,#8B5CF6,#D946EF)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ccard{display:flex;flex-direction:column;gap:2px;text-align:start;padding:12px;border-radius:16px;border:1.5px solid var(--line);background:linear-gradient(135deg,rgba(124,58,237,.22),rgba(192,38,211,.12));color:var(--ink);font-family:Cairo;cursor:pointer;margin:0}
+.ccard b{font-size:16px}.ccard small{color:var(--mute);font-size:12px}
+.plist{display:flex;flex-direction:column;gap:8px}
+.pcard{display:flex;align-items:center;gap:12px;width:100%;text-align:start;padding:10px 12px;border-radius:16px;border:1.5px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font-family:Cairo;cursor:pointer;margin:0}
+.pi{width:42px;height:42px;border-radius:13px;background:rgba(139,92,246,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.pn{flex:1;display:flex;flex-direction:column;font-weight:700;font-size:16px;line-height:1.35;min-width:0}.pn small{font-weight:500;font-size:12px;color:var(--mute)}
+.chev{font-size:24px;color:#8f82b3}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.nums.g4{grid-template-columns:repeat(2,1fr)}
+.nchip{padding:11px 0;border-radius:12px;border:1.5px solid var(--line);background:#0F0920;color:#fff;font:700 16px Cairo;cursor:pointer;margin:0}
+.nchip:active{background:rgba(192,38,211,.35)}
+.back{border:0;background:transparent;color:#C4B5FD;font:700 15px Cairo;cursor:pointer;padding:8px 2px;margin-top:6px}
+.fld{display:flex;align-items:center;gap:12px;width:100%;background:#0F0920;border:1.5px solid var(--line);border-radius:16px;padding:11px 14px;margin-top:8px;color:var(--ink);font-family:Cairo;text-align:start;cursor:pointer}
+.fld svg{width:20px;height:20px;color:#8f82b3;flex:none}
+.fd{width:12px;height:12px;border-radius:50%;flex:none}
+.fd.f{background:#34D399;box-shadow:0 0 0 4px rgba(52,211,153,.22)}
+.fd.t{background:#F472B6;border-radius:3px;box-shadow:0 0 0 4px rgba(244,114,182,.22)}
+.ft{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.4}
+.ft small{color:var(--mute);font-size:12px}.ft b{font-size:16px}.ft b.ph{color:#8f82b3;font-weight:600}
+.nm{font-size:11px;color:#FCD34D}
+.lmz{pointer-events:all}.lmz.ctx{pointer-events:none}
+.plc{cursor:pointer}.pdot{fill:rgba(167,139,250,.28);stroke:rgba(167,139,250,.6);stroke-width:1;vector-effect:non-scaling-stroke}
+.mapnote{position:absolute;top:calc(64px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:5;background:rgba(26,16,48,.92);border:1px solid rgba(252,211,77,.45);color:#FDE68A;font:600 12px Cairo;padding:6px 12px;border-radius:99px;white-space:nowrap;pointer-events:none;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.hsheet{transition:transform .25s ease}
+.hsheet.dragging{transition:none}
+.hsheet.collapsed{transform:translateY(calc(100% - 64px))}
+.hsheet .grab{cursor:grab;touch-action:none;padding:8px 0;margin:-8px auto 6px;width:64px}
+.supbox a{display:block;color:#fff;text-decoration:none;font-weight:800;font-size:13px;line-height:1.4}
+.credit{text-align:center;font-size:11px;color:#8b7fb0;padding:14px 0 6px;letter-spacing:.4px}
+.pk-free{background:rgba(26,16,48,.8);border:1px dashed rgba(167,139,250,.5);border-radius:16px;padding:10px;margin:8px 0 10px}
+.pk-free label{margin:0 0 6px}
+.pk-actions{display:flex;gap:8px;margin:6px 0 4px}
+.pk-actions .btn{flex:1}
+.dm-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+.dm{background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:8px;text-align:center}
+.dm img{width:100%;border-radius:10px;display:block;background:#0b0617}
+.dm b{display:block;font-size:13px;margin-top:6px}
+.ins-steps{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.ins-card{background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ins-card b{font-size:14px}
+.ins-card ol{margin:6px 0 0;padding-inline-start:20px;font-size:13px;color:var(--mute);line-height:1.8}
+.drc{display:flex;align-items:center;gap:10px;background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0}
+.drc-av{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #A78BFA}
+.drc-av.ph{display:flex;align-items:center;justify-content:center;background:#2a1560;font-size:24px}
+.drc-t{flex:1;min-width:0}.drc-t b{font-size:15px}
+.drc-car{width:78px;height:50px;border-radius:10px;object-fit:cover;flex:none;border:1px solid var(--line)}
+.plate{display:inline-block;margin-top:4px;background:#fff;color:#111;font:800 15px monospace;letter-spacing:2px;padding:2px 10px;border-radius:6px;border:2px solid #111}
+.pk-free .row{display:flex;flex-direction:column;gap:8px}
+.pk-free .row>*{flex:none!important;width:100%}
+.pk-free input#pfree{width:100%;min-height:46px;background:#0F0920;color:#fff;border:1.5px solid #A78BFA;border-radius:12px;padding:10px 12px;font:600 16px Cairo;direction:rtl;text-align:right}
+.pk-free input#pfree::placeholder{color:#8f83b3}
+.pk-free .btn{margin:0!important;width:100%}
+.fld{transition:transform .25s ease,border-color .3s,background .3s}
+.fld.filled{animation:fillIn .5s ease}
+.fld.from{border-inline-start:4px solid #34D399}
+.fld.to{border-inline-start:4px solid #F472B6}
+.fld.from .fd{background:#34D399;box-shadow:0 0 10px #34D399}
+.fld.to .fd{background:#F472B6;box-shadow:0 0 10px #F472B6}
+.fld .ft small{transition:color .3s}
+@keyframes fillIn{0%{transform:scale(.97);opacity:.4}60%{transform:scale(1.02);opacity:1}100%{transform:none}}
+.route-line{position:relative;height:26px;margin:0 auto;width:4px}
+.route-line:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(#A78BFA 0 5px,transparent 5px 10px);border-radius:4px;animation:flowDown 1s linear infinite}
+@keyframes flowDown{to{background-position:0 20px}}
+.route-line.on:before{background:repeating-linear-gradient(#FCD34D 0 5px,transparent 5px 10px)}
+/* free-text box: full width input on its own line, button below */
+#pkFreeBox .row{display:block!important}
+#pkFreeBox input#pfree{display:block!important;width:100%!important;box-sizing:border-box;min-height:46px;margin:0 0 8px!important;direction:rtl;text-align:right}
+#pkFreeBox .btn{display:block!important;width:100%!important;margin:0!important;box-sizing:border-box}
+body.adm{overflow-x:hidden}
+body.adm .card{overflow:hidden;min-width:0}
+body.adm .trip .row{flex-wrap:wrap}
+body.adm .trip .row select{min-width:0;flex:1 1 140px}
+body.adm .trip .row .btn{flex:1 1 120px;min-width:0;white-space:normal}
+body.adm .bgrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}
+body.adm .bchip{min-width:0;overflow:hidden}
+body.adm .bchip b{font-size:13px}
+</style>
+<link rel="manifest" href="/manifest-admin.json">
+<meta name="theme-color" content="#7C3AED">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="admin">
+<link rel="apple-touch-icon" href="/icon-192.png">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="ic-car" viewBox="0 0 64 32"><path d="M5 21 L9 12 Q11 8 16 8 H38 Q43 8 46 12 L52 18 Q60 19 60 24 V26 H4 V24 Q4 22 5 21Z"/><path d="M14 12 H26 V18 H11Z M29 12 H38 L44 18 H29Z" fill="#12071F" opacity=".6"/><circle cx="17" cy="26" r="5" fill="#12071F" stroke="currentColor" stroke-width="2.5"/><circle cx="46" cy="26" r="5" fill="#12071F" stroke="currentColor" stroke-width="2.5"/></symbol>
+<symbol id="ic-pin" viewBox="0 0 32 40"><path d="M16 1C8 1 2 7 2 15c0 10 14 24 14 24s14-14 14-24C30 7 24 1 16 1z"/><circle cx="16" cy="15" r="5.5" fill="#12071F" opacity=".7"/></symbol>
+</defs></svg>
+<div class="bgdeco" aria-hidden="true">
+  <svg style="width:90px;height:90px;top:34%;left:6%;transform:rotate(-12deg)"><use href="#ic-pin"/></svg>
+  <svg style="width:150px;height:75px;top:58%;right:-20px;transform:rotate(8deg)"><use href="#ic-car"/></svg>
+  <svg style="width:70px;height:70px;top:80%;left:14%;transform:rotate(10deg)"><use href="#ic-pin"/></svg>
+  <svg style="width:120px;height:60px;top:22%;right:10%;transform:rotate(-6deg)"><use href="#ic-car"/></svg>
+</div>
+<header>
+  <svg class="deco" viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M-10 112 C 90 40, 170 130, 260 70 S 360 30 392 34" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2.5" stroke-dasharray="7 9" stroke-linecap="round"/>
+    <g style="color:rgba(255,255,255,.2)" transform="translate(340 -4) scale(1.1)"><use href="#ic-pin" width="32" height="40"/></g>
+    <g style="color:rgba(244,114,182,.22)" transform="translate(40 66)"><use href="#ic-car" width="70" height="35"/></g>
+    <g style="color:rgba(255,255,255,.12)" transform="translate(150 6) scale(.8)"><use href="#ic-pin" width="32" height="40"/></g>
+  </svg>
+  <div class="brand"><span class="sign"><svg class="ic"><use href="#ic-pin"/></svg>توصيلة</span><span id="sub">توصيل داخل المدينة</span><span id="conn" class="conn"></span></div>
+  <div id="heroText" class="heroText"></div>
+  <div class="tabs" id="tabs"></div>
+  <button class="down" id="down" onclick="scrollDown()" aria-label="انزل لصفحة التسجيل"><span>انزل للتسجيل</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+</header>
+<main id="app"></main>
+<div id="home" class="homepg">
+  <div class="mapwrap"><svg id="map" role="img" aria-label="خريطة المدينة"></svg><div class="mapnote">⚠️ الخريطة دي تقريبية للمدينة، مش خريطة حقيقية بالمقاييس</div></div>
+  <button class="fab fab-menu" onclick="openDrawer()" aria-label="القايمة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <button class="fab fab-trips" onclick="openHistory()" aria-label="رحلاتي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+  <div class="hwrap">
+    <div class="above">
+      <button class="pill" onclick="openSafety()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>الأمان</button>
+      <button class="fab loc" onclick="locate()" aria-label="مركز الخريطة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+    </div>
+    <div class="hsheet" id="hsheet"></div>
+  </div>
+  <div class="drawer" id="drawer" onclick="if(event.target===this)closeDrawer()"><div class="drawer-in" id="drawerIn"></div></div>
+</div>
+<div class="picker" id="picker"><div class="pk-in" id="pickerIn"></div></div>
+<div class="sheet" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet-in" id="modalIn"></div></div>
+<div class="sheet" id="sheet" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet-in"><h3 id="sheetT">أضف صورة</h3>
+    <button class="btn" onclick="chooseSrc('cam')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>الكاميرا</button>
+    <button class="btn" onclick="chooseSrc('gal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/></svg>المعرض (الصور)</button>
+    <button class="btn red" id="delBtn" style="display:none" onclick="removeSlot()">حذف الصورة</button>
+    <button class="btn ghost" onclick="closeSheet()">إلغاء</button></div>
+</div>
+<input type="file" id="fcam" class="vh" accept="image/*" capture="environment" aria-hidden="true" tabindex="-1">
+<input type="file" id="fgal" class="vh" accept="image/*" multiple aria-hidden="true" tabindex="-1">
+
+
+<script>
+// ---------- ثوابت ----------
+// غيّر الكود ده لكود سري بتاعك. رابط الأدمن: الرابط + هذا الكود
+const ADMIN_KEY='#admin-x7k29q';
+const SUPPORT_PHONE='01031730512'; // رقم الدعم وخدمة العملاء (هيتغيّر للرقم الحقيقي)
+const WALLET={vodafone:'فودافون كاش',orange:'أورنج كاش',etisalat:'اتصالات كاش',instapay:'إنستا باي'};
+const ST={requested:'في انتظار سواق',accepted:'السواق أكّد وجاي لك',arrived:'السواق وصل',started:'الرحلة بدأت',done:'انتهت',cancelled:'اتلغت'};
+const LIVE=['accepted','arrived','started'];
+const COLL=['riders','drivers','trips','payments','msgs'];
+const uid=()=>Date.now()*1000+Math.floor(Math.random()*1000);
+// عمارات المدينة: المجموعة (A1..C17) وأرقام العمارات جواها، من الخرائط
+const BLOCKS={A1:[88,89,90,91,92,97,98,99,106,107,108],A2:[85,86,87,93,94,95,96,100,101,102,103,104,105],A3:[64,65,66,67,68,73,74,75,76,82,83,84],A4:[59,60,61,62,63,69,70,71,72,77,78,79,80,81],A5:[701,702,703,704,719,720,721,722,737,738,739,740,741,742],A6:[766,767,768,769,770,771,786,787,788,789,810,811,812,813],A7:[814,815,816,817,838,839,840,841,856,857,858,859,860,861],A8:[876,877,878,879,880,881,896,897,898,899,920,921,922,923],A9:[924,925,926,927,928,929,930,931],A10:[874,875,882,883,894,895,900,901,916,917,918,919],A11:[818,819,820,821,836,837,842,843,854,855,862,863],A12:[764,765,772,773,784,785,790,791,806,807,808,809],A13:[705,706,707,708,717,718,723,724,735,736,743,744],A14:[709,710,711,712,715,716,725,726,733,734,745,746,747,748],A15:[760,761,762,763,774,775,782,783,792,793,802,803,804,805],A16:[822,823,824,825,834,835,844,845,852,853],A17:[884,885,892,893,902,903,912,913,914,915],A18:[932,933,934,935,936,937,938],A19:[870,871,872,873,886,887,890,891,904,905,908,909,910,911],A20:[826,827,828,829,832,833,846,847,850,851,864,865,866,867],A21:[756,757,758,759,776,777,780,781,794,795,798,799,800,801],A22:[713,714,727,728,731,732,749,750,751,752],A23:[729,730,753,754,755,778,779,796,797],A24:[830,831,848,849,868,869,888,889,906,907],B1:[35,36,37,38,39,40,41,42,601,602,603,604,607,608],B2:[434,435,436,446,447,448,449,456,458,459,460,461],B3:[401,414,415,422,423,433],B4:[402,403,404,405,406,412,413,416,421,424,425,426,427],B5:[437,438,445,450,451,457,462,463,464],B6:[29,30,31,32,33,34,605,606,609,610,611,612],B7:[439,440,441,442,443,444,452,453,454,455,465,466,467,468],B8:[407,408,409,410,411,417,418,419,420,428,429,430,431,432],B9:[501,502,515,516,517,518,527,528,529,530],B10:[553,554,555,556,565,566,567,568],B11:[20,21,22,23,24,25,26,27,28,613,614,615],B12:[541,542,543,544,551,552,557,558,563,564,569,570,571,572],B13:[503,504,505,506,513,514,519,520,525,526,531,532,533,534],B14:[507,508,509,510,511,512,521,522,523,524,535,536,537,538],B15:[539,540,545,546,547,548,549,550,559,560,561,562,573,574,575,576],B16:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,616,617,618],C1:[117,118,119,120,121,122,139,140,141,142,167,168,169,170],C2:[113,114,115,116,123,124,137,138,143,144,163,164,165,166],C3:[109,110,111,112,125,126,135,136,145,146,159,160,161,162],C4:[105,106,107,108,127,128,133,134,147,148,155,156,157,158],C5:[101,102,103,104,129,130,131,132,149,150,151,152,153,154],C6:[1,2,13,14,25,26],C7:[3,4,5,11,12,15,16,22,23,24],C8:[6,7,8,9,10,17,18,19,20,21],C9:[32,33,34,35,36,43,44,45,46,47],C10:[29,30,31,37,38,41,42,48,49,50],C11:[27,28,39,40,51,52],C12:[53,54,55,56,57,58],C13:[171,172,173,174,175,176,177,178,179,180,181,182,183,184,185],C14:[46,47,48,49,50,58,59,60,61,62,63,186,187,188,189],C15:[24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,201,202],C16:[14,15,16,17,18,19,20,21,22,23,203],C17:[1,2,3,4,5,6,7,8,9,10,11,12,13,204,205,206,207,208,209]};   // مجموعات الخريطة وأرقام العمارات اللي جواها (لتحديد مكان العمارة على الخريطة)
+const PLACES=[{"id":"yas3","z":"block","n":"نادي الياسمين ٣","e":"🏊","at":[204,345],"draw":1,"rect":[174,321,61,79]},{"id":"metro","z":"block","n":"محلات مترو ماركت","e":"🛒"},{"id":"tahawy","z":"block","n":"مسجد الشهيد أحمد الطحاوي","e":"🕌","at":[204,386],"draw":1},{"id":"dmosque","z":"block","n":"مسجد حديقة الدراجات","e":"🕌"},{"id":"quattro","z":"block","n":"كواترو مول","e":"🏬","gates":4},{"id":"club","z":"u","n":"نادي المستقبل","e":"🏊","at":[259,889],"draw":1,"rect":[185,844,148,90]},{"id":"power","z":"u","n":"باور جيم","e":"🏋️"},{"id":"prime","z":"u","n":"برايم ماركت","e":"🛒"},{"id":"rakha","z":"u","n":"مسجد الرخاء","e":"🕌","at":[152,798],"draw":1},{"id":"yusr","z":"u","n":"حضانة اليسر","e":"🧸","at":[137,756],"draw":1},{"id":"abtal","z":"u","n":"مدرسة الأبطال","e":"🏫","at":[204,652]},{"id":"abtalm","z":"u","n":"مدرسة الأبطال المتميزة","e":"🏫","at":[234,652]},{"id":"salam","z":"u","n":"مدرسة السلام","e":"🏫","at":[204,701]},{"id":"yaban","z":"u","n":"مدرسة اليابانية","e":"🏫","at":[234,701]},{"id":"azora","z":"u","n":"أزورا مول","e":"🏬"},{"id":"rosa","z":"u","n":"روزا مول","e":"🏬"},{"id":"ushops","z":"u","n":"محلات الـU","e":"🛍️","at":[297,728],"draw":1,"rect":[260,681,75,95]},{"id":"cinema","z":"u","n":"سينما المستقبل","e":"🎬","at":[303,820],"draw":1,"rect":[272,798,62,45]},{"id":"fmall","z":"u","n":"Future Mall","e":"🏬"},{"id":"bm","z":"u","n":"بنك مصر","e":"🏦"},{"id":"gnew","z":"u","n":"بوابة المستقبل الجديدة","e":"🚪"},{"id":"gqatr","z":"u","n":"بوابة المستقبل القطر","e":"🚪"},{"id":"lrt","z":"u","n":"محطة القطار (LRT)","e":"🚆"},{"id":"sarour","z":"t","n":"مسجد الشهيد سرور","e":"🕌","at":[47,1331],"draw":1},{"id":"fuel","z":"t","n":"بنزينة وطنية","e":"⛽","at":[47,1383],"draw":1},{"id":"yas1","z":"t","n":"نادي الياسمين 1","e":"🏊","at":[47,1451],"draw":1},{"id":"ahly","z":"t","n":"البنك الأهلي","e":"🏦"},{"id":"milsch","z":"t","n":"المدرسة العسكرية","e":"🎖️","at":[565,1446],"draw":1},{"id":"milhotel","z":"t","n":"فندق المدرسة العسكرية","e":"🏨"},{"id":"tshops","z":"t","n":"محلات الـT","e":"🛍️"},{"id":"shorouk","z":"t","n":"بوابة الشروق","e":"🚪"},{"id":"downtown","z":"t","n":"وسط البلد","e":"🏙️"},{"id":"food","z":"t","n":"الفود كورت","e":"🍽️"},{"id":"clinics","z":"t","n":"العيادات","e":"🏥","at":[280,1488],"draw":1}];   // الأماكن بالترتيب: بلوك ثم U ثم T
+const ZONES=[
+  {id:'block',n:'بلوك',s:'700 و800 و900'},
+  {id:'u',n:'منطقة U',s:'600 و500 و400'},
+  {id:'t',n:'منطقة T',s:'100 و200 والشروق'}
+];
+// فئات العمارات (بترتيبك) — a..b هو نطاق الأرقام
+const BCATS=[
+  {id:'b800',z:'block',n:'قطاع 800',a:800,b:899},{id:'b900',z:'block',n:'قطاع 900',a:900,b:938},
+  {id:'b700',z:'block',n:'قطاع 700',a:701,b:799},{id:'bqasr',z:'block',n:'استثماري القصر',a:59,b:108},
+  {id:'u600',z:'u',n:'قطاع 600',a:601,b:618},{id:'u500',z:'u',n:'قطاع 500',a:501,b:576},
+  {id:'u400',z:'u',n:'قطاع 400',a:401,b:468},{id:'uold',z:'u',n:'قديم',a:1,b:42},{id:'uext',z:'u',n:'امتداد قديم',a:1,b:6},
+  {id:'t100',z:'t',n:'قطاع 100',a:101,b:189},{id:'t200',z:'t',n:'قطاع 200',a:201,b:209},
+  {id:'told',z:'t',n:'قديم',a:1,b:42},{id:'text',z:'t',n:'امتداد قديم',a:46,b:63},
+  {id:'tshr',z:'t',n:'استثماري الشروق',a:1,b:52},{id:'tcmd',z:'t',n:'عمارات القادة',a:53,b:58}
+];
+const _AB=Object.keys(BLOCKS).filter(k=>k[0]==='A'),_BB=Object.keys(BLOCKS).filter(k=>k[0]==='B');
+const CAND={b800:_AB,b900:_AB,b700:_AB,bqasr:_AB,u600:_BB,u500:_BB,u400:_BB,uold:_BB,uext:['B16'],
+  t100:['C1','C2','C3','C4','C5','C13','C14'],t200:['C15','C16','C17'],told:['C15','C16','C17'],text:['C14'],tshr:['C6','C7','C8','C9','C10','C11'],tcmd:['C12']};
+const PLACE_EMOJI='📍';
+// خريطة المدينة المخصصة: مستطيلات المجموعات [x,y,عرض,ارتفاع]
+const CITY={"w":664,"h":1620,"secs":[{"k":"A","t":"منطقة بلوك (700 • 800 • 900)","x":10,"y":44,"w":644,"h":476},{"k":"B","t":"منطقة U","x":10,"y":586,"w":646,"h":474},{"k":"C","t":"منطقة T","x":10,"y":1126,"w":642,"h":478}],"blocks":{"A1":[80,75,89,97],"A2":[182,75,153,96],"A3":[363,74,89,97],"A4":[465,75,154,97],"A9":[21,190,31,129],"A8":[80,185,124,66],"A7":[221,186,114,61],"A6":[366,187,114,60],"A5":[503,188,122,61],"A10":[81,258,123,65],"A11":[221,260,114,61],"A12":[360,264,121,61],"A13":[502,263,121,60],"A18":[18,332,28,129],"A17":[74,332,95,65],"A16":[239,335,95,61],"A15":[360,335,120,60],"A14":[495,332,127,62],"A22":[496,402,127,61],"A19":[74,405,127,60],"A20":[208,404,127,61],"A21":[360,404,120,61],"A24":[82,474,242,15],"A23":[360,473,219,15],"B1":[40,615,130,104],"B2":[348,629,120,52],"B3":[477,629,156,52],"B5":[348,688,127,77],"B4":[509,688,124,57],"B6":[40,723,130,112],"B7":[348,773,127,61],"B8":[509,753,125,78],"B11":[40,840,129,105],"B10":[348,843,127,46],"B9":[482,843,155,46],"B12":[348,898,157,66],"B13":[513,898,124,66],"B16":[40,954,295,85],"B15":[349,973,166,66],"B14":[522,973,124,66],"C1":[26,1163,90,98],"C2":[125,1163,65,98],"C3":[195,1163,64,98],"C4":[268,1163,65,98],"C5":[341,1164,65,97],"C6":[429,1164,52,97],"C7":[489,1165,59,97],"C8":[557,1165,62,97],"C14":[100,1279,110,87],"C13":[216,1279,82,86],"C12":[303,1279,110,87],"C11":[429,1274,52,97],"C10":[489,1275,59,98],"C9":[557,1275,62,98],"C15":[100,1380,87,199],"C16":[198,1500,141,79],"C17":[349,1500,188,80]},"lm":[[140,52,"حديقة الدراجات"],[530,52,"حديقة الدراجات"],[140,594,"حديقة الدراجات"],[530,594,"حديقة الدراجات"],[140,1134,"حديقة الدراجات"],[530,1134,"حديقة الدراجات"],[182,618,"مجمع المدارس",74,138]]};
+const DEFAULT_CATS=[
+  {id:'eco',name:'اقتصادي',desc:'٤ ركاب • الأوفر',extra:0},
+  {id:'comfort',name:'مريح',desc:'٤ ركاب • عربية أحدث وأريح',extra:10},
+  {id:'family',name:'عائلي',desc:'٦ ركاب • عربية كبيرة',extra:20}
+];
+function fresh(){return{
+  settings:{base:30,stop:5,sub:100,pin:'1234',cats:DEFAULT_CATS.map(c=>({...c})),wallets:{vodafone:'01000000000',orange:'01200000000',etisalat:'01100000000',instapay:'yourname@instapay'}},
+  buildings:[],coords:{},
+  riders:[],trips:[],payments:[],msgs:[],
+  drivers:[{id:uid(),name:'سواق تجريبي (تجربة)',phone:'01000000002',license:'DEMO',nid:'',cat:'comfort',photos:{},status:'approved',subUntil:Date.now()+90*864e5},{id:uid(),name:'سواق تجريبي ثلاثي',phone:'01000000001',license:'123456',nid:'29001010101010',cat:'eco',photos:{},status:'approved',subUntil:Date.now()+30*864e5}]
+}}
+let S=fresh();
+let REMOTE=false,adminPin='',tab='rider',riderId=null,driverId=null,adminOK=false,method='vodafone',tmp={},openChat=null,seen={},post=[];
+let snap={},sending=false,dirty=false,lastFP='',conn='local',lastErr=0;
+let regMode=false,reqOpen=false,selCat=null,sel={f:null,t:null},modalFn=null,mapField='t',PK={on:false,field:'t',zone:'block',q:'',cat:null,gate:null};
+
+// ---------- أدوات ----------
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const val=id=>($('#'+id)?.value||'').trim();
+const money=n=>n+' جنيه';
+const cats=()=>S.settings.cats&&S.settings.cats.length?S.settings.cats:DEFAULT_CATS;
+const catOf=id=>cats().find(c=>c.id===id)||cats()[0];
+const price=t=>S.settings.base+(catOf(t.cat).extra||0)+t.stops*S.settings.stop;
+const driverActive=d=>!!d&&d.status==='approved'&&d.subUntil>Date.now();
+const fdate=ts=>new Date(ts).toLocaleDateString('ar-EG');
+const hhmm=ts=>new Date(ts).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+const okPhone=p=>/^01[0125]\d{8}$/.test(p);
+const okMail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+const isAdmin=()=>window.FORCE_ADMIN===true||location.hash===ADMIN_KEY;
+const bkey=s=>String(s||'').split(' – ')[0];
+function toast(m,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+const ls={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function persist(){if(REMOTE)ls.s('tw-sess',JSON.stringify({r:riderId,d:driverId,t:tab}))}
+const ICON={
+  car:'<svg class="ic"><use href="#ic-car"/></svg>',pin:'<svg class="ic"><use href="#ic-pin"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'
+};
+
+// ---------- المزامنة مع السيرفر (لو شغّال) ----------
+const keyOf=(c,it)=>c+':'+it.id;
+function takeSnap(){snap={};for(const c of COLL)for(const it of S[c])snap[keyOf(c,it)]=JSON.stringify(it);snap._s=JSON.stringify(S.settings);snap._b=JSON.stringify(S.buildings);snap._c=JSON.stringify(S.coords||{})}
+function diff(){
+  const up={};let any=false;
+  for(const c of COLL)for(const it of S[c])if(snap[keyOf(c,it)]!==JSON.stringify(it)){(up[c]=up[c]||[]).push(it);any=true}
+  const out={upserts:up};
+  if(snap._s!==JSON.stringify(S.settings)){out.settings=S.settings;any=true}
+  if(snap._b!==JSON.stringify(S.buildings)){out.buildings=S.buildings;any=true}
+  if(snap._c!==JSON.stringify(S.coords||{})){out.coords=S.coords||{};any=true}
+  if((S.removedDrivers||[]).length){out.removed={drivers:[...S.removedDrivers]};any=true}
+  return any?out:null;
+}
+const hdrs=()=>({'Content-Type':'application/json','x-admin-pin':adminPin});
+function setConn(c){conn=c;const e=$('#conn');if(!e)return;e.className='conn '+(c==='ok'?'ok':c==='bad'?'bad':'');
+  e.textContent=c==='ok'?'متصل بالسيرفر':c==='bad'?'الاتصال مقطوع':'وضع تجريبي'}
+function applyRemote(st){
+  const fp=JSON.stringify(st);
+  S.settings=st.settings;S.buildings=st.buildings;S.coords=st.coords||{};for(const c of COLL)S[c]=st[c]||[];
+  takeSnap();
+  if(fp!==lastFP){lastFP=fp;render()}
+  notifyDriverStatus();
+  notifyRiderTrip();
+  notifyDriverTrips();
+}
+async function save(){
+  if(!REMOTE)return;
+  if(sending){dirty=true;return}
+  const d=diff();if(!d)return;
+  sending=true;let st;
+  try{
+    const r=await fetch('/api/sync',{method:'POST',headers:hdrs(),body:JSON.stringify(d)});
+    if(!r.ok)throw new Error('http '+r.status);
+    st=await r.json();
+  }catch(e){sending=false;setConn('bad');if(Date.now()-lastErr>8000){lastErr=Date.now();toast('مفيش اتصال بالسيرفر، هنحاول تاني',1)}return}
+  for(const c of COLL)for(const it of d.upserts[c]||[])snap[keyOf(c,it)]=JSON.stringify(it);
+  if(d.settings)snap._s=JSON.stringify(d.settings);
+  if(d.buildings)snap._b=JSON.stringify(d.buildings);
+  if(d.coords)snap._c=JSON.stringify(d.coords);
+  if(d.removed)S.removedDrivers=(S.removedDrivers||[]).filter(x=>!d.removed.drivers.includes(x));
+  sending=false;
+  if(dirty){dirty=false;return save()}
+  applyRemote(st);setConn('ok');
+  const cbs=post;post=[];cbs.forEach(f=>f());
+}
+async function pull(){
+  const r=await fetch('/api/state',{headers:hdrs()});
+  if(!r.ok)throw new Error('http '+r.status);
+  const st=await r.json();
+  if(sending||dirty||diff())return;
+  applyRemote(st);
+}
+let lastPoll=0;
+// التحديث الذكي: كل ثانية لو فيه رحلة أو شات مفتوح، وكل ثانيتين لو الموقع فاضي
+function pollEvery(){
+  const me=curRole?curRole():null;
+  const busy=!!openChat||S.trips.some(t=>(me==='rider'?t.riderId===riderId:me==='driver'?t.driverId===driverId:false)&&(t.status==='requested'||LIVE.includes(t.status)));
+  return busy?1000:2000;
+}
+async function poll(){
+  if(!REMOTE||document.hidden||sending||dirty)return;
+  if(Date.now()-lastPoll<pollEvery()-50)return;
+  lastPoll=Date.now();
+  if(diff()){save();return}
+  try{await pull();setConn('ok')}catch(e){setConn('bad')}
+}
+function commit(){save();render()}
+
+// ---------- الخريطة المخصصة للمدينة ----------
+const NS='http://www.w3.org/2000/svg';
+let mapBuilt=false,tx=0,ty=0,sc=1,ptrs=new Map(),dragMoved=false,downPt=null,lastSig='';
+const center=k=>{const b=CITY.blocks[k];return b?[b[0]+b[2]/2,b[1]+b[3]/2]:null};
+// ترتيب القطاعات جنب بعض بالعرض: قطاع 700/800/900 ← بلوك U ← بلوك T
+let CITY_LAID=false;
+function layoutCity(){
+  if(CITY_LAID) return; CITY_LAID=true;
+  const OLD_X=10, NEW_Y=44, GAP=26;
+  let x=12;
+  const shift={};
+  for(const s2 of CITY.secs){
+    const oldY=s2.y;
+    shift[s2.k]={dx:x-OLD_X,dy:NEW_Y-oldY};
+    s2.x=x;s2.y=NEW_Y;
+    x+=s2.w+GAP;
+  }
+  for(const k in CITY.blocks){const sh=shift[k[0]];const b=CITY.blocks[k];b[0]+=sh.dx;b[1]+=sh.dy}
+  const band=y=>y<580?'A':y<1120?'B':'C';
+  for(const l of CITY.lm){const sh=shift[band(l[1])];l[0]+=sh.dx;l[1]+=sh.dy}
+  // الأماكن (الدبابيس) كمان لازم تتحرك مع القطاعات
+  for(const q of PLACES){
+    if(!q.at) continue;
+    const sh=shift[band(q.at[1])];
+    q.at=[q.at[0]+sh.dx,q.at[1]+sh.dy];
+    if(q.rect) q.rect=[q.rect[0]+sh.dx,q.rect[1]+sh.dy,q.rect[2],q.rect[3]];
+  }
+  CITY.w=x-GAP+12;
+  CITY.h=NEW_Y+Math.max(...CITY.secs.map(q=>q.h))+60;
+}
+// الخريطة ماتبعدش عن الشاشة: لو أكبر من الشاشة بتتحرك بس في حدودها، ولو أصغر بتتوسّط
+function clampT(){
+  const v=visBox();
+  const W=CITY.w*sc,H=CITY.h*sc;
+  if(W<=v.w) tx=(v.w-W)/2; else tx=Math.min(30,Math.max(v.w-W-30,tx));
+  if(H<=v.h) ty=Math.max(60,(v.h-H)/2); else ty=Math.min(60,Math.max(v.h-H-40,ty));
+}
+function hideMapNote(){const m=document.querySelector('.mapnote');if(m)m.style.display='none'}
+function buildMap(){
+  if(mapBuilt)return;mapBuilt=true;layoutCity();
+  const svg=$('#map');
+  let h='<g id="mapg"><rect x="-300" y="-300" width="1264" height="2220" fill="#0b0617"/>';
+  for(const s of CITY.secs)h+=`<rect class="secp" x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="14"/><text class="sect" x="${s.x+s.w-12}" y="${s.y-12}" text-anchor="start" direction="rtl">${s.t} (${s.k})</text>`;
+  for(const l of CITY.lm){
+    if(l[3])h+=`<rect class="lmz ctx" x="${l[0]}" y="${l[1]}" width="${l[3]}" height="${l[4]}" rx="9"/><text class="lmt" x="${l[0]+l[3]/2}" y="${l[1]+l[4]/2}">${esc(l[2])}</text>`;
+    else h+=`<text class="lmt" x="${l[0]}" y="${l[1]}">${esc(l[2])}</text>`;
+  }
+  for(const k in CITY.blocks){
+    const [x,y,w,hh]=CITY.blocks[k];const fs=Math.max(7,Math.min(17,Math.min(w,hh)*.22));
+    h+=`<g class="blk" data-b="${k}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="6"/><text x="${x+w/2}" y="${y+hh/2}" style="font-size:${fs}px">${k}</text></g>`;
+  }
+  for(const p of PLACES){if(!p.draw||!p.at)continue;
+    if(p.rect){const r=p.rect;h+=`<g class="plc" data-p="${p.id}"><rect class="lmz" x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx="9"/><text class="lmt" x="${r[0]+r[2]/2}" y="${r[1]+r[3]/2}">${esc(p.n)}</text></g>`}
+    else h+=`<g class="plc" data-p="${p.id}"><circle class="pdot" cx="${p.at[0]}" cy="${p.at[1]}" r="9"/><circle cx="${p.at[0]}" cy="${p.at[1]}" r="3" fill="#C4B5FD"/><text class="lmt" x="${p.at[0]}" y="${p.at[1]+13}">${esc(p.n)}</text></g>`}
+  h+='<g id="mapdyn"></g></g>';
+  svg.innerHTML=h;
+  svg.addEventListener('pointerdown',e=>{hideMapNote();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});dragMoved=false;downPt={x:e.clientX,y:e.clientY};try{svg.setPointerCapture(e.pointerId)}catch(_){}});
+  svg.addEventListener('pointermove',e=>{
+    const p=ptrs.get(e.pointerId);if(!p)return;
+    if(ptrs.size===1){tx+=e.clientX-p.x;ty+=e.clientY-p.y;if(Math.hypot(e.clientX-downPt.x,e.clientY-downPt.y)>6)dragMoved=true}
+    else if(ptrs.size===2){
+      const o=[...ptrs.values()];const oldD=Math.hypot(o[0].x-o[1].x,o[0].y-o[1].y),oldM={x:(o[0].x+o[1].x)/2,y:(o[0].y+o[1].y)/2};
+      ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      const n=[...ptrs.values()];const nd=Math.hypot(n[0].x-n[1].x,n[0].y-n[1].y),nm={x:(n[0].x+n[1].x)/2,y:(n[0].y+n[1].y)/2};
+      tx+=nm.x-oldM.x;ty+=nm.y-oldM.y;if(oldD>0)zoomAt(nm.x,nm.y,nd/oldD);dragMoved=true;applyT();return;
+    }
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});applyT();
+  });
+  const up=e=>{
+    const was=ptrs.size===1&&ptrs.has(e.pointerId);ptrs.delete(e.pointerId);
+    if(was&&!dragMoved&&e.type==='pointerup'){const el=document.elementFromPoint(e.clientX,e.clientY);const b=el&&el.closest&&el.closest('[data-b]');if(b)onMapTap(b.dataset.b);else{const pl=el&&el.closest&&el.closest('[data-p]');if(pl)onPlaceTap(pl.dataset.p)}}
+  };
+  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+  svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,e.deltaY<0?1.15:1/1.15);applyT()},{passive:false});
+  window.addEventListener('resize',()=>{if(document.body.classList.contains('home'))refit(true)});
+}
+function zoomAt(mx,my,f){const n=Math.min(4,Math.max(.3,sc*f));f=n/sc;tx=mx-(mx-tx)*f;ty=my-(my-ty)*f;sc=n}
+function applyT(){clampT();const g=$('#mapg');if(g)g.setAttribute('transform',`translate(${tx} ${ty}) scale(${sc})`);drawDyn()}
+function visBox(){const h=$('.hwrap');return{w:innerWidth,h:Math.max(220,innerHeight-(h?h.offsetHeight:300))}}
+function overview(){const v=visBox();sc=Math.min(0.62,v.w/560);tx=10;ty=60;applyT()}
+function fitPts(pts){
+  if(!pts.length)return overview();
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),pad=70;
+  const x0=Math.min(...xs)-pad,x1=Math.max(...xs)+pad,y0=Math.min(...ys)-pad,y1=Math.max(...ys)+pad,w=x1-x0,h=y1-y0;
+  const v=visBox(),top=80;
+  sc=Math.min(1.4,Math.max(.3,Math.min((v.w-30)/w,(v.h-top-30)/h)));
+  tx=v.w/2-sc*(x0+w/2);ty=top+(v.h-top)/2-sc*(y0+h/2);applyT();
+}
+// ---------- المناطق والعمارات والأماكن ----------
+const zn=id=>(ZONES.find(z=>z.id===id)||ZONES[0]).n;
+const catById=id=>BCATS.find(c=>c.id===id);
+const blockOf=(cat,n)=>{const c=CAND[cat.id];return c.find(k=>BLOCKS[k].includes(n))||c[0]};
+function catOfBN(k,n){
+  const L=k[0],num=+k.slice(1);let id;
+  if(L==='A')id=n>=59&&n<=108?'bqasr':n<=799?'b700':n<=899?'b800':'b900';
+  else if(L==='B')id=n>=601?'u600':n>=501?'u500':n>=401?'u400':'uold';
+  else if((num>=1&&num<=5)||k==='C13')id='t100';
+  else if(num>=6&&num<=11)id='tshr';
+  else if(k==='C12')id='tcmd';
+  else if(k==='C14')id=n>=186?'t100':'text';
+  else id=n>=201?'t200':'told';
+  return catById(id);
+}
+function hash(s){let h=0;for(const ch of s)h=(h*31+ch.codePointAt(0))>>>0;return h.toString(36)}
+function allPlaces(){
+  const extra=(S.buildings||[]).map(s=>{const i=s.indexOf('|');if(i<0)return null;const z=s.slice(0,i),n=s.slice(i+1);
+    return ZONES.some(x=>x.id===z)&&n?{id:'c'+hash(s),z,n,e:PLACE_EMOJI,custom:s}:null}).filter(Boolean);
+  return PLACES.concat(extra);
+}
+const locB=(cat,n)=>({id:`b:${cat.id}:${n}`,kind:'b',z:cat.z,label:`${zn(cat.z)} • ${cat.n} • عمارة ${n}`,block:blockOf(cat,n)});
+const locP=(p,gate)=>({id:`p:${p.id}${gate?':'+gate:''}`,kind:'p',z:p.z,label:`${zn(p.z)} • ${p.n}${gate?' – بوابة '+gate:''}`,place:p});
+function resolveLoc(id){
+  if(!id)return null;const a=String(id).split(':');
+  if(a[0]==='b'){const c=catById(a[1]);return c?locB(c,+a[2]):null}
+  if(a[0]==='p'){const p=allPlaces().find(x=>x.id===a[1]);return p?locP(p,a[2]||''):null}
+  return null;
+}
+const locPoint=l=>!l?null:l.kind==='b'?center(l.block):(l.place&&l.place.at)||null;
+const AR='٠١٢٣٤٥٦٧٨٩';
+const norm=s=>String(s||'').replace(/[٠-٩]/g,d=>AR.indexOf(d)).toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652\u0640]/g,'').replace(/\s+/g,' ').trim();
+function searchLocs(q){
+  const nq=norm(q);if(!nq)return[];
+  const out=[];
+  for(const c of BCATS)if(norm(c.n).includes(nq))out.push({t:'cat',c});
+  if(/^\d+$/.test(nq)){
+    const n=+nq,ex=[],pre=[];
+    for(const c of BCATS)for(let i=c.a;i<=c.b;i++){if(i===n)ex.push({t:'b',c,n:i});else if(nq.length>=2&&String(i).startsWith(nq))pre.push({t:'b',c,n:i})}
+    out.push(...ex,...pre.slice(0,30));
+  }
+  for(const p of allPlaces())if(norm(p.n).includes(nq))out.push({t:'p',p});
+  return out.slice(0,60);
+}
+// ---------- حالة الخريطة حسب الدور والرحلة ----------
+function curRole(){return tab==='rider'&&S.riders.some(x=>x.id===riderId)?'rider':tab==='driver'&&S.drivers.some(x=>x.id===driverId)?'driver':null}
+const riderTrip=()=>S.trips.find(t=>t.riderId===riderId&&(t.status==='requested'||LIVE.includes(t.status)));
+const driverTrip=()=>S.trips.find(t=>t.driverId===driverId&&LIVE.includes(t.status));
+function openForDriver(d){return S.trips.filter(t=>t.status==='requested'&&(!d.cat||catOf(t.cat).id===d.cat))}
+function mapState(){
+  const role=curRole();let f=null,t=null,pulses=[];
+  if(role==='rider'){const c=riderTrip();if(c){f=resolveLoc(c.fromId);t=resolveLoc(c.toId)}else if(reqOpen){f=sel.f;t=sel.t}}
+  if(role==='driver'){const d=S.drivers.find(x=>x.id===driverId);const c=driverTrip();
+    if(c){f=resolveLoc(c.fromId);t=resolveLoc(c.toId)}
+    else if(driverActive(d))pulses=openForDriver(d).map(x=>resolveLoc(x.fromId)).filter(Boolean)}
+  return{f,t,pulses};
+}
+function drawDyn(){
+  const g=$('#mapdyn');if(!g)return;const m=mapState();
+  const blk=l=>l&&l.kind==='b'?l.block:null,fb=blk(m.f),tb=blk(m.t),pb=m.pulses.map(blk).filter(Boolean);
+  document.querySelectorAll('.blk').forEach(e=>{const k=e.dataset.b;e.classList.toggle('sf',k===fb);e.classList.toggle('st',k===tb);e.classList.toggle('pu',pb.includes(k))});
+  const a=locPoint(m.f),b=locPoint(m.t),s=1/sc;let h='';
+  if(a&&b&&Math.hypot(a[0]-b[0],a[1]-b[1])>2){const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,dx=b[0]-a[0],dy=b[1]-a[1];
+    h+=`<path class="route" d="M${a[0]} ${a[1]} Q${mx-dy*.18} ${my+dx*.18} ${b[0]} ${b[1]}"/>`}
+  for(const l of m.pulses){const p=locPoint(l);if(p)h+=`<g transform="translate(${p[0]+12*s} ${p[1]-12*s}) scale(${s})"><circle class="pulse" r="12"/><circle r="6" fill="#FCD34D" stroke="#fff" stroke-width="2"/></g>`}
+  if(a)h+=`<g transform="translate(${a[0]} ${a[1]}) scale(${s})"><circle r="9" fill="#34D399" stroke="#fff" stroke-width="3"/></g>`;
+  if(b)h+=`<g transform="translate(${b[0]} ${b[1]}) scale(${s})" style="color:#F472B6"><use href="#ic-pin" x="-15" y="-38" width="30" height="38"/></g>`;
+  g.innerHTML=h;
+}
+function refit(force){
+  if(!mapBuilt)return;const m=mapState();
+  const sig=[curRole(),m.f&&m.f.id,m.t&&m.t.id,m.pulses.map(l=>l.id).join(','),reqOpen?1:0].join('|');
+  if(!force&&sig===lastSig){drawDyn();return}
+  lastSig=sig;const pts=[locPoint(m.f),locPoint(m.t),...m.pulses.map(locPoint)].filter(Boolean);
+  pts.length?fitPts(pts):overview();
+}
+function locate(){lastSig='';refit(true)}
+// الضغط على الخريطة: مجموعة -> اختيار العمارة، مكان -> يتختار على طول
+function nextField(){return !sel.t?'t':!sel.f?'f':'t'}
+function onMapTap(k){
+  if(curRole()!=='rider'||riderTrip())return;
+  mapField=nextField();openModal(()=>blockChooser(k));
+}
+function onPlaceTap(id){
+  if(curRole()!=='rider'||riderTrip())return;
+  const p=allPlaces().find(x=>x.id===id);if(!p)return;mapField=nextField();
+  if(p.gates)openModal(()=>gateChooser(p));else selectLoc(mapField,locP(p));
+}
+function blockChooser(k){
+  const groups={};
+  for(const n of BLOCKS[k]||[]){const c=catOfBN(k,n);(groups[c.id]=groups[c.id]||{c,ns:[]}).ns.push(n)}
+  return `<h3>اختار العمارة</h3><div class="small" style="text-align:center">${mapField==='f'?'عايز تمشي منين':'عايز تروح فين'} • المجموعة ${k}</div>
+    ${Object.values(groups).map(g=>`<div class="sec-t">${zn(g.c.z)} • ${g.c.n}</div><div class="nums">${g.ns.sort((a,b)=>a-b).map(n=>`<button class="nchip" onclick="pickB('${g.c.id}',${n})">${n}</button>`).join('')}</div>`).join('')}
+    <button class="btn ghost" onclick="closeModal()">إغلاق</button>`;
+}
+function gateChooser(p){return `<h3>${esc(p.n)}</h3><div class="small" style="text-align:center">اختار البوابة</div>
+  <div class="nums g4">${[1,2,3,4].map(g=>`<button class="nchip" onclick="pickGate('${p.id}',${g})">بوابة ${g}</button>`).join('')}</div>
+  <button class="btn ghost" onclick="closeModal()">إغلاق</button>`}
+const pickB=(cid,n)=>selectLoc(mapField,locB(catById(cid),n));
+const pickGate=(pid,g)=>selectLoc(mapField,locP(allPlaces().find(x=>x.id===pid),String(g)));
+function togglePanel(id){const el=document.getElementById(id);const open=el.style.display==='none';el.style.display=open?'':'none';if(open){const i=el.querySelector('input');if(i)i.focus()}}
+function useFree(){
+  const v=val('pfree');
+  if(v.length<2) return toast('اكتب اسم المكان',1);
+  const name=v.slice(0,80);
+  selectLoc(PK.field,{id:'free:'+name,label:name,z:'free',free:true});
+}
+function selectLoc(field,loc){
+  sel[field]=loc;closePicker();closeModal();reqOpen=true;
+  const other=field==='f'?'t':'f';
+  renderHome();
+  if(!sel[other])openPicker(other);
+}
+// ---------- شاشة اختيار المكان ----------
+const pkTitle=()=>PK.field==='f'?'عايز تمشي منين':'عايز تروح فين';
+const pkPH=()=>PK.field==='f'?'اكتب عايز تمشي منين':'اكتب أنت عايز تروح فين';
+function openPicker(f){
+  const o=f==='f'?sel.t:sel.f;
+  PK={on:true,field:f,zone:(o&&o.z)||PK.zone||'block',q:'',cat:null,gate:null};
+  $('#picker').classList.add('on');renderPicker();
+}
+function closePicker(){PK.on=false;$('#picker').classList.remove('on')}
+function renderPicker(){
+  $('#pickerIn').innerHTML=`<div class="pk-h"><button class="x" onclick="closePicker()" aria-label="إغلاق">×</button><b>${pkTitle()}</b></div>
+    <div class="pk-actions"><button class="btn ghost" style="margin:0" onclick="togglePanel('pkSearchBox')">🔍 ابحث</button><button class="btn ghost" style="margin:0" onclick="togglePanel('pkFreeBox')">✏️ اكتب مكانك</button></div>
+    <div class="pk-s" id="pkSearchBox" style="display:none">${ICON.search}<input id="pq" type="search" placeholder="${pkPH()}" value="${esc(PK.q)}" autocomplete="off" oninput="pkSearch(this.value)"></div>
+    <div class="pk-free" id="pkFreeBox" style="display:none"><label for="pfree">اكتب اسم المكان لو مش موجود في القايمة</label><div class="row"><input id="pfree" placeholder="مثلاً: صيدلية الأمل" autocomplete="off"><button class="btn" style="flex:0 0 auto;margin:0" onclick="useFree()">استخدم</button></div><p class="small" style="margin:6px 0 0">المكان ده بيتحفظ في الرحلة دي بس، ومش بيتضاف للقايمة.</p></div>
+    <div id="pkZones"></div><div class="pk-body" id="pkBody"></div>`;
+  renderPickerBody();
+}
+function pkRow(l,sub,click,icon){return `<button class="pcard" onclick="${click}"><span class="pi">${icon}</span><span class="pn">${l}<small>${sub}</small></span><span class="chev">›</span></button>`}
+function renderPickerBody(){
+  const zt=$('#pkZones'),body=$('#pkBody');if(!zt||!body)return;
+  const q=PK.q.trim();
+  zt.innerHTML=q?'':`<div class="zt">${ZONES.map(z=>`<button class="${PK.zone===z.id?'on':''}" onclick="pkZone('${z.id}')"><b>${z.n}</b><small>${z.s}</small></button>`).join('')}</div>`;
+  if(q){
+    const r=searchLocs(q);
+    body.innerHTML=r.length?r.map(x=>x.t==='cat'?pkRow(esc(x.c.n),`${zn(x.c.z)} • من ${x.c.a} إلى ${x.c.b}`,`pkCat('${x.c.id}')`,'🏢')
+      :x.t==='b'?pkRow('عمارة '+x.n,`${zn(x.c.z)} • ${esc(x.c.n)}`,`pkBld('${x.c.id}',${x.n})`,'🏢')
+      :pkRow(esc(x.p.n),zn(x.p.z),`pkPlace('${x.p.id}')`,x.p.e)).join(''):'<p class="small" style="text-align:center;margin-top:24px">مفيش نتايج. جرّب رقم عمارة أو اسم مكان.</p>';
+    return;
+  }
+  if(PK.gate){const p=allPlaces().find(x=>x.id===PK.gate);
+    body.innerHTML=`<button class="back" onclick="PK.gate=null;renderPickerBody()">› رجوع</button><div class="sec-t">${esc(p.n)} • اختار البوابة</div><div class="nums g4">${[1,2,3,4].map(g=>`<button class="nchip" onclick="pkGate('${p.id}',${g})">بوابة ${g}</button>`).join('')}</div>`;return}
+  if(PK.cat){const c=catById(PK.cat),ns=[];for(let i=c.a;i<=c.b;i++)ns.push(i);
+    body.innerHTML=`<button class="back" onclick="PK.cat=null;renderPickerBody()">› رجوع</button><div class="sec-t">${zn(c.z)} • ${c.n} — اختار رقم العمارة</div><div class="nums">${ns.map(n=>`<button class="nchip" onclick="pkBld('${c.id}',${n})">${n}</button>`).join('')}</div>`;return}
+  body.innerHTML=`<div class="sec-t">العمارات</div><div class="cgrid">${BCATS.filter(c=>c.z===PK.zone).map(c=>`<button class="ccard" onclick="pkCat('${c.id}')"><b>${c.n}</b><small>من ${c.a} إلى ${c.b}</small></button>`).join('')}</div>
+    <div class="sec-t">الأماكن</div><div class="plist">${allPlaces().filter(p=>p.z===PK.zone).map(p=>pkRow(esc(p.n),p.gates?'اختار البوابة':'',`pkPlace('${p.id}')`,p.e)).join('')}</div>`;
+}
+function pkZone(z){PK.zone=z;PK.cat=null;PK.gate=null;renderPickerBody()}
+function pkSearch(v){PK.q=v;PK.cat=null;PK.gate=null;renderPickerBody()}
+function pkCat(id){const c=catById(id);PK.cat=id;PK.zone=c.z;PK.q='';const i=$('#pq');if(i)i.value='';renderPickerBody()}
+const pkBld=(cid,n)=>selectLoc(PK.field,locB(catById(cid),n));
+function pkPlace(id){const p=allPlaces().find(x=>x.id===id);if(!p)return;if(p.gates){PK.gate=id;PK.q='';const i=$('#pq');if(i)i.value='';renderPickerBody()}else selectLoc(PK.field,locP(p))}
+const pkGate=(pid,g)=>selectLoc(PK.field,locP(allPlaces().find(x=>x.id===pid),String(g)));
+
+// ---------- الرسم ----------
+function grabForm(){
+  const o={f:{},a:null};
+  document.querySelectorAll('#app input[id],#app select[id],#hsheet input[id],#hsheet select[id]').forEach(e=>{if(e.type==='file')return;o.f[e.id]=e.type==='checkbox'?e.checked:e.value});
+  const a=document.activeElement;
+  if(a&&a.id&&(a.closest('#app')||a.closest('#hsheet'))){o.a=a.id;try{o.s=a.selectionStart;o.e=a.selectionEnd}catch(_){}}
+  return o;
+}
+function restoreForm(o){
+  for(const id in o.f){
+    const e=document.getElementById(id);if(!e)continue;
+    if(e.type==='checkbox')e.checked=o.f[id];
+    else if(e.tagName==='SELECT'){if([...e.options].some(x=>x.value===o.f[id]))e.value=o.f[id]}
+    else e.value=o.f[id];
+  }
+  if(o.a){const e=document.getElementById(o.a);if(e){e.focus();try{e.setSelectionRange(o.s,o.e)}catch(_){}}}
+  paintSlots();
+  document.querySelectorAll('.msgs').forEach(m=>m.scrollTop=m.scrollHeight);
+}
+function scene(){return `<svg class="scene" viewBox="0 0 400 760" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+<defs><radialGradient id="g1"><stop offset="0" stop-color="#A855F7" stop-opacity=".6"/><stop offset="1" stop-color="#A855F7" stop-opacity="0"/></radialGradient>
+<radialGradient id="g2"><stop offset="0" stop-color="#EC4899" stop-opacity=".4"/><stop offset="1" stop-color="#EC4899" stop-opacity="0"/></radialGradient></defs>
+<circle cx="70" cy="120" r="190" fill="url(#g1)"/><circle cx="340" cy="640" r="210" fill="url(#g2)"/>
+<circle cx="70" cy="128" r="34" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+<circle cx="70" cy="128" r="62" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+<circle cx="70" cy="128" r="92" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+<path d="M430 700 C 330 560, 370 420, 220 360 S 70 260, 70 140" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="3" stroke-dasharray="8 10" stroke-linecap="round"/>
+<g style="color:#F472B6" transform="translate(34 40)"><use href="#ic-pin" width="72" height="90"/></g>
+<g style="color:#C4B5FD" transform="translate(240 590) rotate(-6)"><use href="#ic-car" width="150" height="75"/></g>
+<g style="color:#A78BFA;opacity:.8" transform="translate(205 300)"><use href="#ic-pin" width="24" height="30"/></g>
+<g style="color:#F9A8D4;opacity:.7" transform="translate(330 470)"><use href="#ic-pin" width="20" height="25"/></g>
+<g style="color:#C4B5FD;opacity:.45" transform="translate(150 480) rotate(8)"><use href="#ic-car" width="70" height="35"/></g>
+</svg>`}
+function render(){
+  const adm=isAdmin(),role=adm?null:curRole();
+  const ml=document.querySelector('link[rel=manifest]');if(ml)ml.href=adm?'/manifest-admin.json':'/manifest.json';
+  document.body.classList.toggle('adm',adm);
+  document.body.classList.toggle('home',!adm&&!!role);
+  document.body.classList.toggle('landing',!adm&&!role);
+  $('#sub').textContent=adm?'لوحة التحكم':'توصيل داخل المدينة';
+  $('#heroText').innerHTML=adm||role?'':tab==='rider'
+    ?'<b>من عمارتك لحد وجهتك</b><span>اطلب سواق في ثواني وادفع كاش</span>'
+    :'<b>اشتغل واكسب جوه مدينتك</b><span>سجّل بياناتك واستلم طلبات الركاب</span>';
+  $('#tabs').innerHTML=adm||role?'':[['rider','راكب'],['driver','سواق']].map(([k,v])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')">${v}</button>`).join('');
+  if(role){$('#app').innerHTML='';renderHome();}
+  else{
+    let html=adm?adminView():tab==='driver'?driverLogin():riderLogin();
+    if(!adm)html=`<div class="stage">${scene()}<div class="stage-in">${html}<div class="credit">Designed by ادهم</div></div></div>`;
+    const saved=grabForm();$('#app').innerHTML=html;restoreForm(saved);
+    if(regMode&&editingDriverId)prefillEdit();
+  }
+  if(modalFn&&$('#modal').classList.contains('on'))$('#modalIn').innerHTML=modalFn();
+  setConn(conn);
+}
+function go(t){tab=t;regMode=false;openChat=null;persist();render();window.scrollTo(0,0)}
+function scrollDown(){$('#app').scrollIntoView({behavior:'smooth',block:'start'})}
+
+// ---------- الصفحة الرئيسية (خريطة + شيت) ----------
+function renderHome(){
+  buildMap();
+  if(openChat){const t=S.trips.find(x=>x.id===openChat);
+    if(!t||!LIVE.includes(t.status))openChat=null;else seen[openChat]=otherCount(t.id,curRole())}
+  const saved=grabForm();
+  $('#hsheet').innerHTML=curRole()==='rider'?riderSheet():driverSheet();
+  $('#hsheet').insertAdjacentHTML('beforeend','<div class="credit">Designed by ادهم</div>');
+  maybeInstallPrompt();
+  restoreForm(saved);
+  requestAnimationFrame(()=>refit(false));
+}
+function deco(){return `<svg class="shdeco" viewBox="0 0 360 190" aria-hidden="true">
+  <circle cx="320" cy="48" r="20" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"/><circle cx="320" cy="48" r="38" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/><circle cx="320" cy="48" r="58" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="2"/>
+  <path d="M30 168 C 100 110, 150 180, 205 108 S 290 70, 320 50" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="3" stroke-dasharray="8 10" stroke-linecap="round"/>
+  <g style="color:#F472B6" transform="translate(300 8)"><use href="#ic-pin" width="40" height="50"/></g>
+  <g style="color:#C4B5FD" transform="translate(18 120) rotate(-4)"><use href="#ic-car" width="96" height="48"/></g>
+  <g style="color:#A78BFA;opacity:.8" transform="translate(150 118)"><use href="#ic-pin" width="18" height="22"/></g>
+  <g style="color:#F9A8D4;opacity:.6" transform="translate(236 60)"><use href="#ic-pin" width="14" height="18"/></g>
+  <g style="color:#C4B5FD;opacity:.35" transform="translate(205 128) rotate(6)"><use href="#ic-car" width="54" height="27"/></g>
+</svg>`}
+function riderSheet(){
+  const r=S.riders.find(x=>x.id===riderId);
+  const mine=S.trips.filter(t=>t.riderId===r.id).sort((a,b)=>b.at-a.at);
+  const cur=riderTrip();
+  const unrated=mine.find(t=>t.status==='done'&&!t.rating);
+  let h='<div class="grab"></div>';
+  if(cur) return h+`<div class="sh-t"><b>رحلتك</b><span class="badge">${esc(catOf(cur.cat).name)}</span></div>`+tripRider(cur);
+  if(unrated) h+=`<div class="card">${tripRider(unrated)}</div>`;
+  if(reqOpen) return h+requestPanel();
+  return h+`<button class="where" onclick="openDest()">${ICON.search}<b>اكتب أنت عايز تروح فين</b></button>${deco()}`;
+}
+function fieldBtn(f){
+  const l=sel[f],ph=f==='f'?'اكتب عايز تمشي منين':'اكتب أنت عايز تروح فين';
+  return `<button class="fld ${l?'filled':''} ${f==='f'?'from':'to'}" onclick="openPicker('${f}')"><span class="fd ${f}"></span><span class="ft"><small>${f==='f'?'عايز تمشي منين':'عايز تروح فين'}</small>
+    <b class="${l?'':'ph'}">${l?esc(l.label):ph}</b>${l&&!locPoint(l)?'<span class="nm">مكانه مش متحدد على الخريطة لسه</span>':''}</span>${ICON.search}</button>`;
+}
+function requestPanel(){
+  if(!selCat)selCat=cats()[0].id;
+  return `<div class="sh-t"><b>رحلتك</b><button class="x" onclick="closeReq()" aria-label="إغلاق">×</button></div>
+    ${fieldBtn('f')}<div class="route-line ${sel.f&&sel.t?'on':''}"></div>${fieldBtn('t')}
+    <div class="cats" role="radiogroup" aria-label="فئة العربية">${cats().map(c=>{
+      const ok=S.drivers.some(d=>driverActive(d)&&(d.cat||cats()[0].id)===c.id);
+      return `<button class="cat ${selCat===c.id?'on':''}" role="radio" aria-checked="${selCat===c.id}" onclick="setCat('${c.id}')">
+        ${ICON.car}<span class="ct"><b>${esc(c.name)}</b><span class="small">${esc(c.desc)} • <span class="av ${ok?'y':''}">${ok?'متاح':'مفيش سواقين'}</span></span></span>
+        <span class="cp">${price({cat:c.id,stops:0})}<small> جنيه</small></span></button>`}).join('')}</div>
+    <p class="small" style="margin:6px 0 0">+ ${S.settings.stop} جنيه لكل وقفة • الدفع كاش للسواق.</p>
+    <button class="btn" onclick="reqTrip()">اطلب ${esc(catOf(selCat).name)}</button>`;
+}
+function openDest(){reqOpen=true;renderHome();openPicker('t')}
+function closeReq(){reqOpen=false;sel={f:null,t:null};renderHome()}
+function setCat(id){selCat=id;const saved=grabForm();$('#hsheet').innerHTML=riderSheet();restoreForm(saved)}
+
+// ---------- صفحة تسجيل الدخول ----------
+function riderLogin(){
+  if(regMode) return `<div class="card"><h2>حساب راكب جديد</h2>
+    <label for="rn">الاسم</label><input id="rn" autocomplete="name">
+    <label for="re">الإيميل</label><input id="re" type="email" inputmode="email" autocomplete="email">
+    <label for="rp">رقم التليفون</label><input id="rp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx">
+    <button class="btn" onclick="regRider()">سجّل وادخل</button></div>
+    <button class="btn ghost" onclick="toggleReg()">عندي حساب – تسجيل الدخول</button>`;
+  return `<div class="card"><h2>تسجيل الدخول</h2>
+    <label for="lpr">رقم التليفون</label><input id="lpr" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" onkeydown="if(event.key==='Enter')loginRider()">
+    <button class="btn" onclick="loginRider()">دخول</button></div>
+    <button class="btn ghost" onclick="toggleReg()">ماعنديش حساب – حساب جديد</button>`;
+}
+function driverLogin(){
+  if(regMode) return `<div class="card"><h2>${editingDriverId?'✏️ صحّح بياناتك':'سجّل كسواق'}</h2>
+    <label for="dn">الاسم ثلاثي</label><input id="dn" autocomplete="name">
+    <label for="dp">رقم التليفون</label><input id="dp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx">
+    <label for="dnid">الرقم القومي (14 رقم)</label><input id="dnid" inputmode="numeric" maxlength="14">
+    <label for="dl">رقم الرخصة</label><input id="dl">
+    <label for="dpl">نمرة العربية (حروف وأرقام)</label><input id="dpl" placeholder="مثلاً: أ ب ج 1234" autocomplete="off">
+    <label for="dcm">نوع العربية (موديل)</label><input id="dcm" placeholder="مثلاً: هيونداي إلنترا 2018" autocomplete="off">
+    <label for="dcol">لون العربية</label><input id="dcol" placeholder="مثلاً: أبيض" autocomplete="off">
+    <label for="dcat">فئة عربيتك</label><select id="dcat">${cats().map(c=>`<option value="${esc(c.id)}">${esc(c.name)} – ${esc(c.desc)}</option>`).join('')}</select>
+    ${Object.entries(DOCS).map(([k,d])=>`<div class="doc"><div class="doc-t"><b>${d.t}</b><span class="small">وش وضهر • <span id="cnt-${k}">0</span>/2</span></div>
+      <div class="slots">${d.slots.map(x=>`<button type="button" class="slot" id="slot-${x}" onclick="openPick('${k}','${x}')" aria-label="${d.t} ${SLOTLBL[x]}"><img id="pv-${x}" alt=""><span>${SLOTLBL[x]}</span></button>`).join('')}</div>
+      <button type="button" class="plus" onclick="openPick('${k}')" aria-label="إضافة صورة – ${d.t}">+</button></div>`).join('')}
+    <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input id="agree" type="checkbox" style="width:auto;margin-top:6px">أوافق على الشروط والأحكام وإن بياناتي صحيحة.</label>
+    <button class="btn" onclick="regDriver()">ابعت للمراجعة</button></div>
+    <button class="btn ghost" onclick="toggleReg()">عندي حساب – تسجيل الدخول</button>`;
+  return `<div class="card"><h2>تسجيل دخول السواق</h2>
+    <label for="lp">رقم التليفون</label><input id="lp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" onkeydown="if(event.key==='Enter')loginDriver()">
+    <button class="btn" onclick="loginDriver()">دخول</button></div>
+    <button class="btn ghost" onclick="toggleReg()">سواق جديد – سجّل بياناتك</button>
+    <button class="btn ghost" onclick="loginDemo()">🚗 دخول كسواق تجريبي (للتجربة)</button>`;
+}
+function toggleReg(){regMode=!regMode;tmp={};render();window.scrollTo(0,0)}
+function loginRider(){
+  const r=S.riders.find(x=>x.phone===val('lpr'));
+  if(!r) return toast('الرقم ده مش مسجّل، اعمل حساب جديد',1);
+  riderId=r.id;persist();render();
+}
+function regRider(){
+  const n=val('rn'),e=val('re'),p=val('rp');
+  if(n.length<2) return toast('اكتب اسمك',1);
+  if(!okMail(e)) return toast('الإيميل مش صحيح',1);
+  if(!okPhone(p)) return toast('رقم التليفون لازم يكون 11 رقم ويبدأ بـ 01',1);
+  if(S.riders.some(x=>x.phone===p)) return toast('الرقم ده مسجّل قبل كده، ادخل بيه',1);
+  const r={id:uid(),name:n,email:e,phone:p};S.riders.push(r);riderId=r.id;regMode=false;persist();commit();
+}
+// خرائط المدينة للسواق: بتتعرض بعد الدخول، والسواق يختار ينزّلها (JPG) أو يلغي
+const DRIVER_MAPS=[{k:'A',t:'قطاع 700 / 800 / 900',f:'A.jpg'},{k:'B',t:'منطقة اليو (U)',f:'B.jpg'},{k:'C',t:'منطقة ال T',f:'C.jpg'}];
+function offerDriverMaps(){
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>خرائط المدينة</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">عشان تسهّل عليك الوصول للعمارات، تقدر تنزّل الخرائط دي على تليفونك (JPG).</p>
+    <div class="dm-grid">${DRIVER_MAPS.map(m=>`<div class="dm"><img src="${m.f}" alt="${esc(m.t)}" loading="lazy"><b>${esc(m.t)}</b></div>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" onclick="closeModal()">إلغاء</button><button class="btn" onclick="downloadDriverMaps()">نزّل الخرائط</button></div>`;
+  $('#modal').classList.add('on');
+}
+function downloadDriverMaps(){
+  DRIVER_MAPS.forEach((m,i)=>setTimeout(()=>{
+    const a=document.createElement('a');a.href=m.f;a.download='tawseela-map-'+m.k+'.jpg';
+    document.body.appendChild(a);a.click();a.remove();
+  },i*600));
+  setTimeout(closeModal,DRIVER_MAPS.length*600+200);
+  toast('بتتنزّل الخرائط');
+}
+function loginDemo(){
+  const d=S.drivers.find(x=>x.phone==='01000000002');
+  if(!d) return toast('السواق التجريبي مش موجود',1);
+  driverId=d.id;persist();render();offerDriverMaps();
+}
+function loginDriver(){
+  const d=S.drivers.find(x=>x.phone===val('lp'));
+  if(!d) return toast('الرقم ده مش مسجّل',1);
+  driverId=d.id;persist();render();offerDriverMaps();
+}
+let editingDriverId=null,lastDS=null;
+function startEditDriver(){
+  const d=S.drivers.find(x=>x.id===driverId);if(!d)return;
+  editingDriverId=d.id;regMode=true;tmp={};driverId=null;persist();render();window.scrollTo(0,0);
+}
+function prefillEdit(){
+  const d=S.drivers.find(x=>x.id===editingDriverId);if(!d)return;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&!el.value&&v!=null)el.value=v};
+  set('dn',d.name);set('dp',d.phone);set('dnid',d.nid);set('dl',d.license);
+  set('dpl',(d.car&&d.car.plate)||'');set('dcm',(d.car&&d.car.model)||'');set('dcol',(d.car&&d.car.color)||'');
+  if(d.cat){const sc=document.getElementById('dcat');if(sc)sc.value=d.cat}
+  tmp={...(d.photos||{}),avatar:d.avatar||(d.photos&&d.photos.avatar),car:(d.car&&d.car.photo)||(d.photos&&d.photos.car)};
+  paintSlots();
+}
+let lastTS={};
+function notifyRiderTrip(){
+  if(curRole()!=='rider'){lastTS={};return}
+  for(const t of S.trips.filter(x=>x.riderId===riderId)){
+    const prev=lastTS[t.id];lastTS[t.id]=t.status;
+    if(prev===undefined||prev===t.status) continue;
+    const d=S.drivers.find(x=>x.id===t.driverId);
+    const msg=t.status==='accepted'?'✅ السواق '+(d?d.name:'')+' وافق على طلبك':
+              t.status==='arrived'?'🚗 السواق وصل عندك':
+              t.status==='done'?'انتهت الرحلة، شكراً ليك':null;
+    if(msg){showNotif('توصيلة',msg);toast(msg)}
+  }
+}
+let lastDT={};
+function notifyDriverTrips(){
+  const d=S.drivers.find(x=>x.id===driverId);
+  if(!d){lastDT={};return}
+  for(const t of S.trips.filter(x=>x.driverId===d.id)){
+    const prev=lastDT[t.id];lastDT[t.id]=t.status;
+    if(prev===undefined||prev===t.status) continue;
+    if(t.status==='cancelled'){
+      const c=(t.cancel||[]).slice(-1)[0];
+      const msg='الراكب ألغى الرحلة'+(c?' ('+c.name+'): '+c.reason:'');
+      showNotif('توصيلة',msg);toast(msg,true);
+    }
+  }
+}
+function notifyDriverStatus(){
+  const d=S.drivers.find(x=>x.id===driverId);
+  if(!d){lastDS=null;return}
+  if(lastDS&&lastDS.id===d.id&&lastDS.status!==d.status&&(d.status==='approved'||d.status==='rejected')){
+    const msg=d.status==='approved'?'✅ تمام! بياناتك اتأكدت، تقدر تبدأ تشتغل':'⚠️ محتاجين تصحيح: '+(d.reason||'راجع بياناتك');
+    showNotif('توصيلة',msg);toast(msg,d.status==='rejected');
+  }
+  lastDS={id:d.id,status:d.status};
+}
+function showNotif(title,body){
+  if('Notification' in window&&Notification.permission==='granted'){try{new Notification(title,{body,icon:'/icon-192.png'})}catch(_){}}
+}
+function requestNotif(){
+  if(!('Notification' in window)) return toast('المتصفح ده مش بيدعم الإشعارات',1);
+  Notification.requestPermission().then(r=>toast(r==='granted'?'تم تفعيل الإشعارات ✓':'الإشعارات مش مفعّلة',r!=='granted'));
+}
+function regDriver(){
+  const n=val('dn'),p=val('dp'),nid=val('dnid'),l=val('dl');
+  if(n.split(/\s+/).length<3) return toast('اكتب الاسم ثلاثي',1);
+  if(!okPhone(p)) return toast('رقم التليفون مش صحيح',1);
+  if(!/^[23]\d{13}$/.test(nid)) return toast('الرقم القومي لازم يكون 14 رقم',1);
+  if(l.length<4) return toast('اكتب رقم الرخصة',1);
+  if(!tmp.front||!tmp.back) return toast('لازم تضيف صورة البطاقة وش وضهر',1);
+  if(!tmp.licFront||!tmp.licBack) return toast('لازم تضيف صورة الرخصة وش وضهر',1);
+  if(!tmp.avatar) return toast('لازم تضيف صورتك الشخصية',1);
+  if(!tmp.car) return toast('لازم تضيف صورة العربية',1);
+  if(val('dpl').length<3) return toast('اكتب نمرة العربية',1);
+  if(val('dcm').length<2) return toast('اكتب نوع العربية',1);
+  if(val('dcol').length<2) return toast('اكتب لون العربية',1);
+  if(!$('#agree').checked) return toast('وافق على الشروط الأول',1);
+  const ed=editingDriverId?S.drivers.find(x=>x.id===editingDriverId):null;
+  if(S.drivers.some(x=>(!ed||x.id!==ed.id)&&(x.phone===p||(x.nid&&x.nid===nid)))) return toast('الرقم أو البطاقة مسجّلين قبل كده',1);
+  if(ed){
+    Object.assign(ed,{name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
+    driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
+  }
+  const d={id:uid(),name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0};
+  S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();setTimeout(offerDriverMaps,300);
+  post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){driverId=null;persist();toast('الرقم أو البطاقة مسجّلين قبل كده',1);render()}});
+  commit();
+}
+
+// ---------- رفع صور الرخصة والبطاقة ----------
+const DOCS={id:{t:'البطاقة (الرقم القومي)',slots:['front','back']},lic:{t:'الرخصة',slots:['licFront','licBack']},avatar:{t:'صورتك الشخصية (هتظهر للراكب) 🤳',slots:['avatar']},car:{t:'صورة العربية (هتظهر للراكب) 🚗',slots:['car']}};
+const SLOTLBL={front:'وش',back:'ضهر',licFront:'وش',licBack:'ضهر',avatar:'صورتك',car:'العربية'};
+const ALLSLOTS=['front','back','licFront','licBack','avatar','car'];
+let pickT=null;
+function paintSlots(){
+  for(const k of ALLSLOTS){const sl=document.getElementById('slot-'+k);if(!sl)continue;
+    const has=!!tmp[k];sl.classList.toggle('has',has);if(has)document.getElementById('pv-'+k).src=tmp[k]}
+  for(const k in DOCS){const c=document.getElementById('cnt-'+k);if(c)c.textContent=DOCS[k].slots.filter(x=>tmp[x]).length}
+}
+function openPick(doc,slot){
+  const d=DOCS[doc];
+  if(!slot&&d.slots.every(x=>tmp[x]))return toast('الصورتين موجودين، اضغط على الصورة لو عايز تغيّرها');
+  pickT={doc,slot:slot||null};
+  $('#sheetT').textContent=slot?`${d.t} – ${SLOTLBL[slot]}`:`${d.t} – أضف صورة`;
+  $('#delBtn').style.display=slot&&tmp[slot]?'flex':'none';
+  $('#sheet').classList.add('on');
+}
+function closeSheet(){$('#sheet').classList.remove('on')}
+function chooseSrc(src){closeSheet();$(src==='cam'?'#fcam':'#fgal').click()}
+function removeSlot(){if(pickT&&pickT.slot){delete tmp[pickT.slot];paintSlots()}pickT=null;closeSheet()}
+function compress(file){return new Promise((ok,no)=>{
+  const fr=new FileReader();
+  fr.onerror=no;
+  fr.onload=()=>{const img=new Image();img.onerror=no;
+    img.onload=()=>{const sc2=Math.min(1,800/Math.max(img.width,img.height));const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*sc2));c.height=Math.max(1,Math.round(img.height*sc2));
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};
+    img.src=fr.result};
+  fr.readAsDataURL(file)})}
+async function handleFiles(files){
+  const t=pickT;pickT=null;const list=[...files];
+  if(!t||!list.length)return;
+  const d=DOCS[t.doc];
+  for(let i=0;i<list.length;i++){
+    const slot=i===0&&t.slot?t.slot:d.slots.find(k=>!tmp[k]);
+    if(!slot)break;
+    try{tmp[slot]=await compress(list[i])}catch(e){toast('الصورة مش مقروءة، جرّب صورة تانية',1)}
+    paintSlots();
+  }
+}
+['fcam','fgal'].forEach(id=>$('#'+id).addEventListener('change',e=>{handleFiles(e.target.files);e.target.value=''}));
+
+// ---------- الشات ----------
+const otherCount=(tid,me)=>S.msgs.filter(m=>m.tripId===tid&&m.from!==me).length;
+const unread=(t,me)=>Math.max(0,otherCount(t.id,me)-(seen[t.id]||0));
+function quickList(t,me){return me==='rider'
+  ?['أنا مستنيك عند '+t.from,'إنت فين دلوقتي؟','ثواني وجاي']
+  :['أنا في الطريق ليك','وصلت عند '+t.from,'ممكن تنزل دلوقتي؟']}
+function chatPanel(t,me){
+  const msgs=S.msgs.filter(m=>m.tripId===t.id).sort((a,b)=>a.at-b.at||a.id-b.id);
+  const o=me==='rider'?S.drivers.find(x=>x.id===t.driverId):S.riders.find(x=>x.id===t.riderId);
+  return `<div class="chat"><div class="small">محادثة مع ${esc(o?.name||'')}</div>
+    <div class="msgs">${msgs.length?msgs.map(m=>`<div class="bub ${m.from===me?'me':'ot'}">${esc(m.text)}<i>${hhmm(m.at)}</i></div>`).join(''):'<div class="small" style="text-align:center">ابدأ المحادثة أو اختار رسالة سريعة</div>'}</div>
+    <div class="chips q">${quickList(t,me).map((q,i)=>`<button class="chip" onclick="quick(${t.id},'${me}',${i})">${esc(q)}</button>`).join('')}</div>
+    <div class="row"><input id="ci-${t.id}" placeholder="اكتب رسالة" autocomplete="off" onkeydown="if(event.key==='Enter')sendMsg(${t.id},'${me}')">
+    <button class="btn" style="flex:0 0 84px;margin:0" onclick="sendMsg(${t.id},'${me}')">إرسال</button></div></div>`;
+}
+function chatBtn(t,me,label){
+  const u=unread(t,me);
+  return `<button class="btn" onclick="toggleChat(${t.id})">${label}${u&&openChat!==t.id?`<span class="ub">${u}</span>`:''}</button>`;
+}
+function toggleChat(id){openChat=openChat===id?null:id;render()}
+function pushMsg(tid,me,text){
+  text=String(text||'').trim().slice(0,300);if(!text)return;
+  S.msgs.push({id:uid(),tripId:tid,from:me,text,at:Date.now()});commit();
+}
+function sendMsg(tid,me){const i=$('#ci-'+tid);if(!i)return;const t=i.value.trim();if(!t)return;i.value='';pushMsg(tid,me,t)}
+function quick(tid,me,i){const t=S.trips.find(x=>x.id===tid);pushMsg(tid,me,quickList(t,me)[i])}
+
+// ---------- الراكب: الرحلات ----------
+function driverCard(d){
+  if(!d) return '';
+  const c=d.car||{};
+  return `<div class="drc">${d.avatar?`<img class="drc-av" src="${d.avatar}" alt="">`:'<div class="drc-av ph">👤</div>'}
+    <div class="drc-t"><b>${esc(d.name)}</b><div class="small">${esc(c.model||'')}${c.color?' • '+esc(c.color):''}</div>${c.plate?`<div class="plate">${esc(c.plate)}</div>`:''}</div>
+    ${c.photo?`<img class="drc-car" src="${c.photo}" alt="صورة العربية">`:''}</div>`;
+}
+function tripRider(t){
+  const d=S.drivers.find(x=>x.id===t.driverId);
+  let extra='';
+  if(t.status==='requested') extra=`<div class="small">بندوّر على سواق قريب منك…</div><button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الطلب</button>`;
+  else if(d&&LIVE.includes(t.status)) extra=`
+    <div class="confirm">${t.status==='accepted'?`✔ السواق ${esc(d.name)} أكّد طلبك وجاي لك${t.eta?` خلال ${t.eta} دقايق`:''}`:t.status==='arrived'?`✔ السواق ${esc(d.name)} وصل عندك`:`الرحلة شغّالة مع ${esc(d.name)}`}</div>
+    ${driverCard(d)}
+    <div class="row">${chatBtn(t,'rider','تواصل مع السائق')}<a class="btn ghost" href="tel:${esc(d.phone)}">📞 رن عليه</a></div>
+    ${openChat===t.id?chatPanel(t,'rider'):''}
+    ${t.status==='accepted'?`<button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الرحلة</button>`:''}`;
+  else if(t.status==='done') extra=t.rating
+    ?`<div class="small">تقييمك: ${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div>`
+    :`<label for="cm-${t.id}">قيّم السواق</label><input id="cm-${t.id}" placeholder="تعليق (اختياري)">
+      <div class="row" style="margin-top:8px">${[1,2,3,4,5].map(n=>`<button class="chip" onclick="rateTrip(${t.id},${n})" aria-label="${n} من 5">${n}★</button>`).join('')}</div>`;
+  return `<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b><br>
+    <span class="badge ${t.status==='done'?'b-ok':t.status==='cancelled'?'b-bad':'b-wait'}">${ST[t.status]}</span>
+    <span class="small"> • ${esc(catOf(t.cat).name)} • ${money(price(t))}${t.stops?` (شامل ${t.stops} وقفة)`:''}</span>${extra}</div>`;
+}
+function reqTrip(){
+  if(riderTrip()) return toast('عندك رحلة شغّالة لسه',1);
+  if(!sel.f) return toast('اكتب أو اختار هتمشي منين',1);
+  if(!sel.t) return toast('اكتب أو اختار رايح فين',1);
+  if(sel.f.id===sel.t.id) return toast('نقطة البداية والنهاية لازم يختلفوا',1);
+  S.trips.push({id:uid(),riderId,from:sel.f.label,to:sel.t.label,fromId:sel.f.id,toId:sel.t.id,cat:selCat||cats()[0].id,stops:0,status:'requested',driverId:null,eta:null,at:Date.now()});
+  reqOpen=false;sel={f:null,t:null};toast('تم إرسال الطلب');commit();
+}
+
+const CANCEL_LOG_OK=true;
+function openCancel(tid,who){
+  const t=S.trips.find(x=>x.id===tid);if(!t)return;
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>${who==='rider'?'إلغاء الرحلة':'مش هتكمّل الرحلة دي؟'}</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">عشان نتابع، لازم تكتب اسمك وسبب الإلغاء، وهيوصل للأدمن.</p>
+    <label for="cnm">اسمك</label><input id="cnm" placeholder="اكتب اسمك" autocomplete="name">
+    <label for="cnr">سبب الإلغاء</label><textarea id="cnr" rows="3" placeholder="اكتب سبب الإلغاء" style="width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;font:400 15px Cairo;background:#0F0920;color:var(--ink)"></textarea>
+    <button class="btn red" onclick="submitCancel(${tid},'${who}')">إلغاء الرحلة وإرسال للأدمن</button>`;
+  $('#modal').classList.add('on');
+}
+function submitCancel(tid,who){
+  const name=val('cnm'),reason=val('cnr');
+  if(name.length<2) return toast('اكتب اسمك',1);
+  if(reason.length<3) return toast('اكتب سبب الإلغاء',1);
+  const t=S.trips.find(x=>x.id===tid);if(!t)return;
+  t.cancel=(t.cancel||[]).concat([{by:who,name,reason,at:Date.now()}]);
+  if(who==='rider'){ if(t.status==='requested'||t.status==='accepted') t.status='cancelled'; }
+  else { t.status='requested';t.driverId=null;t.eta=null;openChat=null; }
+  closeModal();toast('اتسجل الإلغاء');commit();
+}
+function cancelTrip(id){const _t=S.trips.find(x=>x.id===id);if(_t&&_t.status==='requested'){_t.status='cancelled';toast('اتلغى الطلب، تقدر تعمل طلب جديد');commit();return}openCancel(id,'rider');return;const t=S.trips.find(x=>x.id===id);if(t&&(t.status==='requested'||t.status==='accepted')){t.status='cancelled';commit()}}
+function rateTrip(id,n){const t=S.trips.find(x=>x.id===id);t.rating=n;t.comment=val('cm-'+id);toast('شكرًا على تقييمك');commit()}
+
+// ---------- السواق ----------
+function driverSheet(){
+  const d=S.drivers.find(x=>x.id===driverId);
+  let h=`<div class="grab"></div><div class="sh-t"><b>أهلاً ${esc(d.name)}</b><span class="badge">${esc(catOf(d.cat).name)}</span></div>`;
+  if(d.status==='pending') return h+`<div class="card"><h2>⏳ بياناتك تحت المراجعة</h2><p>الأدمن بيراجع بياناتك ومطابقة الصورة. ده ممكن ياخد <b>يوم أو يومين</b> بحد أقصى.</p><p class="small">هيوصلك إشعار على الموبايل أول ما الأدمن يخلّص، وتقدر تكمّل بعدها.</p><button class="btn ghost" onclick="requestNotif()">🔔 فعّل الإشعارات</button></div>`;
+  if(d.status==='rejected') return h+`<div class="card"><h2>⚠️ محتاجين تصحيح في بياناتك</h2><p>${esc(d.reason||'البيانات أو الصور مش واضحة.')}</p><p class="small">صحّح البيانات اللي غلط، وابعتها تاني للمراجعة.</p><button class="btn" onclick="startEditDriver()">✏️ صحّح بياناتي</button></div>`;
+  if(!driverActive(d)) return h+driverPay(d);
+  if(d.trialMsg && !localStorage.getItem('tw-trial-'+d.phone)) h+=`<div class="card trial"><h2>🎉 مبروك! عندك 3 شهور مجانًا</h2><p>الاشتراك مجاني لحد <b>${fdate(d.subUntil)}</b>. بعد كده الاشتراك <b>${money(S.settings.sub)}</b> كل شهر، وهيظهرلك زرار الدفع لما الفترة تخلص.</p><button class="btn" onclick="ackTrial()">تمام، فهمت</button></div>`;
+  const open=openForDriver(d).sort((a,b)=>a.at-b.at);
+  const cur=driverTrip();
+  const done=S.trips.filter(t=>t.driverId===d.id&&t.status==='done');
+  const earn=done.reduce((a,t)=>a+price(t),0);
+  return h+`<div class="stat"><div><b>${done.length}</b>رحلات</div><div><b>${earn}</b>كاش اتحصّل</div><div class="supbox"><a href="tel:${SUPPORT_PHONE}">📞 تواصل مع الدعم</a></div></div>`
+    +(cur?curTrip(cur):`<div class="card"><h2>طلبات جديدة${open.length?` (${open.length})`:''}</h2>${open.length?open.map(t=>{const r=S.riders.find(x=>x.id===t.riderId);return `<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b>
+      <div class="small">${money(price(t))} • الراكب: ${esc(r?.name||'')}</div>
+      <label for="eta-${t.id}">هتوصله خلال</label>
+      <select id="eta-${t.id}"><option value="3">3 دقايق</option><option value="5" selected>5 دقايق</option><option value="10">10 دقايق</option><option value="15">15 دقيقة</option></select>
+      <button class="btn" onclick="acceptTrip(${t.id})">أؤكد الطلب وجاي له</button></div>`}).join(''):'<p class="small">مفيش طلبات دلوقتي. الطلبات الجديدة بتظهر لوحدها على الخريطة وهنا.</p>'}</div>${deco()}`);
+}
+// إحداثيات عمارات من جوجل مابس (خط العرض، خط الطول) — المفتاح: id الموقع داخل التطبيق
+const COORDS={'b:t100:124':[30.168372,31.564891],'b:u400:451':[30.165356,31.558473],'b:bqasr:105':[30.165332,31.544672],'b:told:13':[30.161848,31.570209],'b:b800:863':[30.162905,31.545525]};
+// ---------- حفظ مكان العمارة بالـ GPS ----------
+const bldId=(k,n)=>'b:'+catOfBN(k,n).id+':'+n;
+function saveGPS(id){
+  if(!window.isSecureContext||!navigator.geolocation) return toast('الـ GPS محتاج الموقع يتفتح على https',1);
+  toast('جاري تحديد مكانك…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const la=pos.coords.latitude,ln=pos.coords.longitude,acc=Math.round(pos.coords.accuracy||999);
+    if(acc>50) return toast('الدقة قليلة ('+acc+' متر). قرّب من باب العمارة وجرّب تاني',1);
+    S.coords=S.coords||{};S.coords[id]=[+la.toFixed(6),+ln.toFixed(6),acc,driverId,Date.now()];
+    toast('تم حفظ مكان العمارة ✓');commit();
+  },()=>toast('مقدرناش نجيب موقعك. اتأكد إن الـ GPS شغال واديت الموقع إذن',1),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+function gpsBtn(id,label){
+  if(!id) return '';
+  if(S.coords&&S.coords[id]) return `<div class="small">✓ مكان ${esc(label)} متسجّل</div>`;
+  return `<button class="btn ghost" onclick="saveGPS('${esc(id)}')">احفظ مكان ${esc(label)} بالـ GPS</button>`;
+}
+function missingBuildings(){
+  const out=[];
+  for(const k in BLOCKS)for(const n of BLOCKS[k]){const id=bldId(k,n);
+    if(!(S.coords&&S.coords[id])&&!COORDS[id]) out.push({id,k,n});}
+  return out;
+}
+function navUrl(fromId,toId,fromLabel,toLabel){
+  const pt=id=>{const c=S.coords&&S.coords[id];if(c)return c[0]+','+c[1];return COORDS[id]?COORDS[id].join(','):null};
+  const txt=x=>encodeURIComponent(String(x||'').replace(/•/g,' ').replace(/\s+/g,' ').trim()+' Future City New Cairo');
+  const o=pt(fromId)||txt(fromLabel),d=pt(toId)||txt(toLabel);
+  return 'https://www.google.com/maps/dir/?api=1&origin='+o+'&destination='+d+'&travelmode=driving';
+}
+function curTrip(t){
+  const r=S.riders.find(x=>x.id===t.riderId);
+  const next={accepted:['وصلت للراكب','arrived'],arrived:['بدأت الرحلة','started']}[t.status];
+  return `<div class="card"><h2>رحلة شغّالة</h2><b>${esc(t.from)} ← ${esc(t.to)}</b>
+    <div class="small">الراكب: ${esc(r?.name)} • <span class="badge b-wait">${ST[t.status]}</span></div>
+    <div class="ticket"><svg class="ic"><use href="#ic-pin"/></svg><div><div class="small" style="color:#fff">حصّل كاش</div><b>${price(t)}</b> جنيه</div>
+      <div class="small" style="color:#fff;text-align:left">${t.stops} وقفة</div></div>
+    <div class="row">${chatBtn(t,'driver','تواصل مع الراكب')}<a class="btn ghost" href="tel:${esc(r?.phone||'')}">📞 رن عليه</a></div>
+    ${t.status==='arrived'?gpsBtn(t.fromId,'الراكب'):''}${t.status==='started'?gpsBtn(t.toId,'الوجهة'):''}
+    ${openChat===t.id?chatPanel(t,'driver'):''}
+    ${next?`<button class="btn" onclick="setStatus(${t.id},'${next[1]}')">${next[0]}</button>`
+      :`<div class="row"><button class="btn ghost" onclick="addStop(${t.id})">وقفة (+${S.settings.stop})</button><button class="btn green" onclick="setStatus(${t.id},'done')">انتهت الرحلة</button></div>`}
+    ${t.status==='accepted'?`<button class="btn ghost" onclick="releaseTrip(${t.id})">مقدرش أكمّل الرحلة دي</button>`:''}</div>`;
+}
+function acceptTrip(id){
+  const t=S.trips.find(x=>x.id===id);
+  if(!t||t.status!=='requested') return toast('الرحلة اتاخدت',1);
+  t.status='accepted';t.driverId=driverId;t.eta=+val('eta-'+id)||5;
+  post.push(()=>{const x=S.trips.find(y=>y.id===id);if(x&&x.driverId!==driverId){toast('الرحلة اتاخدت من سواق تاني',1);render()}});
+  commit();
+}
+function releaseTrip(id){openCancel(id,'driver');return;const t=S.trips.find(x=>x.id===id);t.status='requested';t.driverId=null;t.eta=null;openChat=null;commit()}
+function setStatus(id,s){const t=S.trips.find(x=>x.id===id);t.status=s;if(s==='done')t.doneAt=Date.now();commit()}
+function addStop(id){S.trips.find(x=>x.id===id).stops++;commit()}
+function driverPay(d){
+  const pend=S.payments.find(p=>p.driverId===d.id&&p.status==='review');
+  if(pend) return `<div class="card"><h2>الدفع قيد التأكيد</h2><p>استلمنا بيانات تحويلك (${esc(pend.ref)}). هنفعّل الاشتراك أول ما نتأكد.</p></div>`;
+  return `<div class="card"><h2>اشتراك الشهر: ${money(S.settings.sub)}</h2>
+    <p class="small">ادفع الاشتراك لصاحب الموقع، وبعدها اكتب بيانات التحويل.</p>
+    <div class="chips">${Object.keys(WALLET).map(k=>`<button class="chip ${method===k?'on':''}" onclick="method='${k}';render()">${WALLET[k]}</button>`).join('')}</div>
+    <div class="ticket"><svg class="ic"><use href="#ic-pin"/></svg><div><div class="small" style="color:#fff">حوّل على ${WALLET[method]}</div><b style="font-size:22px" dir="ltr">${esc(S.settings.wallets[method])}</b></div></div>
+    <label for="pr">رقم العملية أو الرقم اللي حوّلت منه</label><input id="pr">
+    <button class="btn" onclick="sendPay()">أكدت التحويل</button></div>`;
+}
+function sendPay(){
+  const ref=val('pr');if(ref.length<4) return toast('اكتب رقم العملية أو رقم المحفظة',1);
+  if(S.payments.some(p=>p.driverId===driverId&&p.status==='review')) return;
+  S.payments.push({id:uid(),driverId,method,ref,amount:S.settings.sub,status:'review',at:Date.now()});commit();
+}
+
+// ---------- القايمة الجانبية والنوافذ ----------
+function openDrawer(){
+  const role=curRole();const u=role==='rider'?S.riders.find(x=>x.id===riderId):S.drivers.find(x=>x.id===driverId);if(!u)return;
+  $('#drawerIn').innerHTML=`<div class="dr-h"><div class="avatar">${esc(u.name.trim()[0]||'؟')}</div><div><b>${esc(u.name)}</b><div class="small" dir="ltr" style="text-align:right">${esc(u.phone)}</div>
+    <span class="badge">${role==='rider'?'راكب':'سواق • '+esc(catOf(u.cat).name)}</span></div></div>
+    <button class="dr-i" onclick="closeDrawer();openHistory()">رحلاتي</button>
+    <button class="dr-i" onclick="closeDrawer();openSafety()">الأمان</button>
+    ${role==='driver'?'<button class="dr-i" onclick="closeDrawer();downloadDriverMaps()">⬇️ نزّل خريطة المدينة</button>':''}
+    <button class="dr-i" onclick="closeDrawer();showInstallPrompt(true)">📲 ثبّت التطبيق على تليفوني</button>
+    <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
+    <button class="dr-i red" onclick="logout()">تسجيل خروج</button>`;
+  $('#drawer').classList.add('on');
+}
+function closeDrawer(){$('#drawer').classList.remove('on')}
+function logout(){
+  if(curRole()==='rider')riderId=null;else driverId=null;
+  openChat=null;reqOpen=false;sel={f:null,t:null};closePicker();lastSig='';closeDrawer();closeModal();persist();render();window.scrollTo(0,0);
+}
+function openModal(fn){modalFn=fn;$('#modalIn').innerHTML=fn();$('#modal').classList.add('on')}
+function closeModal(){modalFn=null;$('#modal').classList.remove('on')}
+function openHistory(){openModal(()=>{
+  const role=curRole();
+  const mine=S.trips.filter(t=>role==='rider'?t.riderId===riderId:t.driverId===driverId).filter(t=>t.status==='done'||t.status==='cancelled').sort((a,b)=>b.at-a.at);
+  const total=mine.filter(t=>t.status==='done').reduce((a,t)=>a+price(t),0);
+  return `<h3>رحلاتي</h3>${role==='driver'?`<div class="small">إجمالي الكاش اللي اتحصّل: ${money(total)}</div>`:''}
+    <div class="hist">${mine.length?mine.map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b><br><span class="badge ${t.status==='done'?'b-ok':'b-bad'}">${ST[t.status]}</span>
+      <span class="small"> • ${fdate(t.at)} • ${esc(catOf(t.cat).name)} • ${money(price(t))}${t.rating?' • '+'★'.repeat(t.rating):''}</span></div>`).join(''):'<p class="small">لسه مفيش رحلات خلصت.</p>'}</div>
+    <button class="btn ghost" onclick="closeModal()">إغلاق</button>`})}
+function openSafety(){openModal(()=>{
+  const c=curRole()==='rider'?riderTrip():driverTrip();
+  let share='';
+  if(c){const d=S.drivers.find(x=>x.id===c.driverId);const r=S.riders.find(x=>x.id===c.riderId);
+    const msg=`رحلتي من ${c.from} إلى ${c.to}${d?` • السواق: ${d.name} ${d.phone}`:''}${r?` • الراكب: ${r.name} ${r.phone}`:''}`;
+    share=`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">شارك رحلتك على واتساب</a>`}
+  return `<h3>الأمان</h3><p class="small">في الطوارئ اتصل فورًا:</p>
+    <a class="btn red" href="tel:122">شرطة النجدة 122</a><a class="btn red" href="tel:123">الإسعاف 123</a><a class="btn red" href="tel:180">المطافئ 180</a>
+    ${share}<button class="btn ghost" onclick="closeModal()">إغلاق</button>`})}
+
+// ---------- الأدمن ----------
+
+function adminDelDriver(id){
+  const d=S.drivers.find(x=>x.id===id);if(!d)return;
+  if(!confirm('امسح السواق ('+d.name+')؟ مش هيقدر يرجع غير لو سجّل من جديد.')) return;
+  S.drivers=S.drivers.filter(x=>x.id!==id);
+  S.removedDrivers=(S.removedDrivers||[]).concat([id]);
+  toast('اتمسح السواق');commit();
+}
+function adminBlockDriver(id){
+  const d=S.drivers.find(x=>x.id===id);if(!d)return;
+  const days=+val('bd-'+id)||0;
+  const until=days?Date.now()+days*864e5:0;
+  S.settings.blocks=(S.settings.blocks||[]).concat([{phone:d.phone,name:d.name,nid:d.nid||'',until,at:Date.now()}]);
+  S.drivers=S.drivers.filter(x=>x.id!==id);
+  S.removedDrivers=(S.removedDrivers||[]).concat([id]);
+  toast(days?'اتحظر لمدة '+days+' يوم':'اتحظر نهائياً');commit();
+}
+function adminUnblock(i){
+  if(!S.settings.blocks||!S.settings.blocks[i])return;
+  S.settings.blocks.splice(i,1);toast('اترفع الحظر');commit();
+}
+function adminView(){
+  if(!adminOK) return `<div class="card"><h2>دخول الأدمن</h2><label for="pin">الرمز السري</label><input id="pin" type="password" inputmode="numeric" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="btn" onclick="adminLogin()">دخول</button><p class="small">${REMOTE?'الرمز بيتحدد في السيرفر (ADMIN_PIN).':'الرمز التجريبي: 1234'}</p></div>`;
+  const pend=S.drivers.filter(d=>d.status==='pending');
+  const pays=S.payments.filter(p=>p.status==='review');
+  const rev=S.payments.filter(p=>p.status==='paid').reduce((a,p)=>a+p.amount,0);
+  const miss=missingBuildings();
+  const allDrv=S.drivers.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'));
+  const activeBlocks=(S.settings.blocks||[]).map((b,i)=>({...b,i})).filter(b=>!b.until||b.until>Date.now());
+  const driversCard=`<div class="card"><h2>كل السواقين (${allDrv.length})</h2>
+    <p class="small">امسح أو احظر أي سواق. الحظر بيمنع نفس الرقم أو نفس الاسم أو نفس البطاقة من الدخول للمدة اللي تختارها.</p>
+    ${allDrv.length?allDrv.map(d=>`<div class="trip"><b>${esc(d.name)}</b> <span class="badge ${d.status==='approved'?'b-ok':d.status==='pending'?'b-wait':'b-bad'}">${d.status==='approved'?'مقبول':d.status==='pending'?'تحت المراجعة':'مرفوض'}</span>
+      <div class="small">${esc(d.phone)} • بطاقة ${esc(d.nid||'—')}</div>
+      <div class="row"><button class="btn red" style="margin:0" onclick="adminDelDriver(${d.id})">🗑 امسح</button></div>
+      <div class="row" style="margin-top:6px"><select id="bd-${d.id}" style="flex:1"><option value="1">حظر يوم</option><option value="7">حظر أسبوع</option><option value="30">حظر شهر</option><option value="0">حظر نهائي</option></select>
+      <button class="btn" style="margin:0;flex:0 0 auto" onclick="adminBlockDriver(${d.id})">🚫 احظر</button></div></div>`).join(''):'<p class="small">مفيش سواقين لسه.</p>'}
+    ${activeBlocks.length?`<h3>المحظورين</h3>${activeBlocks.map(b=>`<div class="trip"><b>${esc(b.name)}</b> <span class="small">• ${esc(b.phone)} • ${b.until?'لحد '+fdate(b.until):'نهائي'}</span>
+      <div class="row"><button class="btn ghost" style="margin:0" onclick="adminUnblock(${b.i})">رفع الحظر</button></div></div>`).join('')}`:''}
+  </div>`;
+  const cancels=[];S.trips.forEach(t=>(t.cancel||[]).forEach(c=>cancels.push({t,c})));cancels.sort((a,b)=>b.c.at-a.c.at);
+  const cancelCard=`<div class="card"><h2>الإلغاءات (${cancels.length})</h2>${cancels.length?cancels.map(x=>`<div class="trip"><b>${esc(x.c.name)}</b> <span class="badge">${x.c.by==='rider'?'راكب':'سواق'}</span>
+    <div class="small">${esc(x.t.from)} ← ${esc(x.t.to)}</div><div class="small">السبب: ${esc(x.c.reason)}</div><div class="small">${hhmm(x.c.at)} • ${fdate(x.c.at)}</div></div>`).join(''):'<p class="small">مفيش إلغاءات.</p>'}</div>`;
+  const missCard=`<div class="card"><h2>عمارات من غير مكان GPS (${miss.length})</h2><p class="small">السواق بيحفظ المكان من تليفونه لما يوصل. دي العمارات اللي لسه مش متسجلة:</p>
+    <div class="bgrid">${miss.slice(0,80).map(x=>`<span class="bchip" style="cursor:default"><b>${esc(x.n)}</b><small>${x.k}</small></span>`).join('')}</div>${miss.length>80?`<p class="small">وغيرهم ${miss.length-80}</p>`:''}</div>`;
+  const w=S.settings.wallets;
+  return `<button class="btn ghost" style="margin:0 0 14px" onclick="adminLogout()">تسجيل خروج</button>
+  <div class="stat"><div><b>${S.drivers.filter(driverActive).length}</b>سواق مفعّل</div><div><b>${S.trips.filter(t=>t.status==='done').length}</b>رحلة خلصت</div><div><b>${rev}</b>إيراد الاشتراكات</div></div>
+  <div class="card"><h2>سواقين محتاجين مراجعة (${pend.length})</h2>${pend.length?pend.map(d=>`<div class="trip"><b>${esc(d.name)}</b>
+    <div class="small">${esc(d.phone)} • ${esc(catOf(d.cat).name)} • بطاقة ${esc(d.nid)} • رخصة ${esc(d.license)}</div>
+    <div class="small">العربية: ${esc((d.car&&d.car.model)||'—')} • ${esc((d.car&&d.car.color)||'—')} • النمرة: ${esc((d.car&&d.car.plate)||'—')}</div>
+    <div class="imgs">${['front','back','licFront','licBack','avatar','car'].map(k=>(d.photos&&d.photos[k])||(k==='avatar'&&d.avatar)||(k==='car'&&d.car&&d.car.photo)?`<img src="${(d.photos&&d.photos[k])||(k==='avatar'?d.avatar:d.car.photo)}" alt="">`:'').join('')}</div>
+    <div class="small">المطابقة: ${d.faceMatch==='yes'?'✅ مطابقة':d.faceMatch==='no'?'❌ مش مطابقة':'لسه ماتأكدتش'}</div>
+    <div class="row"><button class="btn ghost" onclick="setFace(${d.id},'yes')">✅ الصورة مطابقة للبطاقة</button><button class="btn ghost" onclick="setFace(${d.id},'no')">❌ مش مطابقة</button></div>
+    <div class="row"><button class="btn green" onclick="reviewDriver(${d.id},true)">قبول</button><button class="btn red" onclick="reviewDriver(${d.id},false)">رفض</button></div></div>`).join(''):'<p class="small">مفيش طلبات.</p>'}</div>
+  <div class="card"><h2>اشتراكات محتاجة تأكيد (${pays.length})</h2>${pays.length?pays.map(p=>{const d=S.drivers.find(x=>x.id===p.driverId);return `<div class="trip"><b>${esc(d?.name)}</b>
+    <div class="small">${WALLET[p.method]} • ${esc(p.ref)} • ${money(p.amount)}</div>
+    <div class="row"><button class="btn green" onclick="reviewPay(${p.id},true)">وصلت – فعّل</button><button class="btn red" onclick="reviewPay(${p.id},false)">ماوصلتش</button></div></div>`}).join(''):'<p class="small">مفيش اشتراكات معلّقة.</p>'}</div>
+  <div class="card"><h2>متابعة السواقين</h2>${S.drivers.filter(d=>d.status==='approved').map(d=>{const s=dstat(d);return `<div class="trip"><b>${esc(d.name)}</b> <span class="badge ${s.cls}">${s.label}</span>
+    <div class="small">${esc(d.phone)} • ${esc(catOf(d.cat).name)} • النهارده: ${s.today} رحلة • الإجمالي: ${s.total}</div>
+    <div class="small">${s.n?`التقييم: ★ ${s.avg} (${s.n} تقييم)`:'لسه مفيش تقييمات'}</div>
+    ${s.comments.map(c=>`<div class="small">«${esc(c)}»</div>`).join('')}</div>`}).join('')||'<p class="small">مفيش سواقين لسه.</p>'}</div>
+  <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
+  ${driversCard}
+  ${cancelCard}
+  ${missCard}
+  <div class="card"><h2>الأسعار</h2><div class="row"><div><label for="sb">سعر الرحلة</label><input id="sb" type="number" value="${S.settings.base}"></div>
+    <div><label for="ss">سعر الوقفة</label><input id="ss" type="number" value="${S.settings.stop}"></div>
+    <div><label for="su">الاشتراك</label><input id="su" type="number" value="${S.settings.sub}"></div></div>
+    <h3>فئات العربيات (الزيادة على سعر الرحلة)</h3>
+    ${cats().map((c,i)=>`<div class="row"><div><label for="cn-${i}">الاسم</label><input id="cn-${i}" value="${esc(c.name)}"></div><div><label for="cx-${i}">زيادة جنيه</label><input id="cx-${i}" type="number" value="${c.extra||0}"></div></div>`).join('')}
+    <h3>أرقام استلام الاشتراك</h3>
+    ${Object.keys(WALLET).map(k=>`<label for="w-${k}">${WALLET[k]}</label><input id="w-${k}" value="${esc(w[k])}" dir="ltr">`).join('')}
+    <button class="btn" onclick="saveSettings()">حفظ</button></div>
+  <div class="card"><h2>أماكن إضافية</h2><p class="small">الأماكن الأساسية متظبطة. هنا تضيف مكان جديد يظهر للركاب في المنطقة اللي تختارها.</p>
+    <div class="row"><select id="npz">${ZONES.map(z=>`<option value="${z.id}">${z.n}</option>`).join('')}</select><input id="npn" placeholder="اسم المكان"></div>
+    <button class="btn" onclick="addPlace()">إضافة مكان</button>
+    ${(S.buildings||[]).map((b,i)=>({b,i})).filter(x=>x.b.includes('|')).map(x=>{const k=x.b.indexOf('|');return `<div class="trip"><b>${esc(x.b.slice(k+1))}</b> <span class="small">• ${zn(x.b.slice(0,k))}</span> <button class="chip" style="flex:none;margin-inline-start:8px" onclick="delPlace(${x.i})">حذف</button></div>`}).join('')}</div>`;
+}
+function dstat(d){
+  const mine=S.trips.filter(t=>t.driverId===d.id);
+  const busy=mine.some(t=>LIVE.includes(t.status));
+  const done=mine.filter(t=>t.status==='done');
+  const midnight=new Date().setHours(0,0,0,0);
+  const rated=done.filter(t=>t.rating);
+  const avg=rated.length?(rated.reduce((a,t)=>a+t.rating,0)/rated.length).toFixed(1):0;
+  return {label:busy?'في رحلة دلوقتي':driverActive(d)?'فاضي':'اشتراكه منتهي',cls:busy?'b-wait':driverActive(d)?'b-ok':'b-bad',
+    today:done.filter(t=>t.doneAt>=midnight).length,total:done.length,n:rated.length,avg,
+    comments:rated.filter(t=>t.comment).slice(-3).map(t=>t.rating+'★ '+t.comment)};
+}
+async function adminLogin(){
+  const pin=val('pin');
+  if(REMOTE){
+    try{
+      const r=await fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin})});
+      const j=await r.json();if(!j.ok) return toast('الرمز غلط',1);
+      adminPin=pin;adminOK=true;lastFP='';await pull();
+    }catch(e){return toast('مفيش اتصال بالسيرفر',1)}
+  }else{
+    if(pin!==S.settings.pin) return toast('الرمز غلط',1);
+    adminOK=true;
+  }
+  render();
+}
+function adminLogout(){adminOK=false;adminPin='';lastFP='';render()}
+function setFace(id,v){const d=S.drivers.find(x=>x.id===id);d.faceMatch=v;commit()}
+function reviewDriver(id,ok){const d=S.drivers.find(x=>x.id===id);if(ok&&d.faceMatch!=='yes')return toast('لازم تأكد إن الصورة مطابقة للبطاقة الأول',1);
+  if(!ok){d.reason=(prompt('سبب الرفض (هيظهر للسواق):','البيانات أو الصور مش واضحة')||'البيانات محتاجة تصحيح').slice(0,200)}
+  d.status=ok?'approved':'rejected';
+  if(ok){d.subUntil=Date.now()+90*864e5;d.trialMsg=true}
+  commit()}
+function ackTrial(){const d=S.drivers.find(x=>x.id===driverId);if(d){localStorage.setItem('tw-trial-'+d.phone,'1');d.trialMsg=false;commit()}}
+function reviewPay(id,ok){
+  const p=S.payments.find(x=>x.id===id);p.status=ok?'paid':'rejected';
+  if(ok){const d=S.drivers.find(x=>x.id===p.driverId);d.subUntil=Math.max(Date.now(),d.subUntil||0)+30*864e5}
+  commit();
+}
+function saveSettings(){
+  const s=S.settings;s.base=+val('sb')||30;s.stop=+val('ss')||5;s.sub=+val('su')||100;
+  s.cats=cats().map((c,i)=>({...c,name:val('cn-'+i)||c.name,extra:Math.max(0,+val('cx-'+i)||0)}));
+  Object.keys(WALLET).forEach(k=>s.wallets[k]=val('w-'+k));toast('تم الحفظ');commit();
+}
+function addPlace(){
+  const z=val('npz'),n=val('npn');
+  if(n.length<2) return toast('اكتب اسم المكان',1);
+  const b=z+'|'+n;if(S.buildings.includes(b)||allPlaces().some(p=>p.z===z&&norm(p.n)===norm(n))) return toast('المكان ده موجود قبل كده',1);
+  S.buildings.push(b);$('#npn').value='';commit();
+}
+function delPlace(i){S.buildings.splice(i,1);commit()}
+
+// ---------- التشغيل ----------
+async function init(){
+  if(location.protocol==='http:'||location.protocol==='https:'){
+    try{
+      const r=await fetch('/api/state');
+      if(r.ok&&(r.headers.get('content-type')||'').includes('json')){
+        const st=await r.json();REMOTE=true;conn='ok';
+        S.settings=st.settings;S.buildings=st.buildings;S.coords=st.coords||{};for(const c of COLL)S[c]=st[c]||[];
+        takeSnap();lastFP=JSON.stringify(st);
+        let sess={};try{sess=JSON.parse(ls.g('tw-sess')||'{}')}catch(e){}
+        if(S.riders.some(x=>x.id===sess.r))riderId=sess.r;
+        if(S.drivers.some(x=>x.id===sess.d))driverId=sess.d;
+        if(sess.t==='driver'||sess.t==='rider')tab=sess.t;
+      }
+    }catch(e){}
+  }
+  render();
+  setInterval(poll,1000);
+}
+
+// سحب الشيت لتحت عشان الخريطة تبقى كاملة (اسحب المقبض ⬇️)
+let shDrag=null;
+$('#hsheet').addEventListener('pointerdown',e=>{
+  const g=e.target.closest('.grab');if(!g)return;
+  const el=$('#hsheet');
+  shDrag={y0:e.clientY,was:el.classList.contains('collapsed'),el,y:0};
+  el.classList.add('dragging');
+  try{g.setPointerCapture(e.pointerId)}catch(_){}
+});
+window.addEventListener('pointermove',e=>{
+  if(!shDrag)return;
+  const h=shDrag.el.offsetHeight,base=shDrag.was?h-64:0;
+  shDrag.y=Math.max(0,Math.min(h-64,base+(e.clientY-shDrag.y0)));
+  shDrag.el.style.transform=`translateY(${shDrag.y}px)`;
+});
+window.addEventListener('pointerup',()=>{
+  if(!shDrag)return;
+  const el=shDrag.el,h=el.offsetHeight;
+  el.classList.remove('dragging');el.style.transform='';
+  el.classList.toggle('collapsed',shDrag.y>(h-64)/2);
+  shDrag=null;
+});
+
+// ---------- تثبيت التطبيق على التليفون ----------
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;});
+const isStandaloneApp=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+function installSteps(){
+  return `<div class="ins-steps">
+    <div class="ins-card"><b>🤖 أندرويد (Chrome)</b><ol><li>اضغط على القايمة <b>⋮</b> فوق يمين</li><li>اختار <b>Install app</b> أو <b>إضافة إلى الشاشة الرئيسية</b></li><li>اضغط <b>Install</b></li></ol></div>
+    <div class="ins-card"><b>🍎 آيفون (Safari)</b><ol><li>اضغط زرار المشاركة <b>⬆️</b> تحت</li><li>اختار <b>Add to Home Screen</b> (إضافة للشاشة الرئيسية)</li><li>اضغط <b>Add</b></li></ol></div>
+  </div>`;
+}
+function showInstallPrompt(force){
+  if(!force&&isStandaloneApp()) return;
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>ثبّت توصيلة على تليفونك 📲</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">عشان توصل للتطبيق بسرعة من الشاشة الرئيسية، من غير ما تفتح المتصفح كل مرة.</p>
+    ${installSteps()}
+    <div class="row" style="margin-top:12px">${deferredInstall?'<button class="btn" onclick="doInstall()">ثبّته دلوقتي</button>':''}<button class="btn ghost" onclick="closeModal()">بعدين</button></div>`;
+  $('#modal').classList.add('on');
+}
+async function doInstall(){
+  if(!deferredInstall) return toast('اتبع الخطوات اللي فوق',1);
+  deferredInstall.prompt();
+  try{await deferredInstall.userChoice}catch(_){}
+  deferredInstall=null;closeModal();
+}
+// الرسالة بتظهر كل مرة يفتح فيها الموقع (من المتصفح) لحد ما التطبيق يتثبّت، وبعدين مابتظهرش تاني
+let installShownThisLoad=false;
+window.addEventListener('appinstalled',()=>{localStorage.setItem('tw-installed','1');});
+function maybeInstallPrompt(){
+  if(installShownThisLoad) return;
+  if(localStorage.getItem('tw-installed')) return;
+  if(isStandaloneApp()) return;
+  installShownThisLoad=true;
+  showInstallPrompt(false);
+}
+window.addEventListener('hashchange',()=>{window.scrollTo(0,0);render()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
+init();
+</script>
+<script>
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});
+}
+</script>
+</body>
+</html>

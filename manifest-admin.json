@@ -1,0 +1,27 @@
+{
+  "name": "admin",
+  "short_name": "admin",
+  "description": "Tawseela admin panel",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/admin.html#admin-x7k29q",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0617",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    {
+      "src": "/admin-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/admin-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

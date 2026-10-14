@@ -1,7 +1,7 @@
 // Service worker: يخزّن ملفات الواجهة عشان تفتح بسرعة وتشتغل من غير ما الموبايل يبقى فيه نت كويس.
 // الـ API (/api/) مابيتخزنش أبداً: الداتا لازم تيجي طازة.
-const CACHE = 'tawseela-v1';
-const SHELL = ['/', '/tawseela.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'tawseela-v2';
+const SHELL = ['/', '/tawseela.html', '/admin.html', '/manifest.json', '/manifest-admin.json', '/icon-192.png', '/icon-512.png', '/admin-192.png', '/admin-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
