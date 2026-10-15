@@ -258,6 +258,18 @@ body.adm .trip .row .btn{flex:1 1 120px;min-width:0;white-space:normal}
 body.adm .bgrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}
 body.adm .bchip{min-width:0;overflow:hidden}
 body.adm .bchip b{font-size:13px}
+.dr-h .avatar{width:58px;height:58px;border-radius:50%;flex:none;border:2px solid #A78BFA}
+.pg-in{animation:pgIn .32s cubic-bezier(.2,.8,.2,1) both}
+@keyframes pgIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.btn{transition:transform .15s,filter .2s}
+.btn:active{transform:scale(.98)}
+.paypick{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px}
+.paypick button{background:#0F0920;border:1.5px solid var(--line);border-radius:12px;padding:9px 4px;color:#fff;font:700 13px Cairo;cursor:pointer;margin:0;transition:transform .15s,border-color .2s,background .2s}
+.paypick button:active{transform:scale(.96)}
+.paypick button.on{border-color:#34D399;background:rgba(52,211,153,.16)}
+.pay-h{font-size:13px;color:#C4B5FD;font-weight:700;margin-top:8px}
+.paytag{margin-top:8px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.4);border-radius:12px;padding:8px 10px;font-size:14px}
+.paytag.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.45)}
 </style>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7C3AED">
@@ -399,6 +411,7 @@ function diff(){
   if(snap._b!==JSON.stringify(S.buildings)){out.buildings=S.buildings;any=true}
   if(snap._c!==JSON.stringify(S.coords||{})){out.coords=S.coords||{};any=true}
   if((S.removedDrivers||[]).length){out.removed={drivers:[...S.removedDrivers]};any=true}
+  if(S.removedRec&&Object.keys(S.removedRec).some(k=>S.removedRec[k].length)){out.removedRec=JSON.parse(JSON.stringify(S.removedRec));any=true}
   return any?out:null;
 }
 const hdrs=()=>({'Content-Type':'application/json','x-admin-pin':adminPin});
@@ -428,6 +441,7 @@ async function save(){
   if(d.buildings)snap._b=JSON.stringify(d.buildings);
   if(d.coords)snap._c=JSON.stringify(d.coords);
   if(d.removed)S.removedDrivers=(S.removedDrivers||[]).filter(x=>!d.removed.drivers.includes(x));
+  if(d.removedRec){for(const k in d.removedRec)S.removedRec[k]=(S.removedRec[k]||[]).filter(x=>!d.removedRec[k].includes(x));}
   sending=false;
   if(dirty){dirty=false;return save()}
   applyRemote(st);setConn('ok');
@@ -735,6 +749,7 @@ function scene(){return `<svg class="scene" viewBox="0 0 400 760" preserveAspect
 </svg>`}
 function render(){
   const adm=isAdmin(),role=adm?null:curRole();
+  const pgIn=animNext;animNext=false;
   const ml=document.querySelector('link[rel=manifest]');if(ml)ml.href=adm?'/manifest-admin.json':'/manifest.json';
   document.body.classList.toggle('adm',adm);
   document.body.classList.toggle('home',!adm&&!!role);
@@ -747,14 +762,15 @@ function render(){
   if(role){$('#app').innerHTML='';renderHome();}
   else{
     let html=adm?adminView():tab==='driver'?driverLogin():riderLogin();
-    if(!adm)html=`<div class="stage">${scene()}<div class="stage-in">${html}<div class="credit">Designed by ادهم</div></div></div>`;
+    if(!adm)html=`<div class="stage${pgIn?' pg-in':''}">${scene()}<div class="stage-in">${html}<div class="credit">Designed by ادهم</div></div></div>`;
     const saved=grabForm();$('#app').innerHTML=html;restoreForm(saved);
     if(regMode&&editingDriverId)prefillEdit();
   }
   if(modalFn&&$('#modal').classList.contains('on'))$('#modalIn').innerHTML=modalFn();
   setConn(conn);
 }
-function go(t){tab=t;regMode=false;openChat=null;persist();render();window.scrollTo(0,0)}
+let animNext=false;
+function go(t){tab=t;regMode=false;openChat=null;persist();animNext=true;render();window.scrollTo(0,0)}
 function scrollDown(){$('#app').scrollIntoView({behavior:'smooth',block:'start'})}
 
 // ---------- الصفحة الرئيسية (خريطة + شيت) ----------
@@ -794,10 +810,15 @@ function fieldBtn(f){
   return `<button class="fld ${l?'filled':''} ${f==='f'?'from':'to'}" onclick="openPicker('${f}')"><span class="fd ${f}"></span><span class="ft"><small>${f==='f'?'عايز تمشي منين':'عايز تروح فين'}</small>
     <b class="${l?'':'ph'}">${l?esc(l.label):ph}</b>${l&&!locPoint(l)?'<span class="nm">مكانه مش متحدد على الخريطة لسه</span>':''}</span>${ICON.search}</button>`;
 }
+let selPay='cash';
+const PAY_NAMES={cash:'كاش',wallet:'محفظة',insta:'إنستا باي'};
+function setPay(v){selPay=v;const saved=grabForm();$('#hsheet').innerHTML=riderSheet();restoreForm(saved)}
+function payPicker(){return `<div class="paypick" role="radiogroup" aria-label="طريقة الدفع">${Object.keys(PAY_NAMES).map(k=>`<button class="${selPay===k?'on':''}" role="radio" aria-checked="${selPay===k}" onclick="setPay('${k}')">${PAY_NAMES[k]}</button>`).join('')}</div>`}
 function requestPanel(){
   if(!selCat)selCat=cats()[0].id;
   return `<div class="sh-t"><b>رحلتك</b><button class="x" onclick="closeReq()" aria-label="إغلاق">×</button></div>
     ${fieldBtn('f')}<div class="route-line ${sel.f&&sel.t?'on':''}"></div>${fieldBtn('t')}
+    <div class="pay-h">طريقة الدفع</div>${payPicker()}
     <div class="cats" role="radiogroup" aria-label="فئة العربية">${cats().map(c=>{
       const ok=S.drivers.some(d=>driverActive(d)&&(d.cat||cats()[0].id)===c.id);
       return `<button class="cat ${selCat===c.id?'on':''}" role="radio" aria-checked="${selCat===c.id}" onclick="setCat('${c.id}')">
@@ -832,6 +853,8 @@ function driverLogin(){
     <label for="dpl">نمرة العربية (حروف وأرقام)</label><input id="dpl" placeholder="مثلاً: أ ب ج 1234" autocomplete="off">
     <label for="dcm">نوع العربية (موديل)</label><input id="dcm" placeholder="مثلاً: هيونداي إلنترا 2018" autocomplete="off">
     <label for="dcol">لون العربية</label><input id="dcol" placeholder="مثلاً: أبيض" autocomplete="off">
+    <label for="dwal">رقم المحفظة (لو معاك، لو مش معاك سيبه فاضي)</label><input id="dwal" inputmode="tel" placeholder="01xxxxxxxxx" autocomplete="off">
+    <label for="dinsta">إنستا باي (لو معاك، لو مش معاك سيبه فاضي)</label><input id="dinsta" placeholder="مثلاً: name@instapay" autocomplete="off">
     <label for="dcat">فئة عربيتك</label><select id="dcat">${cats().map(c=>`<option value="${esc(c.id)}">${esc(c.name)} – ${esc(c.desc)}</option>`).join('')}</select>
     ${Object.entries(DOCS).map(([k,d])=>`<div class="doc"><div class="doc-t"><b>${d.t}</b><span class="small">وش وضهر • <span id="cnt-${k}">0</span>/2</span></div>
       <div class="slots">${d.slots.map(x=>`<button type="button" class="slot" id="slot-${x}" onclick="openPick('${k}','${x}')" aria-label="${d.t} ${SLOTLBL[x]}"><img id="pv-${x}" alt=""><span>${SLOTLBL[x]}</span></button>`).join('')}</div>
@@ -845,7 +868,7 @@ function driverLogin(){
     <button class="btn ghost" onclick="toggleReg()">سواق جديد – سجّل بياناتك</button>
     <button class="btn ghost" onclick="loginDemo()">🚗 دخول كسواق تجريبي (للتجربة)</button>`;
 }
-function toggleReg(){regMode=!regMode;tmp={};render();window.scrollTo(0,0)}
+function toggleReg(){regMode=!regMode;tmp={};animNext=true;render();window.scrollTo(0,0)}
 function loginRider(){
   const r=S.riders.find(x=>x.phone===val('lpr'));
   if(!r) return toast('الرقم ده مش مسجّل، اعمل حساب جديد',1);
@@ -896,7 +919,7 @@ function prefillEdit(){
   const d=S.drivers.find(x=>x.id===editingDriverId);if(!d)return;
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&!el.value&&v!=null)el.value=v};
   set('dn',d.name);set('dp',d.phone);set('dnid',d.nid);set('dl',d.license);
-  set('dpl',(d.car&&d.car.plate)||'');set('dcm',(d.car&&d.car.model)||'');set('dcol',(d.car&&d.car.color)||'');
+  set('dpl',(d.car&&d.car.plate)||'');set('dwal',(d.pay&&d.pay.wallet)||'');set('dinsta',(d.pay&&d.pay.insta)||'');set('dcm',(d.car&&d.car.model)||'');set('dcol',(d.car&&d.car.color)||'');
   if(d.cat){const sc=document.getElementById('dcat');if(sc)sc.value=d.cat}
   tmp={...(d.photos||{}),avatar:d.avatar||(d.photos&&d.photos.avatar),car:(d.car&&d.car.photo)||(d.photos&&d.photos.car)};
   paintSlots();
@@ -961,10 +984,10 @@ function regDriver(){
   const ed=editingDriverId?S.drivers.find(x=>x.id===editingDriverId):null;
   if(S.drivers.some(x=>(!ed||x.id!==ed.id)&&(x.phone===p||(x.nid&&x.nid===nid)))) return toast('الرقم أو البطاقة مسجّلين قبل كده',1);
   if(ed){
-    Object.assign(ed,{name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
+    Object.assign(ed,{pay:{wallet:val('dwal'),insta:val('dinsta')},name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
     driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
   }
-  const d={id:uid(),name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0};
+  const d={id:uid(),name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},status:'pending',subUntil:0};
   S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();setTimeout(offerDriverMaps,300);
   post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){driverId=null;persist();toast('الرقم أو البطاقة مسجّلين قبل كده',1);render()}});
   commit();
@@ -1041,12 +1064,19 @@ function sendMsg(tid,me){const i=$('#ci-'+tid);if(!i)return;const t=i.value.trim
 function quick(tid,me,i){const t=S.trips.find(x=>x.id===tid);pushMsg(tid,me,quickList(t,me)[i])}
 
 // ---------- الراكب: الرحلات ----------
-function driverCard(d){
+function payInfo(d,t){
+  const m=(t&&t.pay)||'cash';
+  if(m==='cash') return `<div class="paytag">💵 الدفع: كاش للسواق</div>`;
+  const pay=(d&&d.pay)||{};
+  if(m==='wallet') return pay.wallet?`<div class="paytag">👛 حوّل على المحفظة: <b dir="ltr">${esc(pay.wallet)}</b></div>`:`<div class="paytag warn">السواق ده معندوش محفظة. ادفع كاش</div>`;
+  return pay.insta?`<div class="paytag">📲 إنستا باي: <b dir="ltr">${esc(pay.insta)}</b></div>`:`<div class="paytag warn">السواق ده معندوش إنستا باي. ادفع كاش</div>`;
+}
+function driverCard(d,t){
   if(!d) return '';
   const c=d.car||{};
   return `<div class="drc">${d.avatar?`<img class="drc-av" src="${d.avatar}" alt="">`:'<div class="drc-av ph">👤</div>'}
     <div class="drc-t"><b>${esc(d.name)}</b><div class="small">${esc(c.model||'')}${c.color?' • '+esc(c.color):''}</div>${c.plate?`<div class="plate">${esc(c.plate)}</div>`:''}</div>
-    ${c.photo?`<img class="drc-car" src="${c.photo}" alt="صورة العربية">`:''}</div>`;
+    ${c.photo?`<img class="drc-car" src="${c.photo}" alt="صورة العربية">`:''}</div>${payInfo(d,t)}`;
 }
 function tripRider(t){
   const d=S.drivers.find(x=>x.id===t.driverId);
@@ -1054,7 +1084,7 @@ function tripRider(t){
   if(t.status==='requested') extra=`<div class="small">بندوّر على سواق قريب منك…</div><button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الطلب</button>`;
   else if(d&&LIVE.includes(t.status)) extra=`
     <div class="confirm">${t.status==='accepted'?`✔ السواق ${esc(d.name)} أكّد طلبك وجاي لك${t.eta?` خلال ${t.eta} دقايق`:''}`:t.status==='arrived'?`✔ السواق ${esc(d.name)} وصل عندك`:`الرحلة شغّالة مع ${esc(d.name)}`}</div>
-    ${driverCard(d)}
+    ${driverCard(d,t)}
     <div class="row">${chatBtn(t,'rider','تواصل مع السائق')}<a class="btn ghost" href="tel:${esc(d.phone)}">📞 رن عليه</a></div>
     ${openChat===t.id?chatPanel(t,'rider'):''}
     ${t.status==='accepted'?`<button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الرحلة</button>`:''}`;
@@ -1071,7 +1101,7 @@ function reqTrip(){
   if(!sel.f) return toast('اكتب أو اختار هتمشي منين',1);
   if(!sel.t) return toast('اكتب أو اختار رايح فين',1);
   if(sel.f.id===sel.t.id) return toast('نقطة البداية والنهاية لازم يختلفوا',1);
-  S.trips.push({id:uid(),riderId,from:sel.f.label,to:sel.t.label,fromId:sel.f.id,toId:sel.t.id,cat:selCat||cats()[0].id,stops:0,status:'requested',driverId:null,eta:null,at:Date.now()});
+  S.trips.push({id:uid(),riderId,pay:selPay,from:sel.f.label,to:sel.t.label,fromId:sel.f.id,toId:sel.t.id,cat:selCat||cats()[0].id,stops:0,status:'requested',driverId:null,eta:null,at:Date.now()});
   reqOpen=false;sel={f:null,t:null};toast('تم إرسال الطلب');commit();
 }
 
@@ -1190,12 +1220,30 @@ function sendPay(){
 }
 
 // ---------- القايمة الجانبية والنوافذ ----------
+function editPayInfo(){
+  const d=S.drivers.find(x=>x.id===driverId);if(!d)return;
+  const w=prompt('رقم المحفظة (سيبه فاضي لو معاكش):',(d.pay&&d.pay.wallet)||'');if(w===null)return;
+  const i=prompt('إنستا باي (سيبه فاضي لو معاكش):',(d.pay&&d.pay.insta)||'');if(i===null)return;
+  d.pay={wallet:w.trim(),insta:i.trim()};closeDrawer();toast('اتحفظت بيانات الدفع ✓');commit();
+}
+function changeDriverAvatar(){
+  const d=S.drivers.find(x=>x.id===driverId);if(!d)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=async()=>{
+    const f=inp.files&&inp.files[0];if(!f)return;
+    try{d.avatar=await compress(f);closeDrawer();toast('اتغيّرت صورة البروفايل ✓');commit()}
+    catch(e){toast('الصورة مش مقروءة، جرّب صورة تانية',1)}
+  };
+  inp.click();
+}
 function openDrawer(){
   const role=curRole();const u=role==='rider'?S.riders.find(x=>x.id===riderId):S.drivers.find(x=>x.id===driverId);if(!u)return;
-  $('#drawerIn').innerHTML=`<div class="dr-h"><div class="avatar">${esc(u.name.trim()[0]||'؟')}</div><div><b>${esc(u.name)}</b><div class="small" dir="ltr" style="text-align:right">${esc(u.phone)}</div>
+  $('#drawerIn').innerHTML=`<div class="dr-h">${u.avatar?`<img class="avatar" src="${u.avatar}" alt="" style="object-fit:cover">`:`<div class="avatar">${esc(u.name.trim()[0]||'؟')}</div>`}<div><b>${esc(u.name)}</b><div class="small" dir="ltr" style="text-align:right">${esc(u.phone)}</div>
     <span class="badge">${role==='rider'?'راكب':'سواق • '+esc(catOf(u.cat).name)}</span></div></div>
     <button class="dr-i" onclick="closeDrawer();openHistory()">رحلاتي</button>
     <button class="dr-i" onclick="closeDrawer();openSafety()">الأمان</button>
+    ${role==='driver'?'<button class="dr-i" onclick="changeDriverAvatar()">📷 غيّر صورة البروفايل</button>':''}
+    ${role==='driver'?'<button class="dr-i" onclick="editPayInfo()">💳 بيانات الدفع (محفظة / إنستا باي)</button>':''}
     ${role==='driver'?'<button class="dr-i" onclick="closeDrawer();downloadDriverMaps()">⬇️ نزّل خريطة المدينة</button>':''}
     <button class="dr-i" onclick="closeDrawer();showInstallPrompt(true)">📲 ثبّت التطبيق على تليفوني</button>
     <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
@@ -1249,6 +1297,20 @@ function openNotice(text){
     <button class="btn" onclick="closeModal()">تمام</button>`;
   $('#modal').classList.add('on');
 }
+function adminDelete(coll,id,label){
+  const word=prompt('عشان تأكد الحذف: هتمسح '+label+'. اكتب كلمة "امسح" بالظبط:');
+  if(word!=='امسح'){toast('الحذف اتلغى، ماتمسحش حاجة',1);return}
+  S[coll]=(S[coll]||[]).filter(x=>x.id!==id);
+  S.removedRec=S.removedRec||{};
+  S.removedRec[coll]=(S.removedRec[coll]||[]).concat([id]);
+  toast('اتمسح '+label);commit();
+}
+function adminDelTrip(id){adminDelete('trips',id,'الرحلة دي')}
+function adminDelRider(id){
+  const r=S.riders.find(x=>x.id===id);if(!r)return;
+  adminDelete('riders',id,'حساب الراكب ('+r.name+')');
+}
+function adminDelPayment(id){adminDelete('payments',id,'تحويل الاشتراك دا')}
 function adminDelDriver(id){
   const d=S.drivers.find(x=>x.id===id);if(!d)return;
   if(!confirm('امسح السواق ('+d.name+')؟ مش هيقدر يرجع غير لو سجّل من جديد.')) return;
@@ -1314,7 +1376,9 @@ function adminView(){
     <div class="small">${esc(d.phone)} • ${esc(catOf(d.cat).name)} • النهارده: ${s.today} رحلة • الإجمالي: ${s.total}</div>
     <div class="small">${s.n?`التقييم: ★ ${s.avg} (${s.n} تقييم)`:'لسه مفيش تقييمات'}</div>
     ${s.comments.map(c=>`<div class="small">«${esc(c)}»</div>`).join('')}</div>`}).join('')||'<p class="small">مفيش سواقين لسه.</p>'}</div>
-  <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
+  <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelTrip(${t.id})">🗑 امسح الرحلة</button></div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
+  ${driversCard}
+  <div class="card"><h2>الركاب (${S.riders.length})</h2>${S.riders.length?S.riders.slice().map(r=>`<div class="trip"><b>${esc(r.name)}</b><div class="small">${esc(r.phone)} • ${esc(r.email||'')}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelRider(${r.id})">🗑 امسح الراكب</button></div></div>`).join(''):'<p class="small">مفيش ركاب لسه.</p>'}</div>
   ${driversCard}
   ${cancelCard}
   ${missCard}
