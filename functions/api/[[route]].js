@@ -91,6 +91,12 @@ function merge(DB, b, admin) {
   }
   if (admin && Array.isArray(b.buildings)) DB.buildings = b.buildings;
   if (admin && b.removed && Array.isArray(b.removed.drivers)) DB.drivers = DB.drivers.filter(x => !b.removed.drivers.includes(x.id));
+  if (admin && b.removedRec && typeof b.removedRec === 'object') {
+    for (const c of ['riders','trips','payments','msgs']) {
+      const ids = Array.isArray(b.removedRec[c]) ? b.removedRec[c] : [];
+      if (ids.length) DB[c] = DB[c].filter(x => !ids.includes(x.id));
+    }
+  }
   const up = b.upserts || {};
   for (const c of COLL) {
     for (const item of up[c] || []) {
@@ -100,6 +106,13 @@ function merge(DB, b, admin) {
         if (i >= 0) {
           if (admin) DB.drivers[i] = item;
           // السواق يقدر يصحّح بياناته لو اتراجعت (مش موافق عليه)، ويرجع للمراجعة تاني
+          else if (DB.drivers[i].status === 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item)) {
+            // المقبول يقدر يغيّر صورة البروفايل وبيانات الدفع بتاعته بس
+            const upd = { ...DB.drivers[i] };
+            if (item.avatar) upd.avatar = item.avatar;
+            if (item.pay && typeof item.pay === 'object') upd.pay = { wallet: String(item.pay.wallet || '').slice(0, 20), insta: String(item.pay.insta || '').slice(0, 60) };
+            DB.drivers[i] = upd;
+          }
           else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item))
             DB.drivers[i] = { ...item, id: DB.drivers[i].id, status: 'pending', subUntil: 0, reason: undefined, faceMatch: undefined, trialMsg: false };
         }
