@@ -1,6 +1,6 @@
 // Service worker: يخزّن ملفات الواجهة عشان تفتح بسرعة وتشتغل من غير ما الموبايل يبقى فيه نت كويس.
 // الـ API (/api/) مابيتخزنش أبداً: الداتا لازم تيجي طازة.
-const CACHE = 'tawseela-v2';
+const CACHE = 'tawseela-v3';
 const SHELL = ['/', '/tawseela.html', '/admin.html', '/manifest.json', '/manifest-admin.json', '/icon-192.png', '/icon-512.png', '/admin-192.png', '/admin-512.png'];
 
 self.addEventListener('install', e => {
@@ -33,4 +33,17 @@ self.addEventListener('fetch', e => {
       return hit || net;
     })
   );
+});
+
+// ---------- إشعارات الدفع (حتى لو التطبيق مقفول) ----------
+self.addEventListener('push', e => {
+  let d = { title: 'توصيلة', body: '' };
+  try { d = e.data.json(); } catch (_) {}
+  e.waitUntil(self.registration.showNotification(d.title || 'توصيلة', {
+    body: d.body || '', icon: '/icon-192.png', badge: '/icon-192.png', dir: 'rtl', lang: 'ar', data: { url: d.url || '/' }
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(clients.openWindow((e.notification.data && e.notification.data.url) || '/'));
 });
