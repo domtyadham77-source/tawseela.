@@ -150,7 +150,7 @@ label.act{color:#F9A8D4}
 .cp{font:800 20px Cairo;color:#fff}.cp small{font-size:12px;font-weight:600;color:var(--mute)}
 .drawer{position:fixed;inset:0;z-index:15;background:rgba(0,0,0,.55);display:none}
 .drawer.on{display:block}
-.drawer-in{position:absolute;top:0;bottom:0;right:0;width:82%;max-width:330px;background:linear-gradient(180deg,#2a1560,#0d0719);border-left:1px solid var(--line);padding:calc(24px + env(safe-area-inset-top)) 16px 20px;display:flex;flex-direction:column;gap:8px}
+.drawer-in{overflow-y:auto;position:absolute;top:0;bottom:0;right:0;width:82%;max-width:330px;background:linear-gradient(180deg,#2a1560,#0d0719);border-left:1px solid var(--line);padding:calc(24px + env(safe-area-inset-top)) 16px 20px;display:flex;flex-direction:column;gap:8px}
 .dr-h{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 .avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#C026D3);display:flex;align-items:center;justify-content:center;font:800 24px Cairo;flex:none}
 .dr-i{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;border-radius:14px;padding:13px 14px;font:700 16px Cairo;text-align:start;cursor:pointer}
@@ -259,6 +259,73 @@ body.adm .trip .row .btn{flex:1 1 120px;min-width:0;white-space:normal}
 body.adm .bgrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}
 body.adm .bchip{min-width:0;overflow:hidden}
 body.adm .bchip b{font-size:13px}
+.dr-h .avatar{width:58px;height:58px;border-radius:50%;flex:none;border:2px solid #A78BFA}
+.pg-in{animation:pgIn .32s cubic-bezier(.2,.8,.2,1) both}
+@keyframes pgIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.btn{transition:transform .15s,filter .2s}
+.btn:active{transform:scale(.98)}
+.paypick{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px}
+.paypick button{background:#0F0920;border:1.5px solid var(--line);border-radius:12px;padding:9px 4px;color:#fff;font:700 13px Cairo;cursor:pointer;margin:0;transition:transform .15s,border-color .2s,background .2s}
+.paypick button:active{transform:scale(.96)}
+.paypick button.on{border-color:#34D399;background:rgba(52,211,153,.16)}
+.pay-h{font-size:13px;color:#C4B5FD;font-weight:700;margin-top:8px}
+.paytag{margin-top:8px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.4);border-radius:12px;padding:8px 10px;font-size:14px}
+.paytag.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.45)}
+.drawer.on{animation:bgIn .2s ease both}
+.drawer.on .drawer-in{animation:drIn .3s cubic-bezier(.2,.8,.2,1) both}
+@keyframes bgIn{from{opacity:0}to{opacity:1}}
+@keyframes drIn{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+.errbtn{width:100%;margin:8px 0 2px;background:linear-gradient(90deg,rgba(124,58,237,.25),rgba(192,38,211,.25));border:1.5px solid #A78BFA;border-radius:14px;padding:11px;color:#fff;font:800 15px Cairo;cursor:pointer;transition:transform .15s}
+.errbtn:active{transform:scale(.98)}
+.errs{display:grid;grid-template-columns:1fr;gap:8px;max-height:60vh;overflow:auto;margin-top:8px}
+.err{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:11px 12px;color:#fff;font-family:Cairo;text-align:start;cursor:pointer;margin:0;transition:transform .15s,border-color .2s}
+.err:active{transform:scale(.98)}.err:hover{border-color:#A78BFA}
+.err span{font-size:13px;color:#C4B5FD;white-space:nowrap}
+.errsum{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:rgba(124,58,237,.14);border:1px solid #A78BFA;border-radius:14px;padding:10px 12px;margin:8px 0}
+
+.errfix{color:#FCD34D !important}
+.vpair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 4px}
+.vbtn{display:flex;flex-direction:column;align-items:center;gap:4px;background:#0F0920;border:1.5px solid var(--line);border-radius:16px;padding:14px 8px;color:#fff;font-family:Cairo;cursor:pointer;margin:0;transition:transform .15s,border-color .2s,background .2s}
+.vbtn span{font-size:28px}.vbtn b{font-size:16px}
+.vbtn:active{transform:scale(.96)}
+.vbtn.moto:hover{border-color:#F472B6}.vbtn.car:hover{border-color:#A78BFA}
+.stage.pg-in.dir-l{animation:slideL .34s cubic-bezier(.2,.8,.2,1) both}
+.stage.pg-in.dir-r{animation:slideR .34s cubic-bezier(.2,.8,.2,1) both}
+@keyframes slideL{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+.downrow{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;align-self:center;margin:12px 0 2px}
+.downrow .down{margin:0}
+.dv{display:none !important}
+body.landing.drv .dv{display:inline-flex !important}
+.vtog{padding:9px 22px;min-width:150px;justify-content:center;text-align:center}
+.vtog .vlabel{display:inline-block;width:100%;text-align:center}
+body.landing.drv .vtog{display:inline-flex !important}
+.stage-in.out-l{animation:outL .23s cubic-bezier(.4,0,.6,1) both}
+.stage-in.out-r{animation:outR .23s cubic-bezier(.4,0,.6,1) both}
+@keyframes outL{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-46px)}}
+@keyframes outR{from{opacity:1;transform:none}to{opacity:0;transform:translateX(46px)}}
+.upd-page{position:fixed;inset:0;z-index:40;display:none;overflow-y:auto;background:radial-gradient(900px 500px at 50% -10%,rgba(124,58,237,.35),transparent 60%),linear-gradient(180deg,#1b0d3d 0%,#0b0617 100%);padding:calc(12px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom))}
+.upd-page.on{display:block;animation:updIn .28s ease both}
+@keyframes updIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.upd-top{display:flex;align-items:center;gap:10px;margin:4px 0 8px}
+.upd-top b{font-size:18px}
+.upd-back{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font:700 18px Cairo;cursor:pointer;margin:0;padding:0}
+.ub-row{display:flex;gap:10px;align-items:flex-end;margin:14px 0;animation:ubIn .3s ease both}
+@keyframes ubIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ub-av{width:40px;height:40px;border-radius:50%;flex:none;background:linear-gradient(135deg,#7C3AED,#C026D3);display:flex;align-items:center;justify-content:center;color:#fff;font:800 16px Cairo;box-shadow:0 4px 12px rgba(124,58,237,.4)}
+.ub-body{min-width:0;max-width:82%}
+.ub-name{font-size:13px;color:#C4B5FD;font-weight:700;margin:0 4px 4px}
+.ub{background:#1E1248;border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:11px 13px;line-height:1.8;font-size:15px;white-space:pre-wrap;word-break:break-word}
+.ub-link{display:block;margin-top:10px;background:linear-gradient(90deg,#7C3AED,#C026D3);color:#fff;text-decoration:none;text-align:center;font-weight:800;padding:10px;border-radius:12px;direction:ltr;word-break:break-all}
+.ub-time{font-size:11px;color:#8b7fb0;margin:4px 6px 0}
+.upd-empty{text-align:center;color:#C4B5FD;margin-top:40px}
+.notif-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.55);border-radius:14px;padding:10px 12px;margin:8px 0 12px;font-size:14px;color:#FDE68A}
+.notif-banner button{margin:0;flex:none;width:auto;padding:8px 14px;border-radius:10px;background:#FBBF24;color:#1b0d3d;font:800 13px Cairo;border:none;cursor:pointer}
+.upd-badge{display:inline-block;min-width:20px;padding:1px 7px;margin-inline-start:6px;border-radius:99px;background:#F472B6;color:#fff;font:800 12px Cairo;text-align:center}
+body:not(.vpicked) #vtog{display:none !important}
+.arw{margin-inline-start:auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(124,58,237,.18);color:#fff;font:800 16px Cairo;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:transform .25s;flex:none}
+.arw.open{transform:rotate(180deg)}
+body.adm .card > h2{display:flex;align-items:center;gap:8px}
 </style>
 <link rel="manifest" href="/manifest-admin.json">
 <meta name="theme-color" content="#7C3AED">
@@ -287,7 +354,7 @@ body.adm .bchip b{font-size:13px}
   <div class="brand"><span class="sign"><svg class="ic"><use href="#ic-pin"/></svg>توصيلة</span><span id="sub">توصيل داخل المدينة</span><span id="conn" class="conn"></span></div>
   <div id="heroText" class="heroText"></div>
   <div class="tabs" id="tabs"></div>
-  <button class="down" id="down" onclick="scrollDown()" aria-label="انزل لصفحة التسجيل"><span>انزل للتسجيل</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+  <div class="downrow"><button class="down" id="down" onclick="scrollDown()" aria-label="انزل لصفحة التسجيل"><span>انزل للتسجيل</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><button class="down dv vtog" id="vtog" onclick="toggleVehicle()" aria-label="سجّل كابتن"><span class="vlabel">عربية</span></button></div>
 </header>
 <main id="app"></main>
 <div id="home" class="homepg">
@@ -320,9 +387,13 @@ body.adm .bchip b{font-size:13px}
 // ---------- ثوابت ----------
 // غيّر الكود ده لكود سري بتاعك. رابط الأدمن: الرابط + هذا الكود
 const ADMIN_KEY='#admin-x7k29q';
+const T_EN={'اكتب أنت عايز تروح فين':'Where to?','اطلب':'Request','دخول':'Login','رحلاتي':'My trips','الأمان':'Safety','تسجيل خروج':'Log out','راكب':'Rider','كابتن':'Driver','المشاوير':'Errands'};
+let LANG=localStorage.getItem('tw-lang')||'ar';
+const tr=x=>LANG==='en'&&T_EN[x]?T_EN[x]:x;
+function toggleLang(){LANG=LANG==='en'?'ar':'en';localStorage.setItem('tw-lang',LANG);document.documentElement.dir=LANG==='en'?'ltr':'rtl';closeDrawer();render()}
 const SUPPORT_PHONE='01031730512'; // رقم الدعم وخدمة العملاء (هيتغيّر للرقم الحقيقي)
 const WALLET={vodafone:'فودافون كاش',orange:'أورنج كاش',etisalat:'اتصالات كاش',instapay:'إنستا باي'};
-const ST={requested:'في انتظار سواق',accepted:'السواق أكّد وجاي لك',arrived:'السواق وصل',started:'الرحلة بدأت',done:'انتهت',cancelled:'اتلغت'};
+const ST={requested:'في انتظار كابتن',accepted:'الكابتن أكّد وجاي لك',arrived:'الكابتن وصل',started:'الرحلة بدأت',done:'انتهت',cancelled:'اتلغت'};
 const LIVE=['accepted','arrived','started'];
 const COLL=['riders','drivers','trips','payments','msgs'];
 const uid=()=>Date.now()*1000+Math.floor(Math.random()*1000);
@@ -353,13 +424,14 @@ const CITY={"w":664,"h":1620,"secs":[{"k":"A","t":"منطقة بلوك (700 • 
 const DEFAULT_CATS=[
   {id:'eco',name:'اقتصادي',desc:'٤ ركاب • الأوفر',extra:0},
   {id:'comfort',name:'مريح',desc:'٤ ركاب • عربية أحدث وأريح',extra:10},
-  {id:'family',name:'عائلي',desc:'٦ ركاب • عربية كبيرة',extra:20}
+  {id:'family',name:'عائلي',desc:'٦ ركاب • عربية كبيرة',extra:20},
+  {id:'moto',name:'موتوسيكل',desc:'راكب واحد • الأسرع في الزحمة',extra:-5}
 ];
 function fresh(){return{
   settings:{base:30,stop:5,sub:100,pin:'1234',cats:DEFAULT_CATS.map(c=>({...c})),wallets:{vodafone:'01000000000',orange:'01200000000',etisalat:'01100000000',instapay:'yourname@instapay'}},
   buildings:[],coords:{},
   riders:[],trips:[],payments:[],msgs:[],
-  drivers:[{id:uid(),name:'سواق تجريبي (تجربة)',phone:'01000000002',license:'DEMO',nid:'',cat:'comfort',photos:{},status:'approved',subUntil:Date.now()+90*864e5},{id:uid(),name:'سواق تجريبي ثلاثي',phone:'01000000001',license:'123456',nid:'29001010101010',cat:'eco',photos:{},status:'approved',subUntil:Date.now()+30*864e5}]
+  drivers:[{id:uid(),name:'كابتن تجريبي (تجربة)',phone:'01000000002',license:'DEMO',nid:'',cat:'comfort',photos:{},status:'approved',subUntil:Date.now()+90*864e5},{id:uid(),name:'كابتن تجريبي ثلاثي',phone:'01000000001',license:'123456',nid:'29001010101010',cat:'eco',photos:{},status:'approved',subUntil:Date.now()+30*864e5}]
 }}
 let S=fresh();
 let REMOTE=false,adminPin='',tab='rider',riderId=null,driverId=null,adminOK=false,method='vodafone',tmp={},openChat=null,seen={},post=[];
@@ -373,7 +445,9 @@ const val=id=>($('#'+id)?.value||'').trim();
 const money=n=>n+' جنيه';
 const cats=()=>S.settings.cats&&S.settings.cats.length?S.settings.cats:DEFAULT_CATS;
 const catOf=id=>cats().find(c=>c.id===id)||cats()[0];
-const price=t=>S.settings.base+(catOf(t.cat).extra||0)+t.stops*S.settings.stop;
+const TRIP_LIMITS={short:{min:20,max:45},long:{min:35,max:50}};
+const limitsOf=k=>{if(k==='errand'&&selErrand)return{min:selErrand.p,max:selErrand.p};return ((S.settings&&S.settings.trip)||TRIP_LIMITS)[k]||TRIP_LIMITS[k]};
+const price=t=>(t.offer?t.offer:S.settings.base+(catOf(t.cat).extra||0))+t.stops*S.settings.stop;
 const driverActive=d=>!!d&&d.status==='approved'&&d.subUntil>Date.now();
 const fdate=ts=>new Date(ts).toLocaleDateString('ar-EG');
 const hhmm=ts=>new Date(ts).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
@@ -400,6 +474,7 @@ function diff(){
   if(snap._b!==JSON.stringify(S.buildings)){out.buildings=S.buildings;any=true}
   if(snap._c!==JSON.stringify(S.coords||{})){out.coords=S.coords||{};any=true}
   if((S.removedDrivers||[]).length){out.removed={drivers:[...S.removedDrivers]};any=true}
+  if(S.removedRec&&Object.keys(S.removedRec).some(k=>S.removedRec[k].length)){out.removedRec=JSON.parse(JSON.stringify(S.removedRec));any=true}
   return any?out:null;
 }
 const hdrs=()=>({'Content-Type':'application/json','x-admin-pin':adminPin});
@@ -413,6 +488,7 @@ function applyRemote(st){
   notifyDriverStatus();
   notifyRiderTrip();
   notifyDriverTrips();
+  if(updOpen) renderUpdates();
 }
 async function save(){
   if(!REMOTE)return;
@@ -429,6 +505,7 @@ async function save(){
   if(d.buildings)snap._b=JSON.stringify(d.buildings);
   if(d.coords)snap._c=JSON.stringify(d.coords);
   if(d.removed)S.removedDrivers=(S.removedDrivers||[]).filter(x=>!d.removed.drivers.includes(x));
+  if(d.removedRec){for(const k in d.removedRec)S.removedRec[k]=(S.removedRec[k]||[]).filter(x=>!d.removedRec[k].includes(x));}
   sending=false;
   if(dirty){dirty=false;return save()}
   applyRemote(st);setConn('ok');
@@ -660,7 +737,7 @@ function selectLoc(field,loc){
 }
 // ---------- شاشة اختيار المكان ----------
 const pkTitle=()=>PK.field==='f'?'عايز تمشي منين':'عايز تروح فين';
-const pkPH=()=>PK.field==='f'?'اكتب عايز تمشي منين':'اكتب أنت عايز تروح فين';
+const pkPH=()=>PK.field==='f'?'اكتب مكانك':'اكتب تروح فين';
 function openPicker(f){
   const o=f==='f'?sel.t:sel.f;
   PK={on:true,field:f,zone:(o&&o.z)||PK.zone||'block',q:'',cat:null,gate:null};
@@ -669,9 +746,9 @@ function openPicker(f){
 function closePicker(){PK.on=false;$('#picker').classList.remove('on')}
 function renderPicker(){
   $('#pickerIn').innerHTML=`<div class="pk-h"><button class="x" onclick="closePicker()" aria-label="إغلاق">×</button><b>${pkTitle()}</b></div>
-    <div class="pk-actions"><button class="btn ghost" style="margin:0" onclick="togglePanel('pkSearchBox')">🔍 ابحث</button><button class="btn ghost" style="margin:0" onclick="togglePanel('pkFreeBox')">✏️ اكتب مكانك</button></div>
+    <div class="pk-actions"><button class="btn ghost" style="margin:0" onclick="togglePanel('pkSearchBox')">🔍 ابحث</button><button class="btn ghost" style="margin:0" onclick="togglePanel('pkFreeBox')">✏️ ${PK.field==='t'?'اكتب تروح فين':'اكتب مكانك'}</button></div>
     <div class="pk-s" id="pkSearchBox" style="display:none">${ICON.search}<input id="pq" type="search" placeholder="${pkPH()}" value="${esc(PK.q)}" autocomplete="off" oninput="pkSearch(this.value)"></div>
-    <div class="pk-free" id="pkFreeBox" style="display:none"><label for="pfree">اكتب اسم المكان لو مش موجود في القايمة</label><div class="row"><input id="pfree" placeholder="مثلاً: صيدلية الأمل" autocomplete="off"><button class="btn" style="flex:0 0 auto;margin:0" onclick="useFree()">استخدم</button></div><p class="small" style="margin:6px 0 0">المكان ده بيتحفظ في الرحلة دي بس، ومش بيتضاف للقايمة.</p></div>
+    <div class="pk-free" id="pkFreeBox" style="display:none"><label for="pfree">${PK.field==='t'?'اكتب تروح فين لو مش موجود في القايمة':'اكتب مكانك لو مش موجود في القايمة'}</label><div class="row"><input id="pfree" placeholder="مثلاً: صيدلية الأمل" autocomplete="off"><button class="btn" style="flex:0 0 auto;margin:0" onclick="useFree()">استخدم</button></div><p class="small" style="margin:6px 0 0">المكان ده بيتحفظ في الرحلة دي بس، ومش بيتضاف للقايمة.</p></div>
     <div id="pkZones"></div><div class="pk-body" id="pkBody"></div>`;
   renderPickerBody();
 }
@@ -679,7 +756,7 @@ function pkRow(l,sub,click,icon){return `<button class="pcard" onclick="${click}
 function renderPickerBody(){
   const zt=$('#pkZones'),body=$('#pkBody');if(!zt||!body)return;
   const q=PK.q.trim();
-  zt.innerHTML=q?'':`<div class="zt">${ZONES.map(z=>`<button class="${PK.zone===z.id?'on':''}" onclick="pkZone('${z.id}')"><b>${z.n}</b><small>${z.s}</small></button>`).join('')}</div>`;
+  zt.innerHTML=q?'':`<div class="zt">${ZONES.map(z=>`<button class="${PK.zone===z.id?'on':''}" onclick="pkZone('${z.id}')"><b>${z.n}</b><small>${z.s}</small></button>`).join('')}${PK.field==='t'?'<button class="zt-err" onclick="closePicker();openErrands()"><b>🛒 المشاوير</b><small>أسعار ثابتة</small></button>':''}</div>`;
   if(q){
     const r=searchLocs(q);
     body.innerHTML=r.length?r.map(x=>x.t==='cat'?pkRow(esc(x.c.n),`${zn(x.c.z)} • من ${x.c.a} إلى ${x.c.b}`,`pkCat('${x.c.id}')`,'🏢')
@@ -734,28 +811,54 @@ function scene(){return `<svg class="scene" viewBox="0 0 400 760" preserveAspect
 <g style="color:#F9A8D4;opacity:.7" transform="translate(330 470)"><use href="#ic-pin" width="20" height="25"/></g>
 <g style="color:#C4B5FD;opacity:.45" transform="translate(150 480) rotate(8)"><use href="#ic-car" width="70" height="35"/></g>
 </svg>`}
+// أقسام لوحة الأدمن: كلها مقفولة في الأول، والسهم بيفتح ويقفل كل قسم
+const admOpen=new Set();
+const admKey=h=>[...h.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim().replace(/\s*\(.*?\)\s*$/,'').slice(0,60);
+function adminCollapse(){
+  document.querySelectorAll('#app .card').forEach(card=>{
+    const h=card.querySelector(':scope > h2'); if(!h) return;
+    const open=admOpen.has(admKey(h));
+    [...card.children].forEach(c=>{if(c!==h)c.style.display=open?'':'none'});
+    h.querySelectorAll('.arw').forEach(x=>x.remove());
+    const btn=document.createElement('button');btn.type='button';btn.className='arw'+(open?' open':'');btn.textContent='⌄';
+    btn.setAttribute('aria-label','افتح أو اقفل القسم');
+    h.appendChild(btn);h.style.cursor='pointer';
+  });
+}
+document.addEventListener('click',e=>{
+  const h=e.target.closest&&e.target.closest('#app .card > h2');
+  if(!h||!document.body.classList.contains('adm'))return;
+  const k=admKey(h);
+  if(admOpen.has(k))admOpen.delete(k);else admOpen.add(k);
+  adminCollapse();
+});
 function render(){
   const adm=isAdmin(),role=adm?null:curRole();
+  const pgIn=animNext;animNext=false;
+  const dirCls=animDir?' dir-'+animDir:'';animDir=null;
   const ml=document.querySelector('link[rel=manifest]');if(ml)ml.href=adm?'/manifest-admin.json':'/manifest.json';
   document.body.classList.toggle('adm',adm);
+  document.body.classList.toggle('drv',tab==='driver');
   document.body.classList.toggle('home',!adm&&!!role);
   document.body.classList.toggle('landing',!adm&&!role);
   $('#sub').textContent=adm?'لوحة التحكم':'توصيل داخل المدينة';
   $('#heroText').innerHTML=adm||role?'':tab==='rider'
-    ?'<b>من عمارتك لحد وجهتك</b><span>اطلب سواق في ثواني وادفع كاش</span>'
+    ?'<b>من عمارتك لحد وجهتك</b><span>اطلب كابتن في ثواني وادفع كاش</span>'
     :'<b>اشتغل واكسب جوه مدينتك</b><span>سجّل بياناتك واستلم طلبات الركاب</span>';
-  $('#tabs').innerHTML=adm||role?'':[['rider','راكب'],['driver','سواق']].map(([k,v])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')">${v}</button>`).join('');
+  $('#tabs').innerHTML=adm||role?'':[['rider','راكب'],['driver','كابتن']].map(([k,v])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')">${v}</button>`).join('');
   if(role){$('#app').innerHTML='';renderHome();}
   else{
     let html=adm?adminView():tab==='driver'?driverLogin():riderLogin();
-    if(!adm)html=`<div class="stage">${scene()}<div class="stage-in">${html}<div class="credit">Designed by ادهم</div></div></div>`;
+    if(!adm)html=`<div class="stage${pgIn?' pg-in':''}${dirCls}">${scene()}<div class="stage-in">${html}<div class="credit">Designed by ادهم</div></div></div>`;
     const saved=grabForm();$('#app').innerHTML=html;restoreForm(saved);
+    if(adm)adminCollapse();
     if(regMode&&editingDriverId)prefillEdit();
   }
   if(modalFn&&$('#modal').classList.contains('on'))$('#modalIn').innerHTML=modalFn();
   setConn(conn);
 }
-function go(t){tab=t;regMode=false;openChat=null;persist();render();window.scrollTo(0,0)}
+let animNext=false;
+function go(t){tab=t;regMode=false;openChat=null;persist();animNext=true;render();window.scrollTo(0,0)}
 function scrollDown(){$('#app').scrollIntoView({behavior:'smooth',block:'start'})}
 
 // ---------- الصفحة الرئيسية (خريطة + شيت) ----------
@@ -788,24 +891,50 @@ function riderSheet(){
   if(cur) return h+`<div class="sh-t"><b>رحلتك</b><span class="badge">${esc(catOf(cur.cat).name)}</span></div>`+tripRider(cur);
   if(unrated) h+=`<div class="card">${tripRider(unrated)}</div>`;
   if(reqOpen) return h+requestPanel();
-  return h+`<button class="where" onclick="openDest()">${ICON.search}<b>اكتب أنت عايز تروح فين</b></button>${deco()}`;
+  return h+`<button class="where" onclick="openDest()">${ICON.search}<b>${tr('اكتب أنت عايز تروح فين')}</b></button>${deco()}`;
 }
 function fieldBtn(f){
   const l=sel[f],ph=f==='f'?'اكتب عايز تمشي منين':'اكتب أنت عايز تروح فين';
   return `<button class="fld ${l?'filled':''} ${f==='f'?'from':'to'}" onclick="openPicker('${f}')"><span class="fd ${f}"></span><span class="ft"><small>${f==='f'?'عايز تمشي منين':'عايز تروح فين'}</small>
     <b class="${l?'':'ph'}">${l?esc(l.label):ph}</b>${l&&!locPoint(l)?'<span class="nm">مكانه مش متحدد على الخريطة لسه</span>':''}</span>${ICON.search}</button>`;
 }
+let selPay='cash';
+const ERRANDS=[
+  {n:'مشوار المطار',p:350,note:'شامل الكارتة'},{n:'مشوار مدرسة غريباني',p:60},{n:'مشوار نرمين اسماعيل',p:70},
+  {n:'مشوار اكوا بارك أو أكاديمية المستقبل ومدرسة الكنانه',p:70},{n:'مشوار مدرسة رجاك',p:70},{n:'كارفور الشروق',p:90},
+  {n:'كارفور العبور',p:100},{n:'جامعة مصر الدولية',p:90},{n:'محطة عدلي منصور',p:130},{n:'موقف العاشر الجديد',p:150},{n:'مستشفى احمد جلال',p:175}
+];
+let selErrand=null;
+function openErrands(){
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>المشاوير (سعر ثابت)</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">اختار المشوار، والسعر بيتحسب لوحده.</p>
+    <div class="errs">${ERRANDS.map((e,i)=>`<button class="err" onclick="pickErrand(${i})"><b>${esc(e.n)}</b><span>${e.p} جنيه${e.note?' • '+esc(e.note):''}</span></button>`).join('')}</div>`;
+  $('#modal').classList.add('on');
+}
+function pickErrand(i){selErrand=ERRANDS[i];reqOpen=true;closeModal();renderHome()}
+function clearErrand(){selErrand=null;selTrip='short';selOffer=null;renderHome()}
+function errandSummary(){return `<div class="errsum"><b>${esc(selErrand.n)}</b><span>${selErrand.p} جنيه ${selErrand.note?'• '+esc(selErrand.note):''}</span><button class="chip" onclick="clearErrand()">إلغاء المشوار</button></div>`}
+let selTrip='short',selOffer=null;
+function setTripType(k){selTrip=k;selOffer=null;const saved=grabForm();$('#hsheet').innerHTML=riderSheet();restoreForm(saved)}
+function tripTypePicker(){const L=limitsOf(selTrip);if(selOffer==null)selOffer=Math.round((L.min+L.max)/2);return `<div class="paypick" role="radiogroup" aria-label="نوع الرحلة"><button class="${selTrip==='short'?'on':''}" onclick="setTripType('short')">قصيرة</button><button class="${selTrip==='long'?'on':''}" onclick="setTripType('long')">طويلة</button></div><div class="offer"><label for="offerIn">السعر اللي عايزه (من ${L.min} لـ ${L.max} جنيه)</label><input id="offerIn" type="number" inputmode="numeric" min="${L.min}" max="${L.max}" value="${selOffer}" onchange="selOffer=+this.value"></div>`}
+const PAY_NAMES={cash:'كاش',wallet:'محفظة',insta:'إنستا باي'};
+function setPay(v){selPay=v;const saved=grabForm();$('#hsheet').innerHTML=riderSheet();restoreForm(saved)}
+function payPicker(){return `<div class="paypick" role="radiogroup" aria-label="طريقة الدفع">${Object.keys(PAY_NAMES).map(k=>`<button class="${selPay===k?'on':''}" role="radio" aria-checked="${selPay===k}" onclick="setPay('${k}')">${PAY_NAMES[k]}</button>`).join('')}</div>`}
 function requestPanel(){
   if(!selCat)selCat=cats()[0].id;
   return `<div class="sh-t"><b>رحلتك</b><button class="x" onclick="closeReq()" aria-label="إغلاق">×</button></div>
-    ${fieldBtn('f')}<div class="route-line ${sel.f&&sel.t?'on':''}"></div>${fieldBtn('t')}
+    ${fieldBtn('f')}<div class="route-line ${sel.f&&sel.t?'on':''}"></div>${selErrand?'':fieldBtn('t')}
+    <button class="errbtn" onclick="openErrands()">🛒 المشاوير (أسعار ثابتة)</button>
+    ${selErrand?errandSummary():`<div class="pay-h">نوع الرحلة والسعر</div>${tripTypePicker()}`}
+    <div class="pay-h">طريقة الدفع</div>${payPicker()}
     <div class="cats" role="radiogroup" aria-label="فئة العربية">${cats().map(c=>{
       const ok=S.drivers.some(d=>driverActive(d)&&(d.cat||cats()[0].id)===c.id);
       return `<button class="cat ${selCat===c.id?'on':''}" role="radio" aria-checked="${selCat===c.id}" onclick="setCat('${c.id}')">
-        ${ICON.car}<span class="ct"><b>${esc(c.name)}</b><span class="small">${esc(c.desc)} • <span class="av ${ok?'y':''}">${ok?'متاح':'مفيش سواقين'}</span></span></span>
-        <span class="cp">${price({cat:c.id,stops:0})}<small> جنيه</small></span></button>`}).join('')}</div>
-    <p class="small" style="margin:6px 0 0">+ ${S.settings.stop} جنيه لكل وقفة • الدفع كاش للسواق.</p>
-    <button class="btn" onclick="reqTrip()">اطلب ${esc(catOf(selCat).name)}</button>`;
+        ${ICON.car}<span class="ct"><b>${esc(c.name)}</b><span class="small">${esc(c.desc)} • <span class="av ${ok?'y':''}">${ok?'متاح':'مفيش كباتن'}</span></span>${selErrand?'<span class="small errfix">سعر المشوار ثابت</span>':''}</span>
+        <span class="cp">${selErrand?selErrand.p:price({cat:c.id,stops:0})}<small> جنيه</small></span></button>`}).join('')}</div>
+    <p class="small" style="margin:6px 0 0">+ ${S.settings.stop} جنيه لكل وقفة • الدفع كاش للكابتن.</p>
+    <button class="btn" onclick="reqTrip()">${tr('اطلب')} ${esc(catOf(selCat).name)}</button>`;
 }
 function openDest(){reqOpen=true;renderHome();openPicker('t')}
 function closeReq(){reqOpen=false;sel={f:null,t:null};renderHome()}
@@ -825,28 +954,46 @@ function riderLogin(){
     <button class="btn ghost" onclick="toggleReg()">ماعنديش حساب – حساب جديد</button>`;
 }
 function driverLogin(){
-  if(regMode) return `<div class="card"><h2>${editingDriverId?'✏️ صحّح بياناتك':'سجّل كسواق'}</h2>
+  if(regMode) return `<div class="card"><h2>${editingDriverId?'✏️ صحّح بياناتك':(driverVehicle==='moto'?'سجّل كابتن موتوسيكل':'سجّل كابتن عربية')}</h2>
     <label for="dn">الاسم ثلاثي</label><input id="dn" autocomplete="name">
     <label for="dp">رقم التليفون</label><input id="dp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx">
     <label for="dnid">الرقم القومي (14 رقم)</label><input id="dnid" inputmode="numeric" maxlength="14">
     <label for="dl">رقم الرخصة</label><input id="dl">
-    <label for="dpl">نمرة العربية (حروف وأرقام)</label><input id="dpl" placeholder="مثلاً: أ ب ج 1234" autocomplete="off">
-    <label for="dcm">نوع العربية (موديل)</label><input id="dcm" placeholder="مثلاً: هيونداي إلنترا 2018" autocomplete="off">
-    <label for="dcol">لون العربية</label><input id="dcol" placeholder="مثلاً: أبيض" autocomplete="off">
-    <label for="dcat">فئة عربيتك</label><select id="dcat">${cats().map(c=>`<option value="${esc(c.id)}">${esc(c.name)} – ${esc(c.desc)}</option>`).join('')}</select>
-    ${Object.entries(DOCS).map(([k,d])=>`<div class="doc"><div class="doc-t"><b>${d.t}</b><span class="small">وش وضهر • <span id="cnt-${k}">0</span>/2</span></div>
+    <label for="dpl">نمرة المركبة (حروف وأرقام)</label><input id="dpl" placeholder="مثلاً: أ ب ج 1234" autocomplete="off">
+    <label for="dcm">نوع المركبة (موديل)</label><input id="dcm" placeholder="مثلاً: هيونداي إلنترا 2018 أو هوندا 2020" autocomplete="off">
+    <label for="dcol">لون المركبة</label><input id="dcol" placeholder="مثلاً: أبيض" autocomplete="off">
+    <label for="dwal">رقم المحفظة (لو معاك، لو مش معاك سيبه فاضي)</label><input id="dwal" inputmode="tel" placeholder="01xxxxxxxxx" autocomplete="off">
+    <label for="dinsta">إنستا باي (لو معاك، لو مش معاك سيبه فاضي)</label><input id="dinsta" placeholder="مثلاً: name@instapay" autocomplete="off">
+    ${driverVehicle=='moto'?'':`<label for="dcat">فئة عربيتك</label><select id="dcat">${cats().map(c=>`<option value="${esc(c.id)}">${esc(c.name)} – ${esc(c.desc)}</option>`).join('')}</select>`}
+    ${Object.entries(DOCS).map(([k,d])=>`<div class="doc"><div class="doc-t"><b>${k==='car'?(driverVehicle==='moto'?'صورة الموتوسيكل 🏍️ (هتظهر للراكب)':'صورة العربية 🚗 (هتظهر للراكب)'):d.t}</b><span class="small">وش وضهر • <span id="cnt-${k}">0</span>/2</span></div>
       <div class="slots">${d.slots.map(x=>`<button type="button" class="slot" id="slot-${x}" onclick="openPick('${k}','${x}')" aria-label="${d.t} ${SLOTLBL[x]}"><img id="pv-${x}" alt=""><span>${SLOTLBL[x]}</span></button>`).join('')}</div>
       <button type="button" class="plus" onclick="openPick('${k}')" aria-label="إضافة صورة – ${d.t}">+</button></div>`).join('')}
     <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input id="agree" type="checkbox" style="width:auto;margin-top:6px">أوافق على الشروط والأحكام وإن بياناتي صحيحة.</label>
     <button class="btn" onclick="regDriver()">ابعت للمراجعة</button></div>
     <button class="btn ghost" onclick="toggleReg()">عندي حساب – تسجيل الدخول</button>`;
-  return `<div class="card"><h2>تسجيل دخول السواق</h2>
+  return `<div class="card"><h2>${driverVehicle==='moto'?'تسجيل دخول الموتوسيكل':'تسجيل دخول العربية'}</h2>
     <label for="lp">رقم التليفون</label><input id="lp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" onkeydown="if(event.key==='Enter')loginDriver()">
     <button class="btn" onclick="loginDriver()">دخول</button></div>
-    <button class="btn ghost" onclick="toggleReg()">سواق جديد – سجّل بياناتك</button>
-    <button class="btn ghost" onclick="loginDemo()">🚗 دخول كسواق تجريبي (للتجربة)</button>`;
+    <div class="vpair"><button class="vbtn moto" onclick="pickVehicle('moto')"><span>🏍️</span><b>موتوسيكل</b></button><button class="vbtn car" onclick="pickVehicle('car')"><span>🚗</span><b>عربية</b></button></div>
+    <p class="small" style="text-align:center;margin:4px 0 0">كابتن جديد؟ اختار مركبتك</p>`;
 }
-function toggleReg(){regMode=!regMode;tmp={};render();window.scrollTo(0,0)}
+let driverVehicle='car',animDir=null;
+function toggleVehicle(){
+  const next=driverVehicle==='car'?'moto':'car';
+  const b=document.getElementById('vtog');if(b)b.querySelector('.vlabel').textContent=next==='moto'?'موتوسيكل':'عربية';
+  pickVehicle(next);
+}
+function pickVehicle(v){
+  document.body.classList.add('vpicked');
+  const go=()=>{driverVehicle=v;animDir=v==='car'?'l':'r';regMode=true;tmp={};animNext=true;render();window.scrollTo(0,0)};
+  const cur=document.querySelector('#app .stage-in');
+  // لو الفورم الحالي مفتوح: يطلع للجنب الأول، وبعدين يدخل الفورم الجديد
+  if(regMode&&cur&&!cur.classList.contains('out-l')&&!cur.classList.contains('out-r')){
+    cur.classList.add(v==='moto'?'out-r':'out-l');
+    setTimeout(go,230);
+  } else go();
+}
+function toggleReg(){regMode=!regMode;tmp={};animNext=true;render();window.scrollTo(0,0)}
 function loginRider(){
   const r=S.riders.find(x=>x.phone===val('lpr'));
   if(!r) return toast('الرقم ده مش مسجّل، اعمل حساب جديد',1);
@@ -860,7 +1007,7 @@ function regRider(){
   if(S.riders.some(x=>x.phone===p)) return toast('الرقم ده مسجّل قبل كده، ادخل بيه',1);
   const r={id:uid(),name:n,email:e,phone:p};S.riders.push(r);riderId=r.id;regMode=false;persist();commit();
 }
-// خرائط المدينة للسواق: بتتعرض بعد الدخول، والسواق يختار ينزّلها (JPG) أو يلغي
+// خرائط المدينة للكابتن: بتتعرض بعد الدخول، والكابتن يختار ينزّلها (JPG) أو يلغي
 const DRIVER_MAPS=[{k:'A',t:'قطاع 700 / 800 / 900',f:'A.jpg'},{k:'B',t:'منطقة اليو (U)',f:'B.jpg'},{k:'C',t:'منطقة ال T',f:'C.jpg'}];
 function offerDriverMaps(){
   modalFn=null;
@@ -880,12 +1027,12 @@ function downloadDriverMaps(){
 }
 function loginDemo(){
   const d=S.drivers.find(x=>x.phone==='01000000002');
-  if(!d) return toast('السواق التجريبي مش موجود',1);
+  if(!d) return toast('الكابتن التجريبي مش موجود',1);
   driverId=d.id;persist();render();offerDriverMaps();
 }
 function loginDriver(){
   const d=S.drivers.find(x=>x.phone===val('lp'));
-  if(!d) return toast('الرقم ده مش مسجّل',1);
+  if(!d){const n=noticeFor(val('lp'));if(n) return openNotice(n.text);return toast('الرقم ده مش مسجّل',1)}
   driverId=d.id;persist();render();offerDriverMaps();
 }
 let editingDriverId=null,lastDS=null;
@@ -897,7 +1044,7 @@ function prefillEdit(){
   const d=S.drivers.find(x=>x.id===editingDriverId);if(!d)return;
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&!el.value&&v!=null)el.value=v};
   set('dn',d.name);set('dp',d.phone);set('dnid',d.nid);set('dl',d.license);
-  set('dpl',(d.car&&d.car.plate)||'');set('dcm',(d.car&&d.car.model)||'');set('dcol',(d.car&&d.car.color)||'');
+  set('dpl',(d.car&&d.car.plate)||'');set('dwal',(d.pay&&d.pay.wallet)||'');set('dinsta',(d.pay&&d.pay.insta)||'');set('dcm',(d.car&&d.car.model)||'');set('dcol',(d.car&&d.car.color)||'');
   if(d.cat){const sc=document.getElementById('dcat');if(sc)sc.value=d.cat}
   tmp={...(d.photos||{}),avatar:d.avatar||(d.photos&&d.photos.avatar),car:(d.car&&d.car.photo)||(d.photos&&d.photos.car)};
   paintSlots();
@@ -909,8 +1056,8 @@ function notifyRiderTrip(){
     const prev=lastTS[t.id];lastTS[t.id]=t.status;
     if(prev===undefined||prev===t.status) continue;
     const d=S.drivers.find(x=>x.id===t.driverId);
-    const msg=t.status==='accepted'?'✅ السواق '+(d?d.name:'')+' وافق على طلبك':
-              t.status==='arrived'?'🚗 السواق وصل عندك':
+    const msg=t.status==='accepted'?'✅ الكابتن '+(d?d.name:'')+' وافق على طلبك':
+              t.status==='arrived'?'🚗 الكابتن وصل عندك':
               t.status==='done'?'انتهت الرحلة، شكراً ليك':null;
     if(msg){showNotif('توصيلة',msg);toast(msg)}
   }
@@ -962,18 +1109,18 @@ function regDriver(){
   const ed=editingDriverId?S.drivers.find(x=>x.id===editingDriverId):null;
   if(S.drivers.some(x=>(!ed||x.id!==ed.id)&&(x.phone===p||(x.nid&&x.nid===nid)))) return toast('الرقم أو البطاقة مسجّلين قبل كده',1);
   if(ed){
-    Object.assign(ed,{name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
+    Object.assign(ed,{pay:{wallet:val('dwal'),insta:val('dinsta')},name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
     driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
   }
-  const d={id:uid(),name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0};
+  const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':(val('dcat')||cats()[0].id),photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
   S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();setTimeout(offerDriverMaps,300);
   post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){driverId=null;persist();toast('الرقم أو البطاقة مسجّلين قبل كده',1);render()}});
   commit();
 }
 
 // ---------- رفع صور الرخصة والبطاقة ----------
-const DOCS={id:{t:'البطاقة (الرقم القومي)',slots:['front','back']},lic:{t:'الرخصة',slots:['licFront','licBack']},avatar:{t:'صورتك الشخصية (هتظهر للراكب) 🤳',slots:['avatar']},car:{t:'صورة العربية (هتظهر للراكب) 🚗',slots:['car']}};
-const SLOTLBL={front:'وش',back:'ضهر',licFront:'وش',licBack:'ضهر',avatar:'صورتك',car:'العربية'};
+const DOCS={id:{t:'البطاقة (الرقم القومي)',slots:['front','back']},lic:{t:'الرخصة',slots:['licFront','licBack']},avatar:{t:'صورتك الشخصية (هتظهر للراكب) 🤳',slots:['avatar']},car:{t:'صورة المركبة (عربية أو موتوسيكل، هتظهر للراكب) 🚗',slots:['car']}};
+const SLOTLBL={front:'وش',back:'ضهر',licFront:'وش',licBack:'ضهر',avatar:'صورتك',car:'المركبة'};
 const ALLSLOTS=['front','back','licFront','licBack','avatar','car'];
 let pickT=null;
 function paintSlots(){
@@ -1042,38 +1189,48 @@ function sendMsg(tid,me){const i=$('#ci-'+tid);if(!i)return;const t=i.value.trim
 function quick(tid,me,i){const t=S.trips.find(x=>x.id===tid);pushMsg(tid,me,quickList(t,me)[i])}
 
 // ---------- الراكب: الرحلات ----------
-function driverCard(d){
+function payInfo(d,t){
+  const m=(t&&t.pay)||'cash';
+  if(m==='cash') return `<div class="paytag">💵 الدفع: كاش للكابتن</div>`;
+  const pay=(d&&d.pay)||{};
+  if(m==='wallet') return pay.wallet?`<div class="paytag">👛 حوّل على المحفظة: <b dir="ltr">${esc(pay.wallet)}</b></div>`:`<div class="paytag warn">الكابتن ده معندوش محفظة. ادفع كاش</div>`;
+  return pay.insta?`<div class="paytag">📲 إنستا باي: <b dir="ltr">${esc(pay.insta)}</b></div>`:`<div class="paytag warn">الكابتن ده معندوش إنستا باي. ادفع كاش</div>`;
+}
+function driverCard(d,t){
   if(!d) return '';
   const c=d.car||{};
   return `<div class="drc">${d.avatar?`<img class="drc-av" src="${d.avatar}" alt="">`:'<div class="drc-av ph">👤</div>'}
     <div class="drc-t"><b>${esc(d.name)}</b><div class="small">${esc(c.model||'')}${c.color?' • '+esc(c.color):''}</div>${c.plate?`<div class="plate">${esc(c.plate)}</div>`:''}</div>
-    ${c.photo?`<img class="drc-car" src="${c.photo}" alt="صورة العربية">`:''}</div>`;
+    ${c.photo?`<img class="drc-car" src="${c.photo}" alt="صورة العربية">`:''}</div>${payInfo(d,t)}`;
 }
 function tripRider(t){
   const d=S.drivers.find(x=>x.id===t.driverId);
   let extra='';
-  if(t.status==='requested') extra=`<div class="small">بندوّر على سواق قريب منك…</div><button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الطلب</button>`;
+  if(t.status==='requested') extra=`<div class="small">بندوّر على كابتن قريب منك…</div><button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الطلب</button>`;
   else if(d&&LIVE.includes(t.status)) extra=`
-    <div class="confirm">${t.status==='accepted'?`✔ السواق ${esc(d.name)} أكّد طلبك وجاي لك${t.eta?` خلال ${t.eta} دقايق`:''}`:t.status==='arrived'?`✔ السواق ${esc(d.name)} وصل عندك`:`الرحلة شغّالة مع ${esc(d.name)}`}</div>
-    ${driverCard(d)}
+    <div class="confirm">${t.status==='accepted'?`✔ الكابتن ${esc(d.name)} أكّد طلبك وجاي لك${t.eta?` خلال ${t.eta} دقايق`:''}`:t.status==='arrived'?`✔ الكابتن ${esc(d.name)} وصل عندك`:`الرحلة شغّالة مع ${esc(d.name)}`}</div>
+    ${driverCard(d,t)}
     <div class="row">${chatBtn(t,'rider','تواصل مع السائق')}<a class="btn ghost" href="tel:${esc(d.phone)}">📞 رن عليه</a></div>
     ${openChat===t.id?chatPanel(t,'rider'):''}
     ${t.status==='accepted'?`<button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الرحلة</button>`:''}`;
   else if(t.status==='done') extra=t.rating
     ?`<div class="small">تقييمك: ${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div>`
-    :`<label for="cm-${t.id}">قيّم السواق</label><input id="cm-${t.id}" placeholder="تعليق (اختياري)">
+    :`<label for="cm-${t.id}">قيّم الكابتن</label><input id="cm-${t.id}" placeholder="تعليق (اختياري)">
       <div class="row" style="margin-top:8px">${[1,2,3,4,5].map(n=>`<button class="chip" onclick="rateTrip(${t.id},${n})" aria-label="${n} من 5">${n}★</button>`).join('')}</div>`;
   return `<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b><br>
     <span class="badge ${t.status==='done'?'b-ok':t.status==='cancelled'?'b-bad':'b-wait'}">${ST[t.status]}</span>
     <span class="small"> • ${esc(catOf(t.cat).name)} • ${money(price(t))}${t.stops?` (شامل ${t.stops} وقفة)`:''}</span>${extra}</div>`;
 }
 function reqTrip(){
+  if(selErrand){sel.t={id:'errand:'+selErrand.n,label:'مشوار: '+selErrand.n,z:'errand'};selTrip='errand';selOffer=selErrand.p}
   if(riderTrip()) return toast('عندك رحلة شغّالة لسه',1);
   if(!sel.f) return toast('اكتب أو اختار هتمشي منين',1);
   if(!sel.t) return toast('اكتب أو اختار رايح فين',1);
   if(sel.f.id===sel.t.id) return toast('نقطة البداية والنهاية لازم يختلفوا',1);
-  S.trips.push({id:uid(),riderId,from:sel.f.label,to:sel.t.label,fromId:sel.f.id,toId:sel.t.id,cat:selCat||cats()[0].id,stops:0,status:'requested',driverId:null,eta:null,at:Date.now()});
-  reqOpen=false;sel={f:null,t:null};toast('تم إرسال الطلب');commit();
+  const L=limitsOf(selTrip),offer=Math.round(+(val('offerIn')||selOffer||0));
+  if(!(offer>=L.min&&offer<=L.max)) return toast('السعر لازم يكون بين '+L.min+' و '+L.max+' جنيه',1);
+  S.trips.push({id:uid(),riderId,pay:selPay,tripType:selTrip,offer,from:sel.f.label,to:sel.t.label,fromId:sel.f.id,toId:sel.t.id,cat:selCat||cats()[0].id,stops:0,status:'requested',driverId:null,eta:null,at:Date.now()});
+  reqOpen=false;sel={f:null,t:null};selOffer=null;selErrand=null;selTrip='short';toast('تم إرسال الطلب');commit();
 }
 
 const CANCEL_LOG_OK=true;
@@ -1100,7 +1257,7 @@ function submitCancel(tid,who){
 function cancelTrip(id){const _t=S.trips.find(x=>x.id===id);if(_t&&_t.status==='requested'){_t.status='cancelled';toast('اتلغى الطلب، تقدر تعمل طلب جديد');commit();return}openCancel(id,'rider');return;const t=S.trips.find(x=>x.id===id);if(t&&(t.status==='requested'||t.status==='accepted')){t.status='cancelled';commit()}}
 function rateTrip(id,n){const t=S.trips.find(x=>x.id===id);t.rating=n;t.comment=val('cm-'+id);toast('شكرًا على تقييمك');commit()}
 
-// ---------- السواق ----------
+// ---------- الكابتن ----------
 function driverSheet(){
   const d=S.drivers.find(x=>x.id===driverId);
   let h=`<div class="grab"></div><div class="sh-t"><b>أهلاً ${esc(d.name)}</b><span class="badge">${esc(catOf(d.cat).name)}</span></div>`;
@@ -1168,7 +1325,7 @@ function acceptTrip(id){
   const t=S.trips.find(x=>x.id===id);
   if(!t||t.status!=='requested') return toast('الرحلة اتاخدت',1);
   t.status='accepted';t.driverId=driverId;t.eta=+val('eta-'+id)||5;
-  post.push(()=>{const x=S.trips.find(y=>y.id===id);if(x&&x.driverId!==driverId){toast('الرحلة اتاخدت من سواق تاني',1);render()}});
+  post.push(()=>{const x=S.trips.find(y=>y.id===id);if(x&&x.driverId!==driverId){toast('الرحلة اتاخدت من كابتن تاني',1);render()}});
   commit();
 }
 function releaseTrip(id){openCancel(id,'driver');return;const t=S.trips.find(x=>x.id===id);t.status='requested';t.driverId=null;t.eta=null;openChat=null;commit()}
@@ -1191,12 +1348,32 @@ function sendPay(){
 }
 
 // ---------- القايمة الجانبية والنوافذ ----------
+function editPayInfo(){
+  const d=S.drivers.find(x=>x.id===driverId);if(!d)return;
+  const w=prompt('رقم المحفظة (سيبه فاضي لو معاكش):',(d.pay&&d.pay.wallet)||'');if(w===null)return;
+  const i=prompt('إنستا باي (سيبه فاضي لو معاكش):',(d.pay&&d.pay.insta)||'');if(i===null)return;
+  d.pay={wallet:w.trim(),insta:i.trim()};closeDrawer();toast('اتحفظت بيانات الدفع ✓');commit();
+}
+function changeDriverAvatar(){
+  const d=S.drivers.find(x=>x.id===driverId);if(!d)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=async()=>{
+    const f=inp.files&&inp.files[0];if(!f)return;
+    try{d.avatar=await compress(f);closeDrawer();toast('اتغيّرت صورة البروفايل ✓');commit()}
+    catch(e){toast('الصورة مش مقروءة، جرّب صورة تانية',1)}
+  };
+  inp.click();
+}
 function openDrawer(){
   const role=curRole();const u=role==='rider'?S.riders.find(x=>x.id===riderId):S.drivers.find(x=>x.id===driverId);if(!u)return;
-  $('#drawerIn').innerHTML=`<div class="dr-h"><div class="avatar">${esc(u.name.trim()[0]||'؟')}</div><div><b>${esc(u.name)}</b><div class="small" dir="ltr" style="text-align:right">${esc(u.phone)}</div>
-    <span class="badge">${role==='rider'?'راكب':'سواق • '+esc(catOf(u.cat).name)}</span></div></div>
-    <button class="dr-i" onclick="closeDrawer();openHistory()">رحلاتي</button>
-    <button class="dr-i" onclick="closeDrawer();openSafety()">الأمان</button>
+  $('#drawerIn').innerHTML=`<div class="dr-h">${u.avatar?`<img class="avatar" src="${u.avatar}" alt="" style="object-fit:cover">`:`<div class="avatar">${esc(u.name.trim()[0]||'؟')}</div>`}<div><b>${esc(u.name)}</b><div class="small" dir="ltr" style="text-align:right">${esc(u.phone)}</div>
+    <span class="badge">${role==='rider'?'راكب':'كابتن • '+esc(catOf(u.cat).name)}</span></div></div>
+    <button class="dr-i" onclick="closeDrawer();openHistory()">${tr('رحلاتي')}</button>
+    <button class="dr-i" onclick="closeDrawer();openSafety()">${tr('الأمان')}</button>
+    <button class="dr-i" onclick="openUpdates()">🔔 التحديثات${updBadge()}</button>
+    <button class="dr-i" onclick="toggleLang()">🌐 ${LANG==='en'?'عربي':'English'}</button>
+    ${role==='driver'?'<button class="dr-i" onclick="changeDriverAvatar()">📷 غيّر صورة البروفايل</button>':''}
+    ${role==='driver'?'<button class="dr-i" onclick="editPayInfo()">💳 بيانات الدفع (محفظة / إنستا باي)</button>':''}
     ${role==='driver'?'<button class="dr-i" onclick="closeDrawer();downloadDriverMaps()">⬇️ نزّل خريطة المدينة</button>':''}
     <button class="dr-i" onclick="closeDrawer();showInstallPrompt(true)">📲 ثبّت التطبيق على تليفوني</button>
     <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
@@ -1222,7 +1399,7 @@ function openSafety(){openModal(()=>{
   const c=curRole()==='rider'?riderTrip():driverTrip();
   let share='';
   if(c){const d=S.drivers.find(x=>x.id===c.driverId);const r=S.riders.find(x=>x.id===c.riderId);
-    const msg=`رحلتي من ${c.from} إلى ${c.to}${d?` • السواق: ${d.name} ${d.phone}`:''}${r?` • الراكب: ${r.name} ${r.phone}`:''}`;
+    const msg=`رحلتي من ${c.from} إلى ${c.to}${d?` • الكابتن: ${d.name} ${d.phone}`:''}${r?` • الراكب: ${r.name} ${r.phone}`:''}`;
     share=`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">شارك رحلتك على واتساب</a>`}
   return `<h3>الأمان</h3><p class="small">في الطوارئ اتصل فورًا:</p>
     <a class="btn red" href="tel:122">شرطة النجدة 122</a><a class="btn red" href="tel:123">الإسعاف 123</a><a class="btn red" href="tel:180">المطافئ 180</a>
@@ -1230,17 +1407,88 @@ function openSafety(){openModal(()=>{
 
 // ---------- الأدمن ----------
 
+function addNotice(d,kind,reason,days){
+  const first=(d.name||'').trim().split(/\s+/)[0]||'يا صديقي';
+  let text;
+  if(kind==='deleted') text='أهلاً '+first+'، للأسف اتشال حسابك من توصيلة بسبب: '+reason+'. شكراً لاستخدامك توصيلة، ونتمنى تكون تجربتك أحسن في أي وقت.';
+  else if(kind==='blocked') text='أهلاً '+first+'، تم حظرك من توصيلة لمدة '+days+(days===1?' يوم':' أيام')+' بسبب: '+reason+'. نأمل إن المشكلة دي متتكررش تاني لما ترجع، ونشكرك على تفهمك واحترامك للمنصة.';
+  else text='أهلاً '+first+'، تم حظرك من توصيلة نهائياً بسبب: '+reason+'. شكراً لاستخدامك توصيلة.';
+  S.settings.notices=(S.settings.notices||[]).concat([{phone:d.phone,name:d.name,nid:d.nid||'',kind,text,at:Date.now()}]).slice(-200);
+}
+function noticeFor(phone){
+  const list=(S.settings&&S.settings.notices)||[];
+  for(let i=list.length-1;i>=0;i--) if(list[i].phone===phone) return list[i];
+  return null;
+}
+function openNotice(text){
+  modalFn=null;
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>رسالة من توصيلة</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p style="font-size:16px;line-height:1.9;margin:8px 0 14px">${esc(text)}</p>
+    <button class="btn" onclick="closeModal()">تمام</button>`;
+  $('#modal').classList.add('on');
+}
+function adminDelete(coll,id,label){
+  const word=prompt('عشان تأكد الحذف: هتمسح '+label+'. اكتب كلمة "امسح" بالظبط:');
+  if(word!=='امسح'){toast('الحذف اتلغى، ماتمسحش حاجة',1);return}
+  S[coll]=(S[coll]||[]).filter(x=>x.id!==id);
+  S.removedRec=S.removedRec||{};
+  S.removedRec[coll]=(S.removedRec[coll]||[]).concat([id]);
+  toast('اتمسح '+label);commit();
+}
+function adminDelTrip(id){adminDelete('trips',id,'الرحلة دي')}
+function adminDelRider(id){
+  const r=S.riders.find(x=>x.id===id);if(!r)return;
+  adminDelete('riders',id,'حساب الراكب ('+r.name+')');
+}
+function adminDelPayment(id){adminDelete('payments',id,'تحويل الاشتراك دا')}
+function notifEnabled(){return ('Notification' in window)&&Notification.permission==='granted'}
+function notifBanner(){
+  if(notifEnabled()) return '';
+  return `<div class="notif-banner"><span>🔔 فعّل الإشعارات عشان توصلك التحديثات أول بأول</span><button onclick="enablePush()">فعّل</button></div>`;
+}
+function unreadCount(){
+  const seen=Number(localStorage.getItem('tw-upd-seen')||0);
+  return ((S.settings&&S.settings.announcements)||[]).filter(a=>a.at>seen).length;
+}
+function updBadge(){const n=unreadCount();return n?`<span class="upd-badge">${n}</span>`:''}
+let updOpen=false;
+function openUpdates(){updOpen=true;localStorage.setItem('tw-upd-seen',String(Date.now()));renderUpdates();const pg=$('#updPage');pg.classList.add('on');pg.setAttribute('aria-hidden','false');pg.scrollTop=0;closeDrawer()}
+function closeUpdates(){updOpen=false;const pg=$('#updPage');pg.classList.remove('on');pg.setAttribute('aria-hidden','true')}
+function renderUpdates(){
+  const list=((S.settings&&S.settings.announcements)||[]).slice().sort((a,b)=>a.at-b.at);
+  const bubbles=list.map(a=>`<div class="ub-row"><div class="ub-av">A</div><div class="ub-body"><div class="ub-name">admin</div>
+    <div class="ub">${esc(a.text||'')}</div>${a.link?`<a class="ub-link" href="${esc(a.link)}" target="_blank" rel="noopener">⬇️ حمّل التحديث الجديد<br>${esc(a.link)}</a>`:''}
+    <div class="ub-time">${fdate(a.at)} • ${hhmm(a.at)}</div></div></div>`).join('');
+  $('#updPage').innerHTML=`<div class="upd-top"><button class="upd-back" onclick="closeUpdates()" aria-label="رجوع">→</button><b>التحديثات</b></div>${notifBanner()}
+    ${list.length?bubbles:'<p class="upd-empty">لسه مفيش تحديثات. هنا هتلاقي أي رسالة أو تحديث جديد من الإدارة.</p>'}`;
+}
+function postAnnouncement(){
+  const raw=val('annText');
+  if(!raw) return toast('اكتب الرسالة',1);
+  // اللينك بيتلقط من الرسالة نفسها: أول https:// بيتحط كزرار تحميل، والباقي رسالة
+  const m=raw.match(/https?:\/\/[^\s]+/);
+  const link=m?m[0].slice(0,300):'';
+  const text=(m?raw.replace(m[0],''):raw).replace(/\s+/g,' ').trim();
+  if(!text&&!link) return toast('اكتب رسالة',1);
+  S.settings.announcements=(S.settings.announcements||[]).concat([{id:uid(),text:text.slice(0,1000),link,at:Date.now()}]).slice(-100);
+  $('#annText').value='';
+  toast('اتنشرت للكل ✓');commit();
+}
 function adminDelDriver(id){
   const d=S.drivers.find(x=>x.id===id);if(!d)return;
-  if(!confirm('امسح السواق ('+d.name+')؟ مش هيقدر يرجع غير لو سجّل من جديد.')) return;
+  if(!confirm('امسح الكابتن ('+d.name+')؟ مش هيقدر يرجع غير لو سجّل من جديد.')) return;
+  const reason=(prompt('سبب الحذف (هيوصل للكابتن في رسالة):','مخالفة لقواعد توصيلة')||'مخالفة لقواعد توصيلة').trim();
+  addNotice(d,'deleted',reason,0);
   S.drivers=S.drivers.filter(x=>x.id!==id);
   S.removedDrivers=(S.removedDrivers||[]).concat([id]);
-  toast('اتمسح السواق');commit();
+  toast('اتمسح الكابتن');commit();
 }
 function adminBlockDriver(id){
   const d=S.drivers.find(x=>x.id===id);if(!d)return;
   const days=+val('bd-'+id)||0;
   const until=days?Date.now()+days*864e5:0;
+  const reason=(prompt('سبب الحظر (هيوصل للكابتن في رسالة):','المشكلة اللي حصلت')||'المشكلة اللي حصلت').trim();
+  addNotice(d,days?'blocked':'banned',reason,days);
   S.settings.blocks=(S.settings.blocks||[]).concat([{phone:d.phone,name:d.name,nid:d.nid||'',until,at:Date.now()}]);
   S.drivers=S.drivers.filter(x=>x.id!==id);
   S.removedDrivers=(S.removedDrivers||[]).concat([id]);
@@ -1259,25 +1507,25 @@ function adminView(){
   const miss=missingBuildings();
   const allDrv=S.drivers.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar'));
   const activeBlocks=(S.settings.blocks||[]).map((b,i)=>({...b,i})).filter(b=>!b.until||b.until>Date.now());
-  const driversCard=`<div class="card"><h2>كل السواقين (${allDrv.length})</h2>
-    <p class="small">امسح أو احظر أي سواق. الحظر بيمنع نفس الرقم أو نفس الاسم أو نفس البطاقة من الدخول للمدة اللي تختارها.</p>
+  const driversCard=`<div class="card"><h2>كل الكباتن (${allDrv.length})</h2>
+    <p class="small">امسح أو احظر أي كابتن. الحظر بيمنع نفس الرقم أو نفس الاسم أو نفس البطاقة من الدخول للمدة اللي تختارها.</p>
     ${allDrv.length?allDrv.map(d=>`<div class="trip"><b>${esc(d.name)}</b> <span class="badge ${d.status==='approved'?'b-ok':d.status==='pending'?'b-wait':'b-bad'}">${d.status==='approved'?'مقبول':d.status==='pending'?'تحت المراجعة':'مرفوض'}</span>
       <div class="small">${esc(d.phone)} • بطاقة ${esc(d.nid||'—')}</div>
       <div class="row"><button class="btn red" style="margin:0" onclick="adminDelDriver(${d.id})">🗑 امسح</button></div>
       <div class="row" style="margin-top:6px"><select id="bd-${d.id}" style="flex:1"><option value="1">حظر يوم</option><option value="7">حظر أسبوع</option><option value="30">حظر شهر</option><option value="0">حظر نهائي</option></select>
-      <button class="btn" style="margin:0;flex:0 0 auto" onclick="adminBlockDriver(${d.id})">🚫 احظر</button></div></div>`).join(''):'<p class="small">مفيش سواقين لسه.</p>'}
+      <button class="btn" style="margin:0;flex:0 0 auto" onclick="adminBlockDriver(${d.id})">🚫 احظر</button></div></div>`).join(''):'<p class="small">مفيش كباتن لسه.</p>'}
     ${activeBlocks.length?`<h3>المحظورين</h3>${activeBlocks.map(b=>`<div class="trip"><b>${esc(b.name)}</b> <span class="small">• ${esc(b.phone)} • ${b.until?'لحد '+fdate(b.until):'نهائي'}</span>
       <div class="row"><button class="btn ghost" style="margin:0" onclick="adminUnblock(${b.i})">رفع الحظر</button></div></div>`).join('')}`:''}
   </div>`;
   const cancels=[];S.trips.forEach(t=>(t.cancel||[]).forEach(c=>cancels.push({t,c})));cancels.sort((a,b)=>b.c.at-a.c.at);
-  const cancelCard=`<div class="card"><h2>الإلغاءات (${cancels.length})</h2>${cancels.length?cancels.map(x=>`<div class="trip"><b>${esc(x.c.name)}</b> <span class="badge">${x.c.by==='rider'?'راكب':'سواق'}</span>
+  const cancelCard=`<div class="card"><h2>الإلغاءات (${cancels.length})</h2>${cancels.length?cancels.map(x=>`<div class="trip"><b>${esc(x.c.name)}</b> <span class="badge">${x.c.by==='rider'?'راكب':'كابتن'}</span>
     <div class="small">${esc(x.t.from)} ← ${esc(x.t.to)}</div><div class="small">السبب: ${esc(x.c.reason)}</div><div class="small">${hhmm(x.c.at)} • ${fdate(x.c.at)}</div></div>`).join(''):'<p class="small">مفيش إلغاءات.</p>'}</div>`;
-  const missCard=`<div class="card"><h2>عمارات من غير مكان GPS (${miss.length})</h2><p class="small">السواق بيحفظ المكان من تليفونه لما يوصل. دي العمارات اللي لسه مش متسجلة:</p>
+  const missCard=`<div class="card"><h2>عمارات من غير مكان GPS (${miss.length})</h2><p class="small">الكابتن بيحفظ المكان من تليفونه لما يوصل. دي العمارات اللي لسه مش متسجلة:</p>
     <div class="bgrid">${miss.slice(0,80).map(x=>`<span class="bchip" style="cursor:default"><b>${esc(x.n)}</b><small>${x.k}</small></span>`).join('')}</div>${miss.length>80?`<p class="small">وغيرهم ${miss.length-80}</p>`:''}</div>`;
   const w=S.settings.wallets;
   return `<button class="btn ghost" style="margin:0 0 14px" onclick="adminLogout()">تسجيل خروج</button>
-  <div class="stat"><div><b>${S.drivers.filter(driverActive).length}</b>سواق مفعّل</div><div><b>${S.trips.filter(t=>t.status==='done').length}</b>رحلة خلصت</div><div><b>${rev}</b>إيراد الاشتراكات</div></div>
-  <div class="card"><h2>سواقين محتاجين مراجعة (${pend.length})</h2>${pend.length?pend.map(d=>`<div class="trip"><b>${esc(d.name)}</b>
+  <div class="stat"><div><b>${S.drivers.filter(driverActive).length}</b>كابتن مفعّل</div><div><b>${S.trips.filter(t=>t.status==='done').length}</b>رحلة خلصت</div><div><b>${rev}</b>إيراد الاشتراكات</div></div>
+  <div class="card"><h2>كباتن محتاجين مراجعة (${pend.length})</h2>${pend.length?pend.map(d=>`<div class="trip"><b>${esc(d.name)}</b>
     <div class="small">${esc(d.phone)} • ${esc(catOf(d.cat).name)} • بطاقة ${esc(d.nid)} • رخصة ${esc(d.license)}</div>
     <div class="small">العربية: ${esc((d.car&&d.car.model)||'—')} • ${esc((d.car&&d.car.color)||'—')} • النمرة: ${esc((d.car&&d.car.plate)||'—')}</div>
     <div class="imgs">${['front','back','licFront','licBack','avatar','car'].map(k=>(d.photos&&d.photos[k])||(k==='avatar'&&d.avatar)||(k==='car'&&d.car&&d.car.photo)?`<img src="${(d.photos&&d.photos[k])||(k==='avatar'?d.avatar:d.car.photo)}" alt="">`:'').join('')}</div>
@@ -1287,17 +1535,28 @@ function adminView(){
   <div class="card"><h2>اشتراكات محتاجة تأكيد (${pays.length})</h2>${pays.length?pays.map(p=>{const d=S.drivers.find(x=>x.id===p.driverId);return `<div class="trip"><b>${esc(d?.name)}</b>
     <div class="small">${WALLET[p.method]} • ${esc(p.ref)} • ${money(p.amount)}</div>
     <div class="row"><button class="btn green" onclick="reviewPay(${p.id},true)">وصلت – فعّل</button><button class="btn red" onclick="reviewPay(${p.id},false)">ماوصلتش</button></div></div>`}).join(''):'<p class="small">مفيش اشتراكات معلّقة.</p>'}</div>
-  <div class="card"><h2>متابعة السواقين</h2>${S.drivers.filter(d=>d.status==='approved').map(d=>{const s=dstat(d);return `<div class="trip"><b>${esc(d.name)}</b> <span class="badge ${s.cls}">${s.label}</span>
+  <div class="card"><h2>متابعة الكباتن</h2>${S.drivers.filter(d=>d.status==='approved').map(d=>{const s=dstat(d);return `<div class="trip"><b>${esc(d.name)}</b> <span class="badge ${s.cls}">${s.label}</span>
     <div class="small">${esc(d.phone)} • ${esc(catOf(d.cat).name)} • النهارده: ${s.today} رحلة • الإجمالي: ${s.total}</div>
     <div class="small">${s.n?`التقييم: ★ ${s.avg} (${s.n} تقييم)`:'لسه مفيش تقييمات'}</div>
-    ${s.comments.map(c=>`<div class="small">«${esc(c)}»</div>`).join('')}</div>`}).join('')||'<p class="small">مفيش سواقين لسه.</p>'}</div>
-  <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
+    ${s.comments.map(c=>`<div class="small">«${esc(c)}»</div>`).join('')}</div>`}).join('')||'<p class="small">مفيش كباتن لسه.</p>'}</div>
+  <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelTrip(${t.id})">🗑 امسح الرحلة</button></div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
   ${driversCard}
+  <div class="card"><h2>الركاب (${S.riders.length})</h2>${S.riders.length?S.riders.slice().map(r=>`<div class="trip"><b>${esc(r.name)}</b><div class="small">${esc(r.phone)} • ${esc(r.email||'')}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelRider(${r.id})">🗑 امسح الراكب</button></div></div>`).join(''):'<p class="small">مفيش ركاب لسه.</p>'}</div>
+  ${driversCard}
+  <div class="card"><h2>📣 رسالة للكل</h2>
+    <p class="small">اكتب الرسالة، وحط لينك التحديث لو فيه. الكل هيشوفها في صفحة التحديثات.</p>
+    <label for="annText">الرسالة (اكتب الرسالة، ولو فيه لينك حطه جوه الرسالة)</label>
+    <textarea id="annText" rows="4" placeholder="اكتب اللي عايزه يوصل للكل" style="width:100%;padding:11px;border:1.5px solid var(--line);border-radius:12px;background:#0F0920;color:#fff;font:400 15px Cairo"></textarea>
+        <button class="btn" style="margin-top:10px" onclick="postAnnouncement()">انشر وابعت للكل</button>
+    <p class="small">اتنشر قبل كده: ${((S.settings&&S.settings.announcements)||[]).length} رسالة</p></div>
   ${cancelCard}
   ${missCard}
   <div class="card"><h2>الأسعار</h2><div class="row"><div><label for="sb">سعر الرحلة</label><input id="sb" type="number" value="${S.settings.base}"></div>
     <div><label for="ss">سعر الوقفة</label><input id="ss" type="number" value="${S.settings.stop}"></div>
     <div><label for="su">الاشتراك</label><input id="su" type="number" value="${S.settings.sub}"></div></div>
+    <h3>أسعار الرحلات (الحد الأدنى والأقصى)</h3>
+    <div class="row"><div><label for="sSmin">قصيرة: أدنى</label><input id="sSmin" type="number" value="${limitsOf('short').min}"></div><div><label for="sSmax">قصيرة: أقصى</label><input id="sSmax" type="number" value="${limitsOf('short').max}"></div></div>
+    <div class="row"><div><label for="sLmin">طويلة: أدنى</label><input id="sLmin" type="number" value="${limitsOf('long').min}"></div><div><label for="sLmax">طويلة: أقصى</label><input id="sLmax" type="number" value="${limitsOf('long').max}"></div></div>
     <h3>فئات العربيات (الزيادة على سعر الرحلة)</h3>
     ${cats().map((c,i)=>`<div class="row"><div><label for="cn-${i}">الاسم</label><input id="cn-${i}" value="${esc(c.name)}"></div><div><label for="cx-${i}">زيادة جنيه</label><input id="cx-${i}" type="number" value="${c.extra||0}"></div></div>`).join('')}
     <h3>أرقام استلام الاشتراك</h3>
@@ -1336,7 +1595,7 @@ async function adminLogin(){
 function adminLogout(){adminOK=false;adminPin='';lastFP='';render()}
 function setFace(id,v){const d=S.drivers.find(x=>x.id===id);d.faceMatch=v;commit()}
 function reviewDriver(id,ok){const d=S.drivers.find(x=>x.id===id);if(ok&&d.faceMatch!=='yes')return toast('لازم تأكد إن الصورة مطابقة للبطاقة الأول',1);
-  if(!ok){d.reason=(prompt('سبب الرفض (هيظهر للسواق):','البيانات أو الصور مش واضحة')||'البيانات محتاجة تصحيح').slice(0,200)}
+  if(!ok){d.reason=(prompt('سبب الرفض (هيظهر للكابتن):','البيانات أو الصور مش واضحة')||'البيانات محتاجة تصحيح').slice(0,200)}
   d.status=ok?'approved':'rejected';
   if(ok){d.subUntil=Date.now()+90*864e5;d.trialMsg=true}
   commit()}
@@ -1348,6 +1607,7 @@ function reviewPay(id,ok){
 }
 function saveSettings(){
   const s=S.settings;s.base=+val('sb')||30;s.stop=+val('ss')||5;s.sub=+val('su')||100;
+  s.trip={short:{min:+val('sSmin')||20,max:+val('sSmax')||45},long:{min:+val('sLmin')||35,max:+val('sLmax')||50}};
   s.cats=cats().map((c,i)=>({...c,name:val('cn-'+i)||c.name,extra:Math.max(0,+val('cx-'+i)||0)}));
   Object.keys(WALLET).forEach(k=>s.wallets[k]=val('w-'+k));toast('تم الحفظ');commit();
 }
@@ -1408,7 +1668,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredIns
 const isStandaloneApp=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
 function installSteps(){
   return `<div class="ins-steps">
-    <div class="ins-card"><b>🤖 أندرويد (Chrome)</b><ol><li>اضغط على القايمة <b>⋮</b> فوق يمين</li><li>اختار <b>Install app</b> أو <b>إضافة إلى الشاشة الرئيسية</b></li><li>اضغط <b>Install</b></li></ol></div>
+    <div class="ins-card"><b>🤖 أندرويد (Chrome)</b><ol><li>اضغط على القايمة <b>⋮</b> فوق يمين</li><li>اختار <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b></li><li>اضغط <b>Install</b></li></ol></div>
     <div class="ins-card"><b>🍎 آيفون (Safari)</b><ol><li>اضغط زرار المشاركة <b>⬆️</b> تحت</li><li>اختار <b>Add to Home Screen</b> (إضافة للشاشة الرئيسية)</li><li>اضغط <b>Add</b></li></ol></div>
   </div>`;
 }
@@ -1447,5 +1707,6 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
 }
 </script>
 <script src="/push.js" defer></script>
+<div id="updPage" class="upd-page" aria-hidden="true"></div>
 </body>
 </html>

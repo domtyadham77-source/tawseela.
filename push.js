@@ -1,4 +1,4 @@
-// تفعيل الإشعارات للراكب والسواق والأدمن
+// تفعيل الإشعارات للراكب والكابتن والأدمن
 (function () {
   const VAPID_PUB = 'BBvHbaXHHDeP3Ep-e_qtz6DizNhzMgUOFwCPHBg599Fr99-iWTlMknPN0py5ZrTGWvcMAfzYM1RAN7NIK9sSW4o';
   const u8 = b64 => { const p = '='.repeat((4 - b64.length % 4) % 4); const s = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, c => c.charCodeAt(0)); };
@@ -26,7 +26,7 @@
   }
   window.enablePush = enablePush;
 
-  // زرار في القايمة (☰) للراكب والسواق
+  // زرار في القايمة (☰) للراكب والكابتن
   const _openDrawer = window.openDrawer;
   window.openDrawer = function () {
     _openDrawer();
