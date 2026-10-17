@@ -4,7 +4,7 @@
 //   KV namespace binding:  TAWSEELA  ->  (للترحيل من الداتا القديمة فقط)
 //   Environment variable:  ADMIN_PIN ->  الرمز السري للأدمن (Secret)
 
-const COLL = ['riders', 'drivers', 'trips', 'payments', 'msgs'];
+const COLL = ['riders', 'drivers', 'trips', 'payments', 'msgs', 'announcements'];
 const KEY = 'db';
 const DEFAULT_CATS = [
   { id: 'eco', name: 'اقتصادي', desc: '٤ ركاب • الأوفر', extra: 0 },
@@ -20,11 +20,7 @@ function fresh() {
     settings: { base: 30, stop: 5, sub: 100, cats: DEFAULT_CATS.map(c => ({ ...c })),
       wallets: { vodafone: '01000000000', orange: '01200000000', etisalat: '01100000000', instapay: 'yourname@instapay' } },
     buildings: [], coords: {},
-    riders: [], trips: [], payments: [], msgs: [],
-    drivers: [
-      { id: DEMO_ID, name: 'كابتن تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 },
-      { id: uid(), name: 'كابتن تجريبي ثلاثي', phone: '01000000001', license: '123456', nid: '29001010101010', cat: 'eco', photos: {}, status: 'approved', subUntil: Date.now() + 30 * 864e5 }
-    ]
+    riders: [], trips: [], payments: [], msgs: [], announcements: [], drivers: []
   };
 }
 
@@ -34,10 +30,14 @@ function normalize(DB) {
   if (!DB.settings.cats) DB.settings.cats = DEFAULT_CATS.map(c => ({ ...c }));
   if (!DB.settings.cats.some(c => c.id === 'moto')) DB.settings.cats.push({ id: 'moto', name: 'موتوسيكل', desc: 'راكب واحد • الأسرع في الزحمة', extra: -5 });
   DB.drivers.forEach(d => { if (!d.cat) d.cat = 'eco'; });
-  // الكابتن التجريبي: دايمًا موجود، مقبول، واشتراكه شغّال، وID ثابت
-  const demo = DB.drivers.find(d => d.phone === '01000000002');
-  if (!demo) DB.drivers.push({ id: DEMO_ID, name: 'كابتن تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 });
-  else { demo.id = DEMO_ID; demo.status = 'approved'; demo.subUntil = Math.max(demo.subUntil || 0, Date.now() + 30 * 864e5); }
+  // السواق التجريبي اتمسح من النظام كله: نشيل أي حساب تجريبي قديم
+  DB.drivers = DB.drivers.filter(d => d.phone !== '01000000001' && d.phone !== '01000000002');
+  // الرسايل القديمة اللي كانت في الإعدادات تتنقل لقايمتها الخاصة
+  if (Array.isArray(DB.settings.announcements) && DB.settings.announcements.length) {
+    const have = new Set(DB.announcements.map(a => a.id));
+    DB.announcements = DB.announcements.concat(DB.settings.announcements.filter(a => !have.has(a.id)));
+    delete DB.settings.announcements;
+  }
   DB.buildings = (DB.buildings || []).filter(b => /^(block|u|t)[|]/.test(b));
   return DB;
 }
@@ -133,6 +133,7 @@ function merge(DB, b, admin) {
       } else if (c === 'msgs') {
         if (i < 0) DB.msgs.push({ ...item, text: String(item.text || '').slice(0, 300) });
       } else {
+        if (c === 'announcements' && !admin) continue;
         if (i >= 0) DB[c][i] = item; else DB[c].push(item);
       }
     }
@@ -196,7 +197,7 @@ async function pushEvents(env, before, DB) {
   const jobs = [];
   // أي رسالة جديدة في صفحة التحديثات بتتبعت إشعار للكل
   const seenAnn = new Set(before.ann || []);
-  for (const a of (DB.settings.announcements || [])) {
+  for (const a of (DB.announcements || [])) {
     if (seenAnn.has(a.id)) continue;
     const body = (a.text || '').slice(0, 140) || 'فيه تحديث جديد، افتح التحديثات';
     jobs.push(broadcast(env, { title: 'رسالة من الإدارة', body, url: '/' }));
@@ -231,7 +232,7 @@ async function broadcast(env, payload) {
   for (const sub of (rows.results || [])) { try { await sendPush(env, sub, payload); } catch (e) { /* نكمّل */ } }
 }
 function snapshot(DB) {
-  const before = { drivers:{}, trips:{}, ann: (DB.settings.announcements || []).map(a => a.id) };
+  const before = { drivers:{}, trips:{}, ann: (DB.announcements || []).map(a => a.id) };
   for (const d of DB.drivers) before.drivers[d.id] = d.status;
   for (const t of DB.trips) before.trips[t.id] = { status: t.status };
   return before;
