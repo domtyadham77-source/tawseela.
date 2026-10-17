@@ -9,9 +9,10 @@ const KEY = 'db';
 const DEFAULT_CATS = [
   { id: 'eco', name: 'اقتصادي', desc: '٤ ركاب • الأوفر', extra: 0 },
   { id: 'comfort', name: 'مريح', desc: '٤ ركاب • عربية أحدث وأريح', extra: 10 },
-  { id: 'family', name: 'عائلي', desc: '٦ ركاب • عربية كبيرة', extra: 20 }
+  { id: 'family', name: 'عائلي', desc: '٦ ركاب • عربية كبيرة', extra: 20 },
+  { id: 'moto', name: 'موتوسيكل', desc: 'راكب واحد • الأسرع في الزحمة', extra: -5 }
 ];
-const DEMO_ID = 9001; // رقم ثابت للسواق التجريبي عشان ميتغيّرش بين الطلبات
+const DEMO_ID = 9001; // رقم ثابت للكابتن التجريبي عشان ميتغيّرش بين الطلبات
 const uid = () => Date.now() * 1000 + Math.floor(Math.random() * 1000);
 
 function fresh() {
@@ -21,8 +22,8 @@ function fresh() {
     buildings: [], coords: {},
     riders: [], trips: [], payments: [], msgs: [],
     drivers: [
-      { id: DEMO_ID, name: 'سواق تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 },
-      { id: uid(), name: 'سواق تجريبي ثلاثي', phone: '01000000001', license: '123456', nid: '29001010101010', cat: 'eco', photos: {}, status: 'approved', subUntil: Date.now() + 30 * 864e5 }
+      { id: DEMO_ID, name: 'كابتن تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 },
+      { id: uid(), name: 'كابتن تجريبي ثلاثي', phone: '01000000001', license: '123456', nid: '29001010101010', cat: 'eco', photos: {}, status: 'approved', subUntil: Date.now() + 30 * 864e5 }
     ]
   };
 }
@@ -31,10 +32,11 @@ function normalize(DB) {
   for (const c of COLL) DB[c] = DB[c] || [];
   DB.coords = DB.coords || {};
   if (!DB.settings.cats) DB.settings.cats = DEFAULT_CATS.map(c => ({ ...c }));
+  if (!DB.settings.cats.some(c => c.id === 'moto')) DB.settings.cats.push({ id: 'moto', name: 'موتوسيكل', desc: 'راكب واحد • الأسرع في الزحمة', extra: -5 });
   DB.drivers.forEach(d => { if (!d.cat) d.cat = 'eco'; });
-  // السواق التجريبي: دايمًا موجود، مقبول، واشتراكه شغّال، وID ثابت
+  // الكابتن التجريبي: دايمًا موجود، مقبول، واشتراكه شغّال، وID ثابت
   const demo = DB.drivers.find(d => d.phone === '01000000002');
-  if (!demo) DB.drivers.push({ id: DEMO_ID, name: 'سواق تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 });
+  if (!demo) DB.drivers.push({ id: DEMO_ID, name: 'كابتن تجريبي (تجربة)', phone: '01000000002', license: 'DEMO', nid: '', cat: 'comfort', photos: {}, status: 'approved', subUntil: Date.now() + 90 * 864e5 });
   else { demo.id = DEMO_ID; demo.status = 'approved'; demo.subUntil = Math.max(demo.subUntil || 0, Date.now() + 30 * 864e5); }
   DB.buildings = (DB.buildings || []).filter(b => /^(block|u|t)[|]/.test(b));
   return DB;
@@ -105,7 +107,7 @@ function merge(DB, b, admin) {
       if (c === 'drivers') {
         if (i >= 0) {
           if (admin) DB.drivers[i] = item;
-          // السواق يقدر يصحّح بياناته لو اتراجعت (مش موافق عليه)، ويرجع للمراجعة تاني
+          // الكابتن يقدر يصحّح بياناته لو اتراجعت (مش موافق عليه)، ويرجع للمراجعة تاني
           else if (DB.drivers[i].status === 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item)) {
             // المقبول يقدر يغيّر صورة البروفايل وبيانات الدفع بتاعته بس
             const upd = { ...DB.drivers[i] };
@@ -124,7 +126,7 @@ function merge(DB, b, admin) {
       } else if (c === 'trips') {
         if (i >= 0) {
           const old = DB.trips[i];
-          // منع سواقين اتنين من قبول نفس الرحلة
+          // منع كباتن اتنين من قبول نفس الرحلة
           if (old.driverId && item.driverId && old.driverId !== item.driverId && item.status === 'accepted') continue;
           DB.trips[i] = item;
         } else DB.trips.push(item);
@@ -181,7 +183,7 @@ async function sendPush(env, sub, payload) {
   if (r.status === 404 || r.status === 410) await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ?').bind(sub.endpoint).run();
   return r.status;
 }
-// بيبعت لكل أجهزة شخص (who + ref). ref للراكب والسواق = رقم التليفون، والأدمن = 'admin'
+// بيبعت لكل أجهزة شخص (who + ref). ref للراكب والكابتن = رقم التليفون، والأدمن = 'admin'
 async function notify(env, who, ref, title, body) {
   if (!env.VAPID_PUBLIC || !env.VAPID_PRIVATE || !env.DB) return;
   const rows = await env.DB.prepare('SELECT endpoint, p256dh, auth FROM push_subs WHERE who = ? AND ref = ?').bind(who, String(ref)).all();
@@ -192,11 +194,18 @@ async function notify(env, who, ref, title, body) {
 // الأحداث اللي بتبعت إشعارات: بنقارن الداتا قبل وبعد التحديث
 async function pushEvents(env, before, DB) {
   const jobs = [];
+  // أي رسالة جديدة في صفحة التحديثات بتتبعت إشعار للكل
+  const seenAnn = new Set(before.ann || []);
+  for (const a of (DB.settings.announcements || [])) {
+    if (seenAnn.has(a.id)) continue;
+    const body = (a.text || '').slice(0, 140) || 'فيه تحديث جديد، افتح التحديثات';
+    jobs.push(broadcast(env, { title: 'رسالة من الإدارة', body, url: '/' }));
+  }
   const rider = id => DB.riders.find(r => r.id === id);
   const drv = id => DB.drivers.find(d => d.id === id);
   for (const d of DB.drivers) {
     const prev = before.drivers[d.id];
-    if (!prev) { if (d.status === 'pending') jobs.push(notify(env,'admin','admin','توصيلة','سواق جديد عايز يدخل: ' + d.name)); continue; }
+    if (!prev) { if (d.status === 'pending') jobs.push(notify(env,'admin','admin','توصيلة','كابتن جديد عايز يدخل: ' + d.name)); continue; }
     if (prev !== d.status && (d.status === 'approved' || d.status === 'rejected'))
       jobs.push(notify(env,'driver',d.phone,'توصيلة', d.status === 'approved' ? 'تمام! بياناتك اتأكدت، تقدر تبدأ تشتغل' : 'محتاجين تصحيح في بياناتك: ' + (d.reason || 'راجع بياناتك')));
   }
@@ -204,20 +213,25 @@ async function pushEvents(env, before, DB) {
     const prev = before.trips[t.id];
     if (!prev || prev.status === t.status) continue;
     const r = rider(t.riderId), d = drv(t.driverId);
-    if (t.status === 'accepted' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','السواق ' + (d ? d.name : '') + ' وافق على طلبك'));
-    if (t.status === 'arrived' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','السواق وصل عندك'));
+    if (t.status === 'accepted' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','الكابتن ' + (d ? d.name : '') + ' وافق على طلبك'));
+    if (t.status === 'arrived' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','الكابتن وصل عندك'));
     if (t.status === 'done' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','انتهت الرحلة، شكراً ليك'));
     if (t.status === 'cancelled') {
       const c = (t.cancel || []).slice(-1)[0];
       const reason = c ? (c.name + ': ' + c.reason) : '';
       if (c && c.by === 'rider' && d) jobs.push(notify(env,'driver',d.phone,'توصيلة','الراكب ألغى الرحلة ' + reason));
-      if (c && c.by === 'driver' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','السواق ألغى الرحلة ' + reason));
+      if (c && c.by === 'driver' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','الكابتن ألغى الرحلة ' + reason));
     }
   }
   await Promise.all(jobs);
 }
+async function broadcast(env, payload) {
+  if (!env.VAPID_PUBLIC || !env.VAPID_PRIVATE || !env.DB) return;
+  const rows = await env.DB.prepare('SELECT endpoint, p256dh, auth FROM push_subs').all();
+  for (const sub of (rows.results || [])) { try { await sendPush(env, sub, payload); } catch (e) { /* نكمّل */ } }
+}
 function snapshot(DB) {
-  const before = { drivers:{}, trips:{} };
+  const before = { drivers:{}, trips:{}, ann: (DB.settings.announcements || []).map(a => a.id) };
   for (const d of DB.drivers) before.drivers[d.id] = d.status;
   for (const t of DB.trips) before.trips[t.id] = { status: t.status };
   return before;
