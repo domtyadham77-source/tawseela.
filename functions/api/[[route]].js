@@ -247,6 +247,15 @@ async function pushEvents(env, before, DB) {
   }
   const rider = id => DB.riders.find(r => r.id === id);
   const drv = id => DB.drivers.find(d => d.id === id);
+  // تأكيد الدفع أو رفضه من الأدمن: الكابتن يوصله إشعار
+  for (const pay of (DB.payments || [])) {
+    const prev = before.pay[pay.id];
+    if (prev !== 'review' || pay.status === 'review') continue;
+    const d = drv(pay.driverId);
+    if (!d) continue;
+    if (pay.status === 'paid') jobs.push(notify(env,'driver',d.phone,'توصيلة','✅ تم تفعيل اشتراكك لمدة 30 يوم، كمّل شغلك'));
+    if (pay.status === 'rejected') jobs.push(notify(env,'driver',d.phone,'توصيلة','❌ الدفع ماوصلش. راجع رقم العملية وابعته تاني'));
+  }
   for (const d of DB.drivers) {
     const prev = before.drivers[d.id];
     if (!prev) { if (d.status === 'pending') jobs.push(notify(env,'admin','admin','توصيلة','كابتن جديد عايز يدخل: ' + d.name)); continue; }
@@ -275,7 +284,8 @@ async function broadcast(env, payload) {
   for (const sub of (rows.results || [])) { try { await sendPush(env, sub, payload); } catch (e) { /* نكمّل */ } }
 }
 function snapshot(DB) {
-  const before = { drivers:{}, trips:{}, ann: (DB.announcements || []).map(a => a.id) };
+  const before = { drivers:{}, trips:{}, ann: (DB.announcements || []).map(a => a.id), pay: {} };
+  for (const p of (DB.payments || [])) before.pay[p.id] = p.status;
   for (const d of DB.drivers) before.drivers[d.id] = d.status;
   for (const t of DB.trips) before.trips[t.id] = { status: t.status };
   return before;
