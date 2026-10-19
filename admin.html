@@ -1373,18 +1373,20 @@ function acceptTrip(id){
 function releaseTrip(id){openCancel(id,'driver');return;const t=S.trips.find(x=>x.id===id);t.status='requested';t.driverId=null;t.eta=null;openChat=null;commit()}
 function setStatus(id,s){const t=S.trips.find(x=>x.id===id);t.status=s;if(s==='done')t.doneAt=Date.now();commit()}
 function addStop(id){S.trips.find(x=>x.id===id).stops++;commit()}
+const PAY_KEYS=['vodafone','instapay'];
 function driverPay(d){
   const pend=S.payments.find(p=>p.driverId===d.id&&p.status==='review');
-  if(pend) return `<div class="card"><h2>الدفع قيد التأكيد</h2><p>استلمنا بيانات تحويلك (${esc(pend.ref)}). هنفعّل الاشتراك أول ما نتأكد.</p></div>`;
-  return `<div class="card"><h2>اشتراك الشهر: ${money(S.settings.sub)}</h2>
-    <p class="small">ادفع الاشتراك لصاحب الموقع، وبعدها اكتب بيانات التحويل.</p>
-    <div class="chips">${Object.keys(WALLET).map(k=>`<button class="chip ${method===k?'on':''}" onclick="method='${k}';render()">${WALLET[k]}</button>`).join('')}</div>
-    <div class="ticket"><svg class="ic"><use href="#ic-pin"/></svg><div><div class="small" style="color:#fff">حوّل على ${WALLET[method]}</div><b style="font-size:22px" dir="ltr">${esc(S.settings.wallets[method])}</b></div></div>
-    <label for="pr">رقم العملية أو الرقم اللي حوّلت منه</label><input id="pr">
-    <button class="btn" onclick="sendPay()">أكدت التحويل</button></div>`;
+  if(pend) return `<div class="card"><h2>⏳ الدفع تحت المراجعة</h2><p>استلمنا رقم العملية (<b dir="ltr">${esc(pend.ref)}</b>). الأدمن هيراجعه، وممكن ياخد وقت. هيوصلك إشعار أول ما يتأكد.</p></div>`;
+  if(!PAY_KEYS.includes(method)) method='vodafone';
+  return `<div class="card"><h2>⏰ اشتراكك خلص</h2>
+    <p>ادفع الاشتراك عشان تكمل شغل: <b>${money(S.settings.sub)}</b> في الشهر.</p>
+    <div class="chips">${PAY_KEYS.map(k=>`<button class="chip ${method===k?'on':''}" onclick="method='${k}';render()">${WALLET[k]}</button>`).join('')}</div>
+    <div class="ticket"><svg class="ic"><use href="#ic-pin"/></svg><div><div class="small" style="color:#fff">حوّل على ${WALLET[method]}</div><b style="font-size:22px" dir="ltr">${esc(S.settings.wallets[method]||'')}</b></div></div>
+    <label for="pr">رقم العملية (بعد التحويل)</label><input id="pr" placeholder="اكتب رقم العملية">
+    <button class="btn" onclick="sendPay()">ابعت للمراجعة</button></div>`;
 }
 function sendPay(){
-  const ref=val('pr');if(ref.length<4) return toast('اكتب رقم العملية أو رقم المحفظة',1);
+  const ref=val('pr');if(ref.length<4) return toast('اكتب رقم العملية',1);
   if(S.payments.some(p=>p.driverId===driverId&&p.status==='review')) return;
   S.payments.push({id:uid(),driverId,method,ref,amount:S.settings.sub,status:'review',at:Date.now()});commit();
 }
@@ -1684,7 +1686,7 @@ function adminView(){
     <h3>فئات العربيات (الزيادة على سعر الرحلة)</h3>
     ${cats().map((c,i)=>`<div class="row"><div><label for="cn-${i}">الاسم</label><input id="cn-${i}" value="${esc(c.name)}"></div><div><label for="cx-${i}">زيادة جنيه</label><input id="cx-${i}" type="number" value="${c.extra||0}"></div></div>`).join('')}
     <h3>أرقام استلام الاشتراك</h3>
-    ${Object.keys(WALLET).map(k=>`<label for="w-${k}">${WALLET[k]}</label><input id="w-${k}" value="${esc(w[k])}" dir="ltr">`).join('')}
+    ${PAY_KEYS.map(k=>`<label for="w-${k}">${WALLET[k]}</label><input id="w-${k}" value="${esc(w[k]||'')}" dir="ltr">`).join('')}
     <button class="btn" onclick="saveSettings()">حفظ</button></div>
   <div class="card"><h2>أماكن إضافية</h2><p class="small">الأماكن الأساسية متظبطة. هنا تضيف مكان جديد يظهر للركاب في المنطقة اللي تختارها.</p>
     <div class="row"><select id="npz">${ZONES.map(z=>`<option value="${z.id}">${z.n}</option>`).join('')}</select><input id="npn" placeholder="اسم المكان"></div>
