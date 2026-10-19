@@ -31,7 +31,13 @@ function normalize(DB) {
   if (!DB.settings.cats.some(c => c.id === 'moto')) DB.settings.cats.push({ id: 'moto', name: 'موتوسيكل', desc: 'راكب واحد • الأسرع في الزحمة', extra: -5 });
   DB.drivers.forEach(d => { if (!d.cat) d.cat = 'eco'; });
   // السواق التجريبي اتمسح من النظام كله: نشيل أي حساب تجريبي قديم
-  DB.drivers = DB.drivers.filter(d => d.phone !== '01000000001' && d.phone !== '01000000002');
+  const isDemo = d => d.id === DEMO_ID || d.phone === '01000000001' || d.phone === '01000000002';
+  const demoIds = new Set(DB.drivers.filter(isDemo).map(d => d.id));
+  DB.drivers = DB.drivers.filter(d => !isDemo(d));
+  DB.trips = DB.trips.filter(t => !demoIds.has(t.driverId));
+  DB.payments = DB.payments.filter(p => !demoIds.has(p.driverId));
+  const keepTrip = new Set(DB.trips.map(t => t.id));
+  DB.msgs = DB.msgs.filter(m => keepTrip.has(m.tripId));
   // الرسايل القديمة اللي كانت في الإعدادات تتنقل لقايمتها الخاصة
   if (Array.isArray(DB.settings.announcements) && DB.settings.announcements.length) {
     const have = new Set(DB.announcements.map(a => a.id));
@@ -48,11 +54,37 @@ async function dbRead(env) {
   return row ? JSON.parse(row.value) : null;
 }
 async function dbWrite(env, DB) {
+  const copy = { ...DB }; delete copy.announcements;
   await env.DB.prepare('INSERT INTO kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-    .bind(KEY, JSON.stringify(DB)).run();
+    .bind(KEY, JSON.stringify(copy)).run();
+}
+const ANN_KEY = 'ann';
+async function annRead(env) {
+  const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?').bind(ANN_KEY).first();
+  return row ? JSON.parse(row.value) : null;
+}
+async function annWrite(env, list) {
+  await env.DB.prepare('INSERT INTO kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+    .bind(ANN_KEY, JSON.stringify(list.slice(-100))).run();
+}
+async function loadAnn(env, DB) {
+  let list = await annRead(env);
+  if (list === null) {
+    // أول مرة: الرسايل القديمة اللي كانت في الداتا الرئيسية تتنقل لهنا
+    list = (DB.announcements || []).slice();
+    await annWrite(env, list);
+  }
+  DB.announcements = list;
+  return DB;
 }
 async function load(env) {
   let db = await dbRead(env);
+  if (db) {
+    const before = JSON.stringify(db);
+    const cleaned = normalize(db);
+    if (JSON.stringify(cleaned) !== before) await dbWrite(env, cleaned);
+    return cleaned;
+  }
   if (!db) {
     // ترحيل لمرة واحدة: لو فيه داتا قديمة في KV ننقلها لـ D1، ولو مفيش نبدأ بداتا جديدة
     const old = env.TAWSEELA ? await env.TAWSEELA.get(KEY, 'json') : null;
@@ -110,9 +142,20 @@ function merge(DB, b, admin) {
           // الكابتن يقدر يصحّح بياناته لو اتراجعت (مش موافق عليه)، ويرجع للمراجعة تاني
           else if (DB.drivers[i].status === 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item)) {
             // المقبول يقدر يغيّر صورة البروفايل وبيانات الدفع بتاعته بس
+            // المقبول يعدّل: اسمه، صورة البروفايل، بيانات الدفع، وبيانات مركبته (التليفون والبطاقة والرخصة مش بتتعدل)
             const upd = { ...DB.drivers[i] };
+            if (typeof item.name === 'string' && item.name.trim().length >= 3) upd.name = item.name.trim().slice(0, 80);
             if (item.avatar) upd.avatar = item.avatar;
             if (item.pay && typeof item.pay === 'object') upd.pay = { wallet: String(item.pay.wallet || '').slice(0, 20), insta: String(item.pay.insta || '').slice(0, 60) };
+            if (item.car && typeof item.car === 'object') {
+              const c = item.car;
+              upd.car = { ...(DB.drivers[i].car || {}),
+                photo: c.photo ? String(c.photo) : ((DB.drivers[i].car || {}).photo || ''),
+                model: String(c.model || '').slice(0, 60),
+                color: String(c.color || '').slice(0, 30),
+                plate: String(c.plate || '').slice(0, 20).toUpperCase() };
+            }
+            if (item.onbSeen === true) upd.onbSeen = true;
             DB.drivers[i] = upd;
           }
           else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item))
@@ -133,7 +176,7 @@ function merge(DB, b, admin) {
       } else if (c === 'msgs') {
         if (i < 0) DB.msgs.push({ ...item, text: String(item.text || '').slice(0, 300) });
       } else {
-        if (c === 'announcements' && !admin) continue;
+        if (c === 'announcements') continue;
         if (i >= 0) DB[c][i] = item; else DB[c].push(item);
       }
     }
@@ -246,7 +289,7 @@ export async function onRequest(context) {
   });
   try {
     if (request.method === 'GET' && p === '/api/state') {
-      const DB = await load(env);
+      const DB = await loadAnn(env, await load(env));
       return json(view(DB, isAdmin(request, env)));
     }
     if (request.method === 'POST' && p === '/api/admin-login') {
@@ -262,7 +305,31 @@ export async function onRequest(context) {
       await dbWrite(env, DB);
       const job = pushEvents(env, before, DB).catch(() => {});
       if (context.waitUntil) context.waitUntil(job);
-      return json(view(DB, admin));
+      return json(view(await loadAnn(env, DB), admin));
+    }
+    if (request.method === 'POST' && p === '/api/announce') {
+      if (!isAdmin(request, env)) return json({ error: 'forbidden' }, 403);
+      const b = await request.json().catch(() => ({}));
+      const raw = String(b.text || '').trim();
+      if (!raw) return json({ error: 'empty' }, 400);
+      const m = raw.match(/https?:\/\/[^\s]+/);
+      const link = m ? m[0].slice(0, 300) : '';
+      const text = (m ? raw.replace(m[0], '') : raw).replace(/\s+/g, ' ').trim().slice(0, 1000);
+      const list = (await annRead(env)) || [];
+      const item = { id: uid(), text, link, at: Date.now() };
+      list.push(item);
+      await annWrite(env, list);
+      const job = broadcast(env, { title: 'رسالة من الإدارة', body: (text || 'فيه تحديث جديد، افتح التحديثات').slice(0, 140), url: '/' }).catch(() => {});
+      if (context.waitUntil) context.waitUntil(job);
+      return json({ ok: true, item });
+    }
+    if (request.method === 'POST' && p === '/api/announce-delete') {
+      if (!isAdmin(request, env)) return json({ error: 'forbidden' }, 403);
+      const b = await request.json().catch(() => ({}));
+      const id = Number(b.id);
+      const list = ((await annRead(env)) || []).filter(a => a.id !== id);
+      await annWrite(env, list);
+      return json({ ok: true });
     }
     if (request.method === 'POST' && p === '/api/push-subscribe') {
       const b = await request.json().catch(() => ({}));
