@@ -328,6 +328,24 @@ body:not(.vpicked) #vtog{display:none !important}
 body.adm .card > h2{display:flex;align-items:center;gap:8px}
 .fab-menu{position:absolute}
 body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-end:4px;width:13px;height:13px;border-radius:50%;background:#EF4444;box-shadow:0 0 0 2px #0b0617}
+.me-ov{position:fixed;inset:0;z-index:55;background:rgba(5,3,14,.72);display:flex;align-items:flex-end}
+.me-box{width:100%;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#2a1560,#0d0719);border:1px solid var(--line);border-radius:26px 26px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom))}
+.me-name{text-align:center;font:800 19px Cairo;color:#fff;margin:12px 0 4px}
+.epav{position:relative;width:150px;height:150px;margin:8px auto 0}
+.epav .circ{width:150px;height:150px;border-radius:50%;background:linear-gradient(180deg,#8fd67a,#3fb950);display:flex;align-items:center;justify-content:center;color:#fff;font:800 42px Cairo;overflow:hidden}
+.epav .circ img{width:100%;height:100%;object-fit:cover}
+.epav .cam{position:absolute;right:4px;bottom:4px;width:46px;height:46px;border-radius:50%;background:#2AABEE;border:4px solid #1b1040;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin:0;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.epav .cam svg{width:22px;height:22px;color:#fff}
+.me-car{background:rgba(124,58,237,.14);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.me-carhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.me-carimg{width:96px;height:60px;border-radius:10px;overflow:hidden;background:#2a1560;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.me-carimg img{width:100%;height:100%;object-fit:cover}
+.avsheet{position:fixed;inset:0;z-index:60;background:rgba(5,3,14,.6);display:flex;align-items:flex-end}
+.avsheet .box{width:100%;background:#17102e;border-radius:22px 22px 0 0;padding:14px 14px 22px;border-top:1px solid var(--line)}
+.avt{font:800 17px Cairo;color:#fff;text-align:center;margin:4px 0 6px}
+.avsheet .opt{display:flex;align-items:center;gap:12px;width:100%;background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:14px;color:#fff;font:700 16px Cairo;margin:8px 0;text-align:start;cursor:pointer}
+.avsheet .opt span{font-size:22px}
+.avsheet .opt.cancel{color:#FDA4AF;justify-content:center}
 </style>
 <link rel="manifest" href="/manifest-admin.json">
 <meta name="theme-color" content="#7C3AED">
@@ -873,6 +891,7 @@ function renderHome(){
   $('#hsheet').innerHTML=curRole()==='rider'?riderSheet():driverSheet();
   $('#hsheet').insertAdjacentHTML('beforeend','<div class="credit">Designed by ادهم</div>');
   maybeInstallPrompt();
+  if(curRole()==='driver') maybeCaptainWelcome(S.drivers.find(x=>x.id===driverId));
   restoreForm(saved);
   requestAnimationFrame(()=>refit(false));
 }
@@ -1028,15 +1047,10 @@ function downloadDriverMaps(){
   setTimeout(closeModal,DRIVER_MAPS.length*600+200);
   toast('بتتنزّل الخرائط');
 }
-function loginDemo(){
-  const d=S.drivers.find(x=>x.phone==='01000000002');
-  if(!d) return toast('الكابتن التجريبي مش موجود',1);
-  driverId=d.id;persist();render();offerDriverMaps();
-}
 function loginDriver(){
   const d=S.drivers.find(x=>x.phone===val('lp'));
   if(!d){const n=noticeFor(val('lp'));if(n) return openNotice(n.text);return toast('الرقم ده مش مسجّل',1)}
-  driverId=d.id;persist();render();offerDriverMaps();
+  driverId=d.id;persist();render();
 }
 let editingDriverId=null,lastDS=null;
 function startEditDriver(){
@@ -1079,12 +1093,37 @@ function notifyDriverTrips(){
     }
   }
 }
+function showWelcome(role){
+  const u=role==='rider'?S.riders.find(x=>x.id===riderId):S.drivers.find(x=>x.id===driverId);
+  if(!u) return;
+  modalFn=null;
+  const map=role==='driver'?`<button class="btn ghost" style="margin:0 0 8px" onclick="downloadDriverMaps()">📥 نزّل خريطة المدينة</button>`:'';
+  const head=role==='driver'?'🎉 تمام! بياناتك اتأكدت':'👋 أهلاً بيك في توصيلة';
+  const sub=role==='driver'?'عشان تشتغل بسهولة، اعمل الخطوات دي مرة واحدة:':'عشان توصلك الرسايل والتحديثات، اعمل الخطوات دي مرة واحدة:';
+  $('#modalIn').innerHTML=`<div class="pk-h"><h3>${head}</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div>
+    <p class="small">${sub}</p>
+    ${map}
+    <div class="ins-steps">
+      <div class="ins-card"><b>📲 1. ثبّت التطبيق على تليفونك</b><ol><li>🍎 آيفون: زرار المشاركة ⬆️ ← <b>إضافة للشاشة الرئيسية</b></li><li>🤖 أندرويد: القايمة ⋮ ← <b>تثبيت التطبيق</b></li></ol></div>
+      <div class="ins-card"><b>🔔 2. فعّل الإشعارات</b><ol><li>اضغط الزرار اللي تحت ووافق، عشان توصلك الرسايل حتى لو التطبيق مقفول</li></ol></div>
+    </div>
+    <button class="btn" style="margin-top:10px" onclick="enablePush()">🔔 فعّل الإشعارات</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">تمام</button>`;
+  $('#modal').classList.add('on');
+}
+function maybeCaptainWelcome(d){
+  if(!d||d.status!=='approved') return;
+  if(d.onbSeen) return;
+  d.onbSeen=true;commit();
+  driverId=d.id;showWelcome('driver');
+}
 function notifyDriverStatus(){
   const d=S.drivers.find(x=>x.id===driverId);
   if(!d){lastDS=null;return}
   if(lastDS&&lastDS.id===d.id&&lastDS.status!==d.status&&(d.status==='approved'||d.status==='rejected')){
     const msg=d.status==='approved'?'✅ تمام! بياناتك اتأكدت، تقدر تبدأ تشتغل':'⚠️ محتاجين تصحيح: '+(d.reason||'راجع بياناتك');
     showNotif('توصيلة',msg);toast(msg,d.status==='rejected');
+    if(d.status==='approved') maybeCaptainWelcome(d);
   }
   lastDS={id:d.id,status:d.status};
 }
@@ -1116,7 +1155,7 @@ function regDriver(){
     driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
   }
   const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':(val('dcat')||cats()[0].id),photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
-  S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();setTimeout(offerDriverMaps,300);
+  S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();
   post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){driverId=null;persist();toast('الرقم أو البطاقة مسجّلين قبل كده',1);render()}});
   commit();
 }
@@ -1357,6 +1396,76 @@ function editPayInfo(){
   const i=prompt('إنستا باي (سيبه فاضي لو معاكش):',(d.pay&&d.pay.insta)||'');if(i===null)return;
   d.pay={wallet:w.trim(),insta:i.trim()};closeDrawer();toast('اتحفظت بيانات الدفع ✓');commit();
 }
+let meAvatar=null,meCar=null;
+const ME_CAM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+function meHTML(d,v){
+  const c=d.car||{};
+  const f=v||{name:d.name||'',wal:(d.pay&&d.pay.wallet)||'',ins:(d.pay&&d.pay.insta)||'',mod:c.model||'',col:c.color||'',num:c.plate||''};
+  const av=meAvatar||d.avatar;
+  const initial=esc((d.name||'؟').trim()[0]||'؟');
+  const carImg=meCar||c.photo;
+  return `<div class="me-box">
+    <div class="grab"></div>
+    <div class="sh-t"><b>تعديل بياناتي</b><button class="x" onclick="closeEditMe()" aria-label="إغلاق">×</button></div>
+    <div class="epav"><div class="circ">${av?`<img src="${av}" alt="">`:initial}</div><button class="cam" onclick="openAvSheet()" aria-label="غيّر الصورة">${ME_CAM}</button></div>
+    <div class="me-name">${esc(f.name)}</div>
+    <label for="meName">الاسم</label><input id="meName" value="${esc(f.name)}">
+    <label for="meWal">المحفظة (لو معاك)</label><input id="meWal" dir="ltr" value="${esc(f.wal)}">
+    <label for="meIns">إنستا باي (رقم أو اسم الحساب، لو معاك)</label><input id="meIns" dir="ltr" value="${esc(f.ins)}">
+    <div class="me-car">
+      <div class="me-carhead"><div class="me-carimg">${carImg?`<img src="${carImg}" alt="">`:'🚗'}</div><button class="chip" onclick="pickMeCar()">📷 غيّر صورة المركبة</button></div>
+      <label for="meMod">نوع المركبة</label><input id="meMod" value="${esc(f.mod)}">
+      <label for="meCol">لون المركبة</label><input id="meCol" value="${esc(f.col)}">
+      <label for="meNum">نمرة المركبة</label><input id="meNum" dir="ltr" value="${esc(f.num)}">
+    </div>
+    <button class="btn" onclick="saveEditMe()">حفظ التعديلات</button>
+  </div>`;
+}
+function collectMe(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+  return {name:g('meName'),wal:g('meWal'),ins:g('meIns'),mod:g('meMod'),col:g('meCol'),num:g('meNum')};
+}
+function openEditMe(){
+  const d=S.drivers.find(x=>x.id===driverId); if(!d) return;
+  closeDrawer(); meAvatar=null; meCar=null;
+  closeEditMe();
+  const ov=document.createElement('div'); ov.id='meEdit'; ov.className='me-ov';
+  ov.innerHTML=meHTML(d); document.body.appendChild(ov);
+}
+function closeEditMe(){const o=document.getElementById('meEdit');if(o)o.remove()}
+function refreshMe(){const d=S.drivers.find(x=>x.id===driverId);const o=document.getElementById('meEdit');if(!d||!o)return;const v=collectMe();o.innerHTML=meHTML(d,v)}
+function openAvSheet(){
+  closeAvSheet();
+  const s=document.createElement('div'); s.className='avsheet'; s.id='avSheet';
+  s.innerHTML=`<div class="box"><div class="grab"></div><div class="avt">تغيير صورة البروفايل</div>
+    <button class="opt" onclick="avPick('cam')"><span>📷</span>تصوير صورة جديدة</button>
+    <button class="opt" onclick="avPick('gal')"><span>🖼️</span>اختيار من المعرض</button>
+    <button class="opt cancel" onclick="closeAvSheet()">إلغاء</button></div>`;
+  document.body.appendChild(s);
+}
+function closeAvSheet(){const s=document.getElementById('avSheet');if(s)s.remove()}
+function pickFile(cb,cam){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+  if(cam) inp.setAttribute('capture','user');
+  inp.onchange=async()=>{const f=inp.files&&inp.files[0]; if(!f) return; try{cb(await compress(f))}catch(e){toast('الصورة مش مقروءة، جرّب صورة تانية',1)}};
+  inp.click();
+}
+function avPick(kind){closeAvSheet();pickFile(d=>{meAvatar=d;refreshMe()},kind==='cam')}
+function pickMeCar(){pickFile(d=>{meCar=d;refreshMe()},false)}
+function saveEditMe(){
+  const d=S.drivers.find(x=>x.id===driverId); if(!d) return;
+  const v=collectMe();
+  if(v.name.split(/\s+/).filter(Boolean).length<3) return toast('اكتب اسمك ثلاثي',1);
+  if(v.wal&&!/^[0-9+]{8,15}$/.test(v.wal)) return toast('رقم المحفظة مش صح',1);
+  if(!v.mod) return toast('اكتب نوع المركبة',1);
+  if(v.num.length<3) return toast('اكتب نمرة المركبة',1);
+  d.name=v.name;
+  d.pay={wallet:v.wal,insta:v.ins};
+  if(meAvatar) d.avatar=meAvatar;
+  d.car={...(d.car||{}),photo:meCar||(d.car&&d.car.photo)||'',model:v.mod,color:v.col,plate:v.num.toUpperCase()};
+  meAvatar=null; meCar=null; closeEditMe();
+  toast('اتحفظت بياناتك ✓'); commit();
+}
 function changeDriverAvatar(){
   const d=S.drivers.find(x=>x.id===driverId);if(!d)return;
   const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
@@ -1375,8 +1484,7 @@ function openDrawer(){
     <button class="dr-i" onclick="closeDrawer();openSafety()">${tr('الأمان')}</button>
     <button class="dr-i" onclick="openUpdates()">🔔 التحديثات${updBadge()}</button>
     <button class="dr-i" onclick="toggleLang()">🌐 ${LANG==='en'?'عربي':'English'}</button>
-    ${role==='driver'?'<button class="dr-i" onclick="changeDriverAvatar()">📷 غيّر صورة البروفايل</button>':''}
-    ${role==='driver'?'<button class="dr-i" onclick="editPayInfo()">💳 بيانات الدفع (محفظة / إنستا باي)</button>':''}
+    ${role==='driver'?'<button class="dr-i" onclick="openEditMe()">✏️ تعديل بياناتي</button>':''}
     ${role==='driver'?'<button class="dr-i" onclick="closeDrawer();downloadDriverMaps()">⬇️ نزّل خريطة المدينة</button>':''}
     <button class="dr-i" onclick="closeDrawer();showInstallPrompt(true)">📲 ثبّت التطبيق على تليفوني</button>
     <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
@@ -1465,17 +1573,28 @@ function renderUpdates(){
   $('#updPage').innerHTML=`<div class="upd-top"><button class="upd-back" onclick="closeUpdates()" aria-label="رجوع">→</button><b>التحديثات</b></div>${notifBanner()}
     ${list.length?bubbles:'<p class="upd-empty">لسه مفيش تحديثات. هنا هتلاقي أي رسالة أو تحديث جديد من الإدارة.</p>'}`;
 }
-function postAnnouncement(){
+async function adminDelAnn(id){
+  const word=prompt('عشان تأكد الحذف، اكتب كلمة "امسح" بالظبط:');
+  if(word!=='امسح'){toast('الحذف اتلغى',1);return}
+  try{
+    const r=await fetch('/api/announce-delete',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pin':adminPin},body:JSON.stringify({id})});
+    if(!r.ok) return toast('ماتمسحتش، جرّب تاني',1);
+    S.announcements=(S.announcements||[]).filter(a=>a.id!==id);
+    toast('اتمسحت الرسالة');render();
+  }catch(e){toast('مفيش اتصال بالسيرفر',1)}
+}
+async function postAnnouncement(){
   const raw=val('annText');
   if(!raw) return toast('اكتب الرسالة',1);
-  // اللينك بيتلقط من الرسالة نفسها: أول https:// بيتحط كزرار تحميل، والباقي رسالة
-  const m=raw.match(/https?:\/\/[^\s]+/);
-  const link=m?m[0].slice(0,300):'';
-  const text=(m?raw.replace(m[0],''):raw).replace(/\s+/g,' ').trim();
-  if(!text&&!link) return toast('اكتب رسالة',1);
-  S.announcements=(S.announcements||[]).concat([{id:uid(),text:text.slice(0,1000),link,at:Date.now()}]).slice(-100);
-  $('#annText').value='';
-  toast('اتنشرت للكل ✓');commit();
+  try{
+    const r=await fetch('/api/announce',{method:'POST',headers:{'Content-Type':'application/json','x-admin-pin':adminPin},body:JSON.stringify({text:raw})});
+    if(!r.ok) return toast('الرسالة ماتبعتتش، جرّب تاني',1);
+    const j=await r.json();
+    $('#annText').value='';
+    if(j.item) S.announcements=(S.announcements||[]).concat([j.item]);
+    toast('اتنشرت للكل ✓');
+    render();
+  }catch(e){toast('مفيش اتصال بالسيرفر',1)}
 }
 function adminDelDriver(id){
   const d=S.drivers.find(x=>x.id===id);if(!d)return;
@@ -1551,7 +1670,9 @@ function adminView(){
     <label for="annText">الرسالة (اكتب الرسالة، ولو فيه لينك حطه جوه الرسالة)</label>
     <textarea id="annText" rows="4" placeholder="اكتب اللي عايزه يوصل للكل" style="width:100%;padding:11px;border:1.5px solid var(--line);border-radius:12px;background:#0F0920;color:#fff;font:400 15px Cairo"></textarea>
         <button class="btn" style="margin-top:10px" onclick="postAnnouncement()">انشر وابعت للكل</button>
-    <p class="small">اتنشر قبل كده: ${(S.announcements||[]).length} رسالة</p></div>
+    <p class="small">الرسايل اللي اتنشرت (${(S.announcements||[]).length}):</p>
+    ${(S.announcements||[]).slice().reverse().map(a=>`<div class="trip"><b>${esc((a.text||'').slice(0,80))}${(a.text||'').length>80?'…':''}</b><div class="small">${fdate(a.at)} • ${hhmm(a.at)}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelAnn(${a.id})">🗑 امسح الرسالة</button></div></div>`).join('')||'<p class="small">مفيش رسايل لسه.</p>'}
+  </div>
   ${cancelCard}
   ${missCard}
   <div class="card"><h2>الأسعار</h2><div class="row"><div><label for="sb">سعر الرحلة</label><input id="sb" type="number" value="${S.settings.base}"></div>
@@ -1695,10 +1816,12 @@ let installShownThisLoad=false;
 window.addEventListener('appinstalled',()=>{localStorage.setItem('tw-installed','1');});
 function maybeInstallPrompt(){
   if(installShownThisLoad) return;
-  if(localStorage.getItem('tw-installed')) return;
-  if(isStandaloneApp()) return;
+  const u=curRole()==='rider'?S.riders.find(x=>x.id===riderId):null;
+  if(!u||isStandaloneApp()) return;
+  if(u.onbSeen) return;
   installShownThisLoad=true;
-  showInstallPrompt(false);
+  u.onbSeen=true;commit();
+  showWelcome('rider');
 }
 window.addEventListener('hashchange',()=>{window.scrollTo(0,0);render()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
