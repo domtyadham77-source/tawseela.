@@ -27,7 +27,9 @@ function fresh() {
 function normalize(DB) {
   for (const c of COLL) DB[c] = DB[c] || [];
   DB.coords = DB.coords || {};
-  if (!DB.settings.cats) DB.settings.cats = DEFAULT_CATS.map(c => ({ ...c }));
+  // فئتين بس: عربية وموتوسيكل. الكباتن القدام اتحولوا للعربية
+  DB.settings.cats = [{ id: 'car', name: 'عربية', desc: 'من 1 لـ 4 ركاب', extra: 0 }, { id: 'moto', name: 'موتوسيكل', desc: 'راكب واحد • الأسرع في الزحمة', extra: 0 }];
+  DB.drivers.forEach(d => { if (d.cat !== 'car' && d.cat !== 'moto') d.cat = 'car'; });
   if (!DB.settings.cats.some(c => c.id === 'moto')) DB.settings.cats.push({ id: 'moto', name: 'موتوسيكل', desc: 'راكب واحد • الأسرع في الزحمة', extra: -5 });
   DB.drivers.forEach(d => { if (!d.cat) d.cat = 'eco'; });
   // السواق التجريبي اتمسح من النظام كله: نشيل أي حساب تجريبي قديم
@@ -159,14 +161,22 @@ function merge(DB, b, admin) {
             DB.drivers[i] = upd;
           }
           else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item))
-            DB.drivers[i] = { ...item, id: DB.drivers[i].id, status: 'pending', subUntil: 0, reason: undefined, faceMatch: undefined, trialMsg: false };
+            DB.drivers[i] = { ...item, id: DB.drivers[i].id, status: 'pending', subUntil: 0, signupAt: DB.drivers[i].signupAt || Date.now(), trialUsed: DB.drivers[i].trialUsed || false, reason: undefined, faceMatch: undefined, trialMsg: false };
         }
         else if (!isBlocked(DB, item) && !DB.drivers.some(x => x.phone === item.phone || (item.nid && x.nid === item.nid)))
-          DB.drivers.push(admin ? item : { ...item, status: 'pending', subUntil: 0 });
+          DB.drivers.push(admin ? item : { ...item, status: 'pending', subUntil: 0, signupAt: Date.now(), trialUsed: false });
       } else if (c === 'payments') {
         if (i >= 0) { if (admin) DB.payments[i] = item; }
         else DB.payments.push(admin ? item : { ...item, status: 'review' });
       } else if (c === 'trips') {
+        if (item.counter && !admin) {
+          const L = ((DB.settings && DB.settings.trip) || { short: { min: 20, max: 45 }, long: { min: 35, max: 50 } })[item.tripType || 'short'] || { min: 20, max: 45 };
+          const cd = DB.drivers.find(x => x.id === item.counter.driverId);
+          const okCounter = cd && cd.status === 'approved' && item.status === 'requested' && !item.driverId &&
+            Number(item.counter.price) >= L.min && Number(item.counter.price) <= L.max;
+          if (!okCounter) item.counter = undefined;
+          else item.counter = { driverId: cd.id, price: Math.round(Number(item.counter.price)), eta: Number(item.counter.eta) || 5, at: Date.now() };
+        }
         if (i >= 0) {
           const old = DB.trips[i];
           // منع كباتن اتنين من قبول نفس الرحلة
@@ -264,6 +274,9 @@ async function pushEvents(env, before, DB) {
   }
   for (const t of DB.trips) {
     const prev = before.trips[t.id];
+    if (prev && t.counter && !prev.c && t.status === 'requested' && r) {
+      jobs.push(notify(env,'rider',r.phone,'توصيلة','في كابتن اقترح سعر تاني على طلبك، افتح التطبيق شوفه'));
+    }
     if (!prev || prev.status === t.status) continue;
     const r = rider(t.riderId), d = drv(t.driverId);
     if (t.status === 'accepted' && r) jobs.push(notify(env,'rider',r.phone,'توصيلة','الكابتن ' + (d ? d.name : '') + ' وافق على طلبك'));
@@ -287,7 +300,7 @@ function snapshot(DB) {
   const before = { drivers:{}, trips:{}, ann: (DB.announcements || []).map(a => a.id), pay: {} };
   for (const p of (DB.payments || [])) before.pay[p.id] = p.status;
   for (const d of DB.drivers) before.drivers[d.id] = d.status;
-  for (const t of DB.trips) before.trips[t.id] = { status: t.status };
+  for (const t of DB.trips) before.trips[t.id] = { status: t.status, c: !!t.counter };
   return before;
 }
 
