@@ -40,7 +40,7 @@ self.addEventListener('push', e => {
   let d = { title: 'توصيلة', body: '' };
   try { d = e.data.json(); } catch (_) {}
   e.waitUntil(self.registration.showNotification(d.title || 'توصيلة', {
-    body: d.body || '', icon: '/icon-192.png', badge: '/icon-192.png', dir: 'rtl', lang: 'ar', data: { url: d.url || '/' }
+    body: d.body || '', icon: '/icon-192.png', badge: '/icon-192.png', dir: 'rtl', lang: 'ar', tag: 'tawseela', renotify: true, vibrate: [200, 100, 200], data: { url: d.url || '/' }
   }));
 });
 self.addEventListener('notificationclick', e => {

@@ -8,6 +8,9 @@
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       return alert('المتصفح ده مش بيدعم الإشعارات. على آيفون: ثبّت التطبيق على الشاشة الرئيسية الأول (Add to Home Screen) وافتحه منها.');
     }
+    // الإشعارات لازم تيجي من التطبيق المتثبت نفسه (مش من المتصفح): لو مش متثبت، نطلب التثبيت الأول
+    const installed = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (!installed && !isAdminView()) return alert('ثبّت التطبيق على تليفونك الأول (من القايمة ☰ ← تثبيت التطبيق)، وبعدين افتحه من الشاشة الرئيسية وفعّل الإشعارات. كده الإشعارات هتيجي من التطبيق نفسه.');
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') return alert('لازم توافق على الإشعارات عشان توصلك');
     const reg = await navigator.serviceWorker.ready;

@@ -939,7 +939,27 @@ function clearErrand(){selErrand=null;selTrip='short';selOffer=null;renderHome()
 function errandSummary(){return `<div class="errsum"><b>${esc(selErrand.n)}</b><span>${selErrand.p} جنيه ${selErrand.note?'• '+esc(selErrand.note):''}</span><button class="chip" onclick="clearErrand()">إلغاء المشوار</button></div>`}
 let selTrip='short',selOffer=null;
 function setTripType(k){selTrip=k;selOffer=null;const saved=grabForm();$('#hsheet').innerHTML=riderSheet();restoreForm(saved)}
-function tripTypePicker(){const L=limitsOf(selTrip);if(selOffer==null)selOffer=Math.round((L.min+L.max)/2);return `<div class="paypick" role="radiogroup" aria-label="نوع الرحلة"><button class="${selTrip==='short'?'on':''}" onclick="setTripType('short')">قصيرة</button><button class="${selTrip==='long'?'on':''}" onclick="setTripType('long')">طويلة</button></div><div class="offer"><label for="offerIn">السعر اللي عايزه (من ${L.min} لـ ${L.max} جنيه)</label><input id="offerIn" type="number" inputmode="numeric" min="${L.min}" max="${L.max}" value="${selOffer}" onchange="selOffer=+this.value"></div>`}
+// المنطقة + القطاع: بيحددوا المسافة (قصيرة لو الانطلاق والوصول في نفس القطاع، أو لو البوابة قريبة من القطاع)
+const GATE_NEAR={'بوابة الشروق':['T:1','T:الشروق'],'بوابة المستقبل القطر':['U:4','U:5'],'بوابة المستقبل الجديدة':['U:قديم']};
+function sectorKey(l){
+  l=(l||'').trim();
+  if(GATE_NEAR[l]!==undefined) return 'gate:'+l;
+  const zone=l.startsWith('بلوك')?'A':(l.match(/منطقة\s*([UT])/)||[])[1]||'';
+  const m=l.match(/قطاع\s*(\d+)/);
+  let sec=m?m[1][0]:'';
+  if(!sec){if(l.includes('استثماري القصر'))sec='القصر';else if(l.includes('استثماري الشروق'))sec='الشروق';else if(l.includes('عمارات القادة'))sec='القادة';else if(l.includes('قديم'))sec='قديم'}
+  if(!zone||!sec) return 'o:'+l;
+  return zone+':'+sec;
+}
+function tripKind(f,t){
+  if(!f||!t) return 'short';
+  const kf=sectorKey(f.label),kt=sectorKey(t.label);
+  if(kf===kt) return 'short';
+  if(GATE_NEAR[t.label.trim()]&&GATE_NEAR[t.label.trim()].includes(kf)) return 'short';
+  if(GATE_NEAR[f.label.trim()]&&GATE_NEAR[f.label.trim()].includes(kt)) return 'short';
+  return 'long';
+}
+function tripTypePicker(){selTrip=tripKind(sel.f,sel.t);const L=limitsOf(selTrip);if(selOffer==null)selOffer=Math.round((L.min+L.max)/2);return `<div class="offer"><label for="offerIn">السعر اللي عايزه (من ${L.min} لـ ${L.max} جنيه)</label><input id="offerIn" type="number" inputmode="numeric" min="${L.min}" max="${L.max}" value="${selOffer}" onchange="selOffer=+this.value"></div>`}
 const PAY_NAMES={cash:'كاش',wallet:'محفظة',insta:'إنستا باي'};
 function setPay(v){selPay=v;const saved=grabForm();$('#hsheet').innerHTML=riderSheet();restoreForm(saved)}
 function payPicker(){return `<div class="paypick" role="radiogroup" aria-label="طريقة الدفع">${Object.keys(PAY_NAMES).map(k=>`<button class="${selPay===k?'on':''}" role="radio" aria-checked="${selPay===k}" onclick="setPay('${k}')">${PAY_NAMES[k]}</button>`).join('')}</div>`}
@@ -979,14 +999,12 @@ function driverLogin(){
   if(regMode) return `<div class="card"><h2>${editingDriverId?'✏️ صحّح بياناتك':(driverVehicle==='moto'?'سجّل كابتن موتوسيكل':'سجّل كابتن عربية')}</h2>
     <label for="dn">الاسم ثلاثي</label><input id="dn" autocomplete="name">
     <label for="dp">رقم التليفون</label><input id="dp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx">
-    <label for="dnid">الرقم القومي (14 رقم)</label><input id="dnid" inputmode="numeric" maxlength="14">
-    <label for="dl">رقم الرخصة</label><input id="dl">
     <label for="dpl">نمرة المركبة (حروف وأرقام)</label><input id="dpl" placeholder="مثلاً: أ ب ج 1234" autocomplete="off">
     <label for="dcm">نوع المركبة (موديل)</label><input id="dcm" placeholder="مثلاً: هيونداي إلنترا 2018 أو هوندا 2020" autocomplete="off">
     <label for="dcol">لون المركبة</label><input id="dcol" placeholder="مثلاً: أبيض" autocomplete="off">
     <label for="dwal">رقم المحفظة (لو معاك، لو مش معاك سيبه فاضي)</label><input id="dwal" inputmode="tel" placeholder="01xxxxxxxxx" autocomplete="off">
     <label for="dinsta">إنستا باي (لو معاك، لو مش معاك سيبه فاضي)</label><input id="dinsta" placeholder="مثلاً: name@instapay" autocomplete="off">
-    ${driverVehicle=='moto'?'':`<label for="dcat">فئة عربيتك</label><select id="dcat">${cats().map(c=>`<option value="${esc(c.id)}">${esc(c.name)} – ${esc(c.desc)}</option>`).join('')}</select>`}
+    
     ${Object.entries(DOCS).map(([k,d])=>`<div class="doc"><div class="doc-t"><b>${k==='car'?(driverVehicle==='moto'?'صورة الموتوسيكل 🏍️ (هتظهر للراكب)':'صورة العربية 🚗 (هتظهر للراكب)'):d.t}</b><span class="small">وش وضهر • <span id="cnt-${k}">0</span>/2</span></div>
       <div class="slots">${d.slots.map(x=>`<button type="button" class="slot" id="slot-${x}" onclick="openPick('${k}','${x}')" aria-label="${d.t} ${SLOTLBL[x]}"><img id="pv-${x}" alt=""><span>${SLOTLBL[x]}</span></button>`).join('')}</div>
       <button type="button" class="plus" onclick="openPick('${k}')" aria-label="إضافة صورة – ${d.t}">+</button></div>`).join('')}
@@ -1135,7 +1153,7 @@ function requestNotif(){
   Notification.requestPermission().then(r=>toast(r==='granted'?'تم تفعيل الإشعارات ✓':'الإشعارات مش مفعّلة',r!=='granted'));
 }
 function regDriver(){
-  const n=val('dn'),p=val('dp'),nid=val('dnid'),l=val('dl');
+  const n=val('dn'),p=val('dp'),nid='',l='';
   if(n.split(/\s+/).length<3) return toast('اكتب الاسم ثلاثي',1);
   if(!okPhone(p)) return toast('رقم التليفون مش صحيح',1);
   if(!/^[23]\d{13}$/.test(nid)) return toast('الرقم القومي لازم يكون 14 رقم',1);
@@ -1154,7 +1172,7 @@ function regDriver(){
     Object.assign(ed,{pay:{wallet:val('dwal'),insta:val('dinsta')},name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
     driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
   }
-  const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':(val('dcat')||cats()[0].id),photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
+  const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':'car',photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
   S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();
   post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){driverId=null;persist();toast('الرقم أو البطاقة مسجّلين قبل كده',1);render()}});
   commit();
@@ -1248,7 +1266,8 @@ function driverCard(d,t){
 function tripRider(t){
   const d=S.drivers.find(x=>x.id===t.driverId);
   let extra='';
-  if(t.status==='requested') extra=`<div class="small">بندوّر على كابتن قريب منك…</div><button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الطلب</button>`;
+  if(t.status==='requested'&&t.counter){const cd=S.drivers.find(x=>x.id===t.counter.driverId);extra=`<div class="card" style="margin-top:8px"><h2>🏍️ الكابتن ${esc(cd?cd.name:'')} اقترح سعر تاني</h2><p>${money(t.counter.price)} بدل ${money(price(t))}</p><button class="btn" onclick="riderAcceptCounter(${t.id})">✅ موافق على ${t.counter.price} جنيه</button><button class="btn ghost" style="margin-top:8px" onclick="riderRefuseCounter(${t.id})">❌ لا، ابعت الطلب تاني</button></div>`}
+  else if(t.status==='requested') extra=`<div class="small">بندوّر على كابتن قريب منك…</div><button class="btn ghost" onclick="cancelTrip(${t.id})">إلغاء الطلب</button>`;
   else if(d&&LIVE.includes(t.status)) extra=`
     <div class="confirm">${t.status==='accepted'?`✔ الكابتن ${esc(d.name)} أكّد طلبك وجاي لك${t.eta?` خلال ${t.eta} دقايق`:''}`:t.status==='arrived'?`✔ الكابتن ${esc(d.name)} وصل عندك`:`الرحلة شغّالة مع ${esc(d.name)}`}</div>
     ${driverCard(d,t)}
@@ -1264,6 +1283,7 @@ function tripRider(t){
     <span class="small"> • ${esc(catOf(t.cat).name)} • ${money(price(t))}${t.stops?` (شامل ${t.stops} وقفة)`:''}</span>${extra}</div>`;
 }
 function reqTrip(){
+  selTrip=tripKind(sel.f,sel.t);
   if(selErrand){sel.t={id:'errand:'+selErrand.n,label:'مشوار: '+selErrand.n,z:'errand'};selTrip='errand';selOffer=selErrand.p}
   if(riderTrip()) return toast('عندك رحلة شغّالة لسه',1);
   if(!sel.f) return toast('اكتب أو اختار هتمشي منين',1);
@@ -1316,7 +1336,9 @@ function driverSheet(){
       <div class="small">${money(price(t))} • الراكب: ${esc(r?.name||'')}</div>
       <label for="eta-${t.id}">هتوصله خلال</label>
       <select id="eta-${t.id}"><option value="3">3 دقايق</option><option value="5" selected>5 دقايق</option><option value="10">10 دقايق</option><option value="15">15 دقيقة</option></select>
-      <button class="btn" onclick="acceptTrip(${t.id})">أؤكد الطلب وجاي له</button></div>`}).join(''):'<p class="small">مفيش طلبات دلوقتي. الطلبات الجديدة بتظهر لوحدها على الخريطة وهنا.</p>'}</div>${deco()}`);
+      <button class="btn" onclick="acceptTrip(${t.id})">✅ أوافق بـ ${money(price(t))}</button>
+      ${t.counter&&t.counter.driverId===driverId?`<p class="small" style="margin:8px 0 0">اقترحت ${money(t.counter.price)}، بانتظار رد الراكب.</p>`:`<label for="cp-${t.id}" style="margin-top:8px">أو اقترح سعر تاني (من ${limitsOf(t.tripType||'short').min} لـ ${limitsOf(t.tripType||'short').max})</label>
+      <div class="row"><input id="cp-${t.id}" type="number" inputmode="numeric" value="${price(t)}"><button class="btn ghost" style="flex:0 0 auto;margin:0" onclick="counterTrip(${t.id})">اقترح</button></div>`}</div>`}).join(''):'<p class="small">مفيش طلبات دلوقتي. الطلبات الجديدة بتظهر لوحدها على الخريطة وهنا.</p>'}</div>${deco()}`);
 }
 // إحداثيات عمارات من جوجل مابس (خط العرض، خط الطول) — المفتاح: id الموقع داخل التطبيق
 const COORDS={'b:t100:124':[30.168372,31.564891],'b:u400:451':[30.165356,31.558473],'b:bqasr:105':[30.165332,31.544672],'b:told:13':[30.161848,31.570209],'b:b800:863':[30.162905,31.545525]};
@@ -1363,10 +1385,27 @@ function curTrip(t){
       :`<div class="row"><button class="btn ghost" onclick="addStop(${t.id})">وقفة (+${S.settings.stop})</button><button class="btn green" onclick="setStatus(${t.id},'done')">انتهت الرحلة</button></div>`}
     ${t.status==='accepted'?`<button class="btn ghost" onclick="releaseTrip(${t.id})">مقدرش أكمّل الرحلة دي</button>`:''}</div>`;
 }
+function counterTrip(id){
+  const t=S.trips.find(x=>x.id===id);
+  if(!t||t.status!=='requested'||t.driverId) return toast('الطلب ده اتاخد',1);
+  const p=Math.round(+val('cp-'+id));const L=limitsOf(t.tripType||'short');
+  if(!(p>=L.min&&p<=L.max)) return toast('السعر لازم يكون بين '+L.min+' و '+L.max+' جنيه',1);
+  t.counter={driverId,price:p,eta:+val('eta-'+id)||5,at:Date.now()};
+  toast('اتبعت اقتراحك للراكب');commit();
+}
+function riderAcceptCounter(id){
+  const t=S.trips.find(x=>x.id===id);if(!t||!t.counter||t.status!=='requested') return;
+  t.status='accepted';t.driverId=t.counter.driverId;t.offer=t.counter.price;t.eta=t.counter.eta;t.counter=null;
+  toast('تمام، الكابتن جاي لك');commit();
+}
+function riderRefuseCounter(id){
+  const t=S.trips.find(x=>x.id===id);if(!t) return;
+  t.counter=null;toast('الطلب رجع للكباتن');commit();
+}
 function acceptTrip(id){
   const t=S.trips.find(x=>x.id===id);
   if(!t||t.status!=='requested') return toast('الرحلة اتاخدت',1);
-  t.status='accepted';t.driverId=driverId;t.eta=+val('eta-'+id)||5;
+  t.status='accepted';t.driverId=driverId;t.eta=+val('eta-'+id)||5;t.counter=null;
   post.push(()=>{const x=S.trips.find(y=>y.id===id);if(x&&x.driverId!==driverId){toast('الرحلة اتاخدت من كابتن تاني',1);render()}});
   commit();
 }
@@ -1723,7 +1762,13 @@ function setFace(id,v){const d=S.drivers.find(x=>x.id===id);d.faceMatch=v;commit
 function reviewDriver(id,ok){const d=S.drivers.find(x=>x.id===id);if(ok&&d.faceMatch!=='yes')return toast('لازم تأكد إن الصورة مطابقة للبطاقة الأول',1);
   if(!ok){d.reason=(prompt('سبب الرفض (هيظهر للكابتن):','البيانات أو الصور مش واضحة')||'البيانات محتاجة تصحيح').slice(0,200)}
   d.status=ok?'approved':'rejected';
-  if(ok){d.subUntil=Date.now()+90*864e5;d.trialMsg=true}
+  if(ok){
+    // الـ 3 شهور المجانية بتبدأ من يوم التسجيل (مرة واحدة بس)
+    const trialEnd=(d.signupAt||Date.now())+90*864e5;
+    if(!d.trialUsed && trialEnd>Date.now()){d.subUntil=trialEnd;d.trialMsg=true}
+    else if(!d.trialUsed){d.subUntil=0}
+    d.trialUsed=true;
+  }
   commit()}
 function ackTrial(){const d=S.drivers.find(x=>x.id===driverId);if(d){localStorage.setItem('tw-trial-'+d.phone,'1');d.trialMsg=false;commit()}}
 function reviewPay(id,ok){
