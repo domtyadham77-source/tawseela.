@@ -51,6 +51,21 @@ function normalize(DB) {
 }
 
 // التخزين على D1: جدول واحد بيحفظ الداتا (المفتاح + القيمة JSON)
+// قراءة + كتابة آمنة: الكتابة بتنجح بس لو الداتا ماتغيرتش من وقت ما قرأناها (مفيش كتابة تمسح كتابة تانية)
+async function rawRead(env) {
+  const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?').bind(KEY).first();
+  return row ? row.value : null;
+}
+async function casWrite(env, raw, DB) {
+  const copy = { ...DB }; delete copy.announcements;
+  const val = JSON.stringify(copy);
+  if (raw === null) {
+    const r = await env.DB.prepare('INSERT OR IGNORE INTO kv (key, value) VALUES (?, ?)').bind(KEY, val).run();
+    return !r || !r.meta || r.meta.changes === undefined ? true : r.meta.changes > 0;
+  }
+  const r = await env.DB.prepare('UPDATE kv SET value = ? WHERE key = ? AND value = ?').bind(val, KEY, raw).run();
+  return !r || !r.meta || r.meta.changes === undefined ? true : r.meta.changes > 0;
+}
 async function dbRead(env) {
   const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?').bind(KEY).first();
   return row ? JSON.parse(row.value) : null;
@@ -106,7 +121,7 @@ function isBlocked(DB, d) {
     (!b.until || b.until > now) && (
       (b.phone && d.phone && b.phone === d.phone) ||
       (b.nid && d.nid && b.nid === d.nid) ||
-      (b.name && d.name && b.name.trim() === d.name.trim())));
+      (b.idHash && d.idHash && hamHex(b.idHash, d.idHash) <= 8)));
 }
 
 function view(DB, admin) {
@@ -116,6 +131,7 @@ function view(DB, admin) {
 }
 
 function merge(DB, b, admin) {
+  LAST_REFUSED = [];
   if (admin && b.settings) DB.settings = { ...DB.settings, ...b.settings };
   // إحداثيات العمارات: أول واحد يحفظها بيكسب، والأدمن يقدر يعدّل
   if (b.coords && typeof b.coords === 'object') {
@@ -158,13 +174,33 @@ function merge(DB, b, admin) {
                 plate: String(c.plate || '').slice(0, 20).toUpperCase() };
             }
             if (item.onbSeen === true) upd.onbSeen = true;
+            // بيانات المركبة لكل نوع (عربية وموتوسيكل): كل نوع بياناته لوحده
+            if (item.cars && typeof item.cars === 'object') {
+              const cur = DB.drivers[i].cars || {};
+              const next = { ...cur };
+              for (const k of ['car', 'moto']) {
+                const c = item.cars[k];
+                if (!c || typeof c !== 'object') continue;
+                next[k] = { model: String(c.model || '').slice(0, 60), color: String(c.color || '').slice(0, 30),
+                  plate: String(c.plate || '').slice(0, 20).toUpperCase(),
+                  photo: c.photo ? String(c.photo) : ((cur[k] && cur[k].photo) || '') };
+              }
+              upd.cars = next;
+            }
+            if (item.vtype === 'car' || item.vtype === 'moto') { upd.vtype = item.vtype; upd.cat = item.vtype; }
             DB.drivers[i] = upd;
           }
           else if (DB.drivers[i].status !== 'approved' && DB.drivers[i].phone === item.phone && !isBlocked(DB, item))
             DB.drivers[i] = { ...item, id: DB.drivers[i].id, status: 'pending', subUntil: 0, signupAt: DB.drivers[i].signupAt || Date.now(), trialUsed: DB.drivers[i].trialUsed || false, reason: undefined, faceMatch: undefined, trialMsg: false };
         }
-        else if (!isBlocked(DB, item) && !DB.drivers.some(x => x.phone === item.phone || (item.nid && x.nid === item.nid)))
+        else if (!isBlocked(DB, item) && !dupFace(DB, item.idHash) && !DB.drivers.some(x => x.phone === item.phone || (item.nid && x.nid === item.nid)))
           DB.drivers.push(admin ? item : { ...item, status: 'pending', subUntil: 0, signupAt: Date.now(), trialUsed: false });
+        else if (!admin) {
+          let why = 'phone';
+          if (isBlocked(DB, item)) why = 'blocked';
+          else if (dupFace(DB, item.idHash)) why = 'card';
+          LAST_REFUSED.push({ id: item.id, why });
+        }
       } else if (c === 'payments') {
         if (i >= 0) { if (admin) DB.payments[i] = item; }
         else DB.payments.push(admin ? item : { ...item, status: 'review' });
@@ -172,13 +208,22 @@ function merge(DB, b, admin) {
         if (item.counter && !admin) {
           const L = ((DB.settings && DB.settings.trip) || { short: { min: 20, max: 45 }, long: { min: 35, max: 50 } })[item.tripType || 'short'] || { min: 20, max: 45 };
           const cd = DB.drivers.find(x => x.id === item.counter.driverId);
-          const okCounter = cd && cd.status === 'approved' && item.status === 'requested' && !item.driverId &&
+          const okCounter = cd && cd.status === 'approved' && cd.subUntil > Date.now() && item.status === 'requested' && !item.driverId &&
             Number(item.counter.price) >= L.min && Number(item.counter.price) <= L.max;
           if (!okCounter) item.counter = undefined;
           else item.counter = { driverId: cd.id, price: Math.round(Number(item.counter.price)), eta: Number(item.counter.eta) || 5, at: Date.now() };
         }
+        // الكابتن اللي الاشتراك بتاعه خلص أو مش موافق عليه ماينفعش ياخد رحلة
+        if (!admin && item.driverId && item.status === 'accepted') {
+          const taker = DB.drivers.find(x => x.id === item.driverId);
+          if (!taker || taker.status !== 'approved' || !(taker.subUntil > Date.now())) continue;
+        }
         if (i >= 0) {
           const old = DB.trips[i];
+          if (!admin && old.driverId && !item.driverId && item.status !== 'cancelled') {
+            // جهاز قديم ماعندوش الكابتن: منمسحش الكابتن اللي اتعين
+            item.driverId = old.driverId; item.status = old.status; item.eta = old.eta;
+          }
           // منع كباتن اتنين من قبول نفس الرحلة
           if (old.driverId && item.driverId && old.driverId !== item.driverId && item.status === 'accepted') continue;
           DB.trips[i] = item;
@@ -187,6 +232,7 @@ function merge(DB, b, admin) {
         if (i < 0) DB.msgs.push({ ...item, text: String(item.text || '').slice(0, 300) });
       } else {
         if (c === 'announcements') continue;
+        if (c === 'payments' && !admin && item.receipt && (typeof item.receipt !== 'string' || item.receipt.length > 600000)) item.receipt = '';
         if (i >= 0) DB[c][i] = item; else DB[c].push(item);
       }
     }
@@ -296,6 +342,13 @@ async function broadcast(env, payload) {
   const rows = await env.DB.prepare('SELECT endpoint, p256dh, auth FROM push_subs').all();
   for (const sub of (rows.results || [])) { try { await sendPush(env, sub, payload); } catch (e) { /* نكمّل */ } }
 }
+// الاسم بعد التنظيف (من غير مسافات وحركات): عشان الكابتن ماينفعش يفتح حساب تاني بنفس الاسم
+function normName(n) { return String(n || '').replace(/[\s\u064B-\u065F\u0640]+/g, '').toLowerCase(); }
+function sameName(a, b) { const x = normName(a); return x.length >= 6 && x === normName(b); }
+// بصمة البطاقة: لو نفس البطاقة (أو شبهها جداً) متسجلة قبل كده، الحساب الجديد ما يتقبلش
+function hamHex(a, b) { let d = 0; for (let i = 0; i < 16; i++) { let x = (parseInt(a[i], 16) ^ parseInt(b[i], 16)); while (x) { d += x & 1; x >>= 1; } } return d; }
+function dupFace(DB, h) { if (!h || h.length !== 16) return false; return DB.drivers.some(x => x.status !== 'rejected' && x.idHash && x.idHash.length === 16 && hamHex(x.idHash, h) <= 8); }
+let LAST_REFUSED = [];
 function snapshot(DB) {
   const before = { drivers:{}, trips:{}, ann: (DB.announcements || []).map(a => a.id), pay: {} };
   for (const p of (DB.payments || [])) before.pay[p.id] = p.status;
@@ -322,13 +375,22 @@ export async function onRequest(context) {
     if (request.method === 'POST' && p === '/api/sync') {
       const b = await request.json().catch(() => ({}));
       const admin = isAdmin(request, env);
-      const DB = await load(env);
-      const before = snapshot(DB);
-      merge(DB, b, admin);
-      await dbWrite(env, DB);
+      let DB = null, before = null, refused = [];
+      for (let attempt = 0; attempt < 8 && !DB; attempt++) {
+        const raw = await rawRead(env);
+        let cur;
+        if (raw !== null) cur = normalize(JSON.parse(raw));
+        else cur = normalize(env.TAWSEELA ? ((await env.TAWSEELA.get(KEY, 'json')) || fresh()) : fresh());
+        const snap = snapshot(cur);
+        merge(cur, b, admin);
+        if (await casWrite(env, raw, cur)) { DB = cur; before = snap; refused = LAST_REFUSED.slice(); }
+      }
+      if (!DB) return json({ error: 'busy, try again' }, 503);
       const job = pushEvents(env, before, DB).catch(() => {});
       if (context.waitUntil) context.waitUntil(job);
-      return json(view(await loadAnn(env, DB), admin));
+      const out = view(await loadAnn(env, DB), admin);
+      out.refused = refused;
+      return json(out);
     }
     if (request.method === 'POST' && p === '/api/announce') {
       if (!isAdmin(request, env)) return json({ error: 'forbidden' }, 403);
