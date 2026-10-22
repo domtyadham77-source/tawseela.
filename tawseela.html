@@ -345,6 +345,20 @@ body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-e
 .avsheet .opt{display:flex;align-items:center;gap:12px;width:100%;background:#0F0920;border:1px solid var(--line);border-radius:14px;padding:14px;color:#fff;font:700 16px Cairo;margin:8px 0;text-align:start;cursor:pointer}
 .avsheet .opt span{font-size:22px}
 .avsheet .opt.cancel{color:#FDA4AF;justify-content:center}
+.me-ov{background:rgba(5,3,14,.38) !important;-webkit-backdrop-filter:blur(3px) saturate(115%);backdrop-filter:blur(3px) saturate(115%)}
+.vsw{position:relative;display:grid;grid-template-columns:1fr 1fr;background:rgba(15,9,32,.55);border:1px solid rgba(196,181,253,.25);border-radius:16px;padding:4px;margin:14px 0}
+.vsw .ind{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:12px;background:linear-gradient(90deg,#7C3AED,#C026D3);box-shadow:0 6px 18px rgba(192,38,211,.4);transition:transform .45s cubic-bezier(.3,.7,.2,1)}
+.vsw.car .ind{transform:translateX(100%)}
+.vsw button{position:relative;z-index:1;background:transparent !important;border:0 !important;padding:10px;font:800 15px Cairo;color:#C4B5FD;cursor:pointer;transition:color .3s;box-shadow:none !important;margin:0}
+.vsw button.on{color:#fff}
+#meFields{transition:opacity .2s ease,transform .2s ease}
+.pinput{position:relative}
+.pinput input{padding-inline-end:52px}
+.plusIn{position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#7C3AED,#C026D3);color:#fff;font:700 26px/1 Cairo;cursor:pointer;margin:0;padding:0 0 3px;box-shadow:0 4px 12px rgba(124,58,237,.4)}
+.rcpt{display:flex;gap:10px;align-items:center;background:rgba(15,9,32,.55);border:1px solid rgba(196,181,253,.25);border-radius:14px;padding:8px;margin:8px 0}
+.rcpt img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#2a1560;flex:none}
+.rcpt .chip{margin:0}
+.rcptA{margin-top:8px;max-height:220px;width:100%;object-fit:contain;border-radius:12px;border:1px solid rgba(196,181,253,.3);background:#0F0920}
 </style>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7C3AED">
@@ -504,11 +518,31 @@ function applyRemote(st){
   S.settings=st.settings;S.buildings=st.buildings;S.coords=st.coords||{};for(const c of COLL)S[c]=st[c]||[];
   takeSnap();
   if(fp!==lastFP){lastFP=fp;render()}
+  if(adminOK&&S.drivers.some(d=>!d.idHash&&d.photos&&d.photos.front)) backfillHashes();
   notifyDriverStatus();
   notifyRiderTrip();
   notifyDriverTrips();
   if(updOpen) renderUpdates();
   document.body.classList.toggle('hasUpd',unreadCount()>0);
+}
+let REFUSED_CL=[];
+function showNote(title,text){modalFn=null;$('#modalIn').innerHTML=`<div class="pk-h"><h3>${title}</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div><p style="line-height:1.8">${text}</p><button class="btn" onclick="closeModal()">تمام</button>`;$('#modal').classList.add('on')}
+function refuseText(why){
+  if(why==='blocked') return 'الحساب ده محظور من التطبيق. لو فاكر إن ده غلط، كلم الدعم على '+SUPPORT_PHONE+'.';
+  if(why==='card') return 'البطاقة دي مسجّلة قبل كده على حساب تاني، فمش هينفع نفتح حساب جديد بيها. لو ده غلط، كلم الدعم على '+SUPPORT_PHONE+'.';
+  if(why==='name') return 'الاسم ده مسجّل قبل كده على حساب تاني. لو ده غلط، كلم الدعم على '+SUPPORT_PHONE+'.';
+  return 'الرقم ده مسجّل قبل كده. ادخل بيه من غير ما تسجّل من جديد.';
+}
+let hashBackfill=false;
+async function backfillHashes(){
+  if(hashBackfill||!adminOK) return; hashBackfill=true;
+  let changed=false;
+  for(const d of S.drivers){
+    if(d.idHash||!d.photos||!d.photos.front) continue;
+    try{d.idHash=await dHash(d.photos.front);changed=true}catch(e){}
+  }
+  hashBackfill=false;
+  if(changed) commit();
 }
 async function save(){
   if(!REMOTE)return;
@@ -518,7 +552,7 @@ async function save(){
   try{
     const r=await fetch('/api/sync',{method:'POST',headers:hdrs(),body:JSON.stringify(d)});
     if(!r.ok)throw new Error('http '+r.status);
-    st=await r.json();
+    st=await r.json();REFUSED_CL=st.refused||[];
   }catch(e){sending=false;setConn('bad');if(Date.now()-lastErr>8000){lastErr=Date.now();toast('مفيش اتصال بالسيرفر، هنحاول تاني',1)}return}
   for(const c of COLL)for(const it of d.upserts[c]||[])snap[keyOf(c,it)]=JSON.stringify(it);
   if(d.settings)snap._s=JSON.stringify(d.settings);
@@ -1168,12 +1202,12 @@ function regDriver(){
   const ed=editingDriverId?S.drivers.find(x=>x.id===editingDriverId):null;
   if(S.drivers.some(x=>(!ed||x.id!==ed.id)&&(x.phone===p||(x.nid&&x.nid===nid)))) return toast('الرقم أو البطاقة مسجّلين قبل كده',1);
   if(ed){
-    Object.assign(ed,{pay:{wallet:val('dwal'),insta:val('dinsta')},name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
+    Object.assign(ed,{pay:{wallet:val('dwal'),insta:val('dinsta')},name:n,phone:p,nid,license:l,cat:val('dcat')||cats()[0].id,photos:{...tmp},idHash:tmp.idHash||'',avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},status:'pending',subUntil:0,reason:undefined,faceMatch:undefined,trialMsg:false});
     driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
   }
-  const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':'car',photos:{...tmp},avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
+  const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':'car',photos:{...tmp},idHash:tmp.idHash||'',avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
   S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();
-  post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){driverId=null;persist();toast('الرقم أو البطاقة مسجّلين قبل كده',1);render()}});
+  post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){const rf=(REFUSED_CL||[]).find(x=>x.id===d.id);driverId=null;persist();showNote('الحساب مش هيتسجل',refuseText(rf?rf.why:'phone'));render()}});
   commit();
 }
 
@@ -1207,6 +1241,8 @@ function compress(file){return new Promise((ok,no)=>{
       c.getContext('2d').drawImage(img,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};
     img.src=fr.result};
   fr.readAsDataURL(file)})}
+// بصمة الصورة (dHash): نفس البطاقة بتطلع نفس البصمة تقريباً، حتى لو الصورة اتصورت تاني
+function dHash(src){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=9;c.height=8;const x=c.getContext('2d');x.drawImage(im,0,0,9,8);const d=x.getImageData(0,0,9,8).data;let bits='';for(let y=0;y<8;y++)for(let k=0;k<8;k++){const i=(y*9+k)*4,j=(y*9+k+1)*4;const g1=d[i]*.3+d[i+1]*.59+d[i+2]*.11,g2=d[j]*.3+d[j+1]*.59+d[j+2]*.11;bits+=g1>g2?'1':'0'}let hex='';for(let q=0;q<64;q+=4)hex+=parseInt(bits.slice(q,q+4),2).toString(16);ok(hex)};im.onerror=no;im.src=src})}
 async function handleFiles(files){
   const t=pickT;pickT=null;const list=[...files];
   if(!t||!list.length)return;
@@ -1217,6 +1253,7 @@ async function handleFiles(files){
     try{tmp[slot]=await compress(list[i])}catch(e){toast('الصورة مش مقروءة، جرّب صورة تانية',1)}
     paintSlots();
   }
+  if(tmp.front){try{tmp.idHash=await dHash(tmp.front)}catch(e){}} else delete tmp.idHash;
 }
 ['fcam','fgal'].forEach(id=>$('#'+id).addEventListener('change',e=>{handleFiles(e.target.files);e.target.value=''}));
 
@@ -1325,7 +1362,7 @@ function driverSheet(){
   if(d.status==='pending') return h+`<div class="card"><h2>⏳ بياناتك تحت المراجعة</h2><p>الأدمن بيراجع بياناتك ومطابقة الصورة. ده ممكن ياخد <b>يوم أو يومين</b> بحد أقصى.</p><p class="small">هيوصلك إشعار على الموبايل أول ما الأدمن يخلّص، وتقدر تكمّل بعدها.</p><button class="btn ghost" onclick="requestNotif()">🔔 فعّل الإشعارات</button></div>`;
   if(d.status==='rejected') return h+`<div class="card"><h2>⚠️ محتاجين تصحيح في بياناتك</h2><p>${esc(d.reason||'البيانات أو الصور مش واضحة.')}</p><p class="small">صحّح البيانات اللي غلط، وابعتها تاني للمراجعة.</p><button class="btn" onclick="startEditDriver()">✏️ صحّح بياناتي</button></div>`;
   if(!driverActive(d)) return h+driverPay(d);
-  if(d.trialMsg && !localStorage.getItem('tw-trial-'+d.phone)) h+=`<div class="card trial"><h2>🎉 مبروك! عندك 3 شهور مجانًا</h2><p>الاشتراك مجاني لحد <b>${fdate(d.subUntil)}</b>. بعد كده الاشتراك <b>${money(S.settings.sub)}</b> كل شهر، وهيظهرلك زرار الدفع لما الفترة تخلص.</p><button class="btn" onclick="ackTrial()">تمام، فهمت</button></div>`;
+  if(d.trialMsg && !localStorage.getItem('tw-trial-'+d.phone)) h+=`<div class="card trial"><h2>🎉 مبروك! عندك 3 شهور مجانًا</h2><p>الاشتراك مجاني لحد <b>${fdate(d.subUntil)}</b>. بعد كده الاشتراك <b>${money(subFor(d))}</b> كل شهر، وهيظهرلك زرار الدفع لما الفترة تخلص.</p><button class="btn" onclick="ackTrial()">تمام، فهمت</button></div>`;
   const open=openForDriver(d).sort((a,b)=>a.at-b.at);
   const cur=driverTrip();
   const done=S.trips.filter(t=>t.driverId===d.id&&t.status==='done');
@@ -1412,22 +1449,31 @@ function releaseTrip(id){openCancel(id,'driver');return;const t=S.trips.find(x=>
 function setStatus(id,s){const t=S.trips.find(x=>x.id===id);t.status=s;if(s==='done')t.doneAt=Date.now();commit()}
 function addStop(id){S.trips.find(x=>x.id===id).stops++;commit()}
 const PAY_KEYS=['vodafone','instapay'];
+// سعر الاشتراك حسب نوع الكابتن: موتوسيكل وعربية ليهم سعر كل واحد
+const subFor=d=>d&&d.vtype==='moto'?(S.settings.subMoto||80):(S.settings.subCar||S.settings.sub||100);
+// إضافة شهور بالتقويم (مش 30 يوم)
+function addMonths(ts,n){const d=new Date(ts);d.setMonth(d.getMonth()+n);return d.getTime()}
+let receiptDraft=null;
 function driverPay(d){
   const pend=S.payments.find(p=>p.driverId===d.id&&p.status==='review');
   if(pend) return `<div class="card"><h2>⏳ الدفع تحت المراجعة</h2><p>استلمنا رقم العملية (<b dir="ltr">${esc(pend.ref)}</b>). الأدمن هيراجعه، وممكن ياخد وقت. هيوصلك إشعار أول ما يتأكد.</p></div>`;
   if(!PAY_KEYS.includes(method)) method='vodafone';
   return `<div class="card"><h2>⏰ اشتراكك خلص</h2>
-    <p>ادفع الاشتراك عشان تكمل شغل: <b>${money(S.settings.sub)}</b> في الشهر.</p>
+    <p>ادفع الاشتراك عشان تكمل شغل: <b>${money(subFor(d))}</b> في الشهر.</p>
     <div class="chips">${PAY_KEYS.map(k=>`<button class="chip ${method===k?'on':''}" onclick="method='${k}';render()">${WALLET[k]}</button>`).join('')}</div>
     <div class="ticket"><svg class="ic"><use href="#ic-pin"/></svg><div><div class="small" style="color:#fff">حوّل على ${WALLET[method]}</div><b style="font-size:22px" dir="ltr">${esc(S.settings.wallets[method]||'')}</b></div></div>
-    <label for="pr">رقم العملية (بعد التحويل)</label><input id="pr" placeholder="اكتب رقم العملية">
+    <label for="pr">رقم العملية (بعد التحويل)</label>
+    <div class="pinput"><input id="pr" placeholder="اكتب رقم العملية"><button type="button" class="plusIn" onclick="pickReceipt()" aria-label="أرفق صورة التحويل">+</button></div>
+    ${receiptDraft?`<div class="rcpt"><img src="${receiptDraft}" alt=""><span class="small" style="color:#fff">تم إرفاق صورة التحويل ✓</span><button class="chip" onclick="receiptDraft=null;render()">❌ شيلها</button></div>`:''}
     <button class="btn" onclick="sendPay()">ابعت للمراجعة</button></div>`;
 }
 function sendPay(){
   const ref=val('pr');if(ref.length<4) return toast('اكتب رقم العملية',1);
   if(S.payments.some(p=>p.driverId===driverId&&p.status==='review')) return;
-  S.payments.push({id:uid(),driverId,method,ref,amount:S.settings.sub,status:'review',at:Date.now()});commit();
+  const dd=S.drivers.find(x=>x.id===driverId);
+  S.payments.push({id:uid(),driverId,method,ref,amount:subFor(dd),status:'review',at:Date.now(),receipt:receiptDraft||''});receiptDraft=null;commit();
 }
+function pickReceipt(){pickFile(d=>{receiptDraft=d;render()},false)}
 
 // ---------- القايمة الجانبية والنوافذ ----------
 function editPayInfo(){
@@ -1436,28 +1482,36 @@ function editPayInfo(){
   const i=prompt('إنستا باي (سيبه فاضي لو معاكش):',(d.pay&&d.pay.insta)||'');if(i===null)return;
   d.pay={wallet:w.trim(),insta:i.trim()};closeDrawer();toast('اتحفظت بيانات الدفع ✓');commit();
 }
-let meAvatar=null,meCar=null;
+let meAvatar=null,meCar=null,meType='car',meDraft={},meDraftPhoto={};
 const ME_CAM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+function vehOf(d,t){return ((d.cars&&d.cars[t])||(d.vtype===t?d.car:null)||{})}
+function vehFields(d,t,v){
+  const c=vehOf(d,t);
+  const f=v||{mod:c.model||'',col:c.color||'',num:c.plate||''};
+  const carImg=(meDraftPhoto[t]!==undefined?meDraftPhoto[t]:(t===meType?meCar:null))||c.photo;
+  const isM=t==='moto';
+  const L=isM?{pic:'صورة الموتوسيكل',mod:'نوع الموتوسيكل',col:'لون الموتوسيكل',num:'نمرة الموتوسيكل',ttl:'بيانات الموتوسيكل',ico:'🏍️'}:{pic:'صورة العربية',mod:'نوع العربية',col:'لون العربية',num:'نمرة العربية',ttl:'بيانات العربية',ico:'🚗'};
+  return `<div class="small" style="margin-bottom:6px">${L.ttl}</div>
+    <label>${L.pic}</label><div class="me-carhead" style="margin-bottom:6px"><div class="me-carimg">${carImg?`<img src="${carImg}" alt="">`:L.ico}</div><button class="chip" onclick="pickMeCar()">📷 غيّر الصورة</button></div>
+    <label for="meMod">${L.mod}</label><input id="meMod" value="${esc(f.mod)}">
+    <label for="meCol">${L.col}</label><input id="meCol" value="${esc(f.col)}">
+    <label for="meNum">${L.num}</label><input id="meNum" dir="ltr" value="${esc(f.num)}">`;
+}
 function meHTML(d,v){
-  const c=d.car||{};
-  const f=v||{name:d.name||'',wal:(d.pay&&d.pay.wallet)||'',ins:(d.pay&&d.pay.insta)||'',mod:c.model||'',col:c.color||'',num:c.plate||''};
+  const f=v||{name:d.name||'',wal:(d.pay&&d.pay.wallet)||'',ins:(d.pay&&d.pay.insta)||''};
   const av=meAvatar||d.avatar;
   const initial=esc((d.name||'؟').trim()[0]||'؟');
-  const carImg=meCar||c.photo;
+  const isM=meType==='moto';
   return `<div class="me-box">
     <div class="grab"></div>
     <div class="sh-t"><b>تعديل بياناتي</b><button class="x" onclick="closeEditMe()" aria-label="إغلاق">×</button></div>
     <div class="epav"><div class="circ">${av?`<img src="${av}" alt="">`:initial}</div><button class="cam" onclick="openAvSheet()" aria-label="غيّر الصورة">${ME_CAM}</button></div>
-    <div class="me-name">${esc(f.name)}</div>
-    <label for="meName">الاسم</label><input id="meName" value="${esc(f.name)}">
-    <label for="meWal">المحفظة (لو معاك)</label><input id="meWal" dir="ltr" value="${esc(f.wal)}">
-    <label for="meIns">إنستا باي (رقم أو اسم الحساب، لو معاك)</label><input id="meIns" dir="ltr" value="${esc(f.ins)}">
-    <div class="me-car">
-      <div class="me-carhead"><div class="me-carimg">${carImg?`<img src="${carImg}" alt="">`:'🚗'}</div><button class="chip" onclick="pickMeCar()">📷 غيّر صورة المركبة</button></div>
-      <label for="meMod">نوع المركبة</label><input id="meMod" value="${esc(f.mod)}">
-      <label for="meCol">لون المركبة</label><input id="meCol" value="${esc(f.col)}">
-      <label for="meNum">نمرة المركبة</label><input id="meNum" dir="ltr" value="${esc(f.num)}">
-    </div>
+    <div class="me-name">${esc(f.name||d.name||'')}</div>
+    <label for="meName">الاسم</label><input id="meName" value="${esc(f.name||d.name||'')}">
+    <label for="meWal">المحفظة (لو معاك)</label><input id="meWal" dir="ltr" value="${esc(f.wal||'')}">
+    <label for="meIns">إنستا باي (رقم أو اسم الحساب، لو معاك)</label><input id="meIns" dir="ltr" value="${esc(f.ins||'')}">
+    <div class="vsw${isM?'':' car'}" id="vsw"><div class="ind"></div><button id="bm" class="${isM?'on':''}" onclick="setMeType('moto')">🏍️ موتوسيكل</button><button id="bc" class="${isM?'':'on'}" onclick="setMeType('car')">🚗 عربية</button></div>
+    <div class="me-car" id="meFields">${vehFields(d,meType,v&&v.veh)}</div>
     <button class="btn" onclick="saveEditMe()">حفظ التعديلات</button>
   </div>`;
 }
@@ -1465,9 +1519,25 @@ function collectMe(){
   const g=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
   return {name:g('meName'),wal:g('meWal'),ins:g('meIns'),mod:g('meMod'),col:g('meCol'),num:g('meNum')};
 }
+function setMeType(t){
+  const d=S.drivers.find(x=>x.id===driverId); if(!d||t===meType) return;
+  const cur=collectMe();
+  meDraft[meType]={mod:cur.mod,col:cur.col,num:cur.num};
+  meDraftPhoto[meType]=meCar;
+  meType=t;
+  meCar=meDraftPhoto[t]!==undefined?meDraftPhoto[t]:null;
+  const vsw=document.getElementById('vsw');
+  if(vsw){vsw.classList.toggle('car',t==='car');
+    const bm=document.getElementById('bm'),bc=document.getElementById('bc');
+    if(bm)bm.classList.toggle('on',t==='moto');if(bc)bc.classList.toggle('on',t==='car');}
+  const box=document.getElementById('meFields');
+  if(box){box.style.opacity='0';box.style.transform='translateY(6px)';
+    setTimeout(()=>{const dr=meDraft[t];box.innerHTML=vehFields(d,t,dr);box.style.opacity='1';box.style.transform='none';},170);}
+}
 function openEditMe(){
   const d=S.drivers.find(x=>x.id===driverId); if(!d) return;
-  closeDrawer(); meAvatar=null; meCar=null;
+  closeDrawer(); meAvatar=null; meCar=null; meDraft={}; meDraftPhoto={};
+  meType=d.vtype||d.cat||'car'; if(meType!=='moto') meType='car';
   closeEditMe();
   const ov=document.createElement('div'); ov.id='meEdit'; ov.className='me-ov';
   ov.innerHTML=meHTML(d); document.body.appendChild(ov);
@@ -1491,7 +1561,7 @@ function pickFile(cb,cam){
   inp.click();
 }
 function avPick(kind){closeAvSheet();pickFile(d=>{meAvatar=d;refreshMe()},kind==='cam')}
-function pickMeCar(){pickFile(d=>{meCar=d;refreshMe()},false)}
+function pickMeCar(){pickFile(d=>{meCar=d;meDraftPhoto[meType]=d;const dd=S.drivers.find(x=>x.id===driverId);const bx=document.getElementById('meFields');if(bx&&dd)bx.innerHTML=vehFields(dd,meType,collectMe());},false)}
 function saveEditMe(){
   const d=S.drivers.find(x=>x.id===driverId); if(!d) return;
   const v=collectMe();
@@ -1499,11 +1569,22 @@ function saveEditMe(){
   if(v.wal&&!/^[0-9+]{8,15}$/.test(v.wal)) return toast('رقم المحفظة مش صح',1);
   if(!v.mod) return toast('اكتب نوع المركبة',1);
   if(v.num.length<3) return toast('اكتب نمرة المركبة',1);
+  d.cars=d.cars||{};
+  const old=vehOf(d,meType);
+  d.cars[meType]={model:v.mod,color:v.col,plate:v.num.toUpperCase(),photo:meCar||old.photo||''};
+  for(const t of ['car','moto']){
+    if(t===meType||!meDraft[t]) continue;
+    const dr=meDraft[t], prev=vehOf(d,t);
+    if(!dr.mod) continue;
+    d.cars[t]={model:dr.mod,color:dr.col,plate:(dr.num||'').toUpperCase(),photo:(meDraftPhoto[t]!==undefined?meDraftPhoto[t]:prev.photo)||''};
+  }
   d.name=v.name;
   d.pay={wallet:v.wal,insta:v.ins};
   if(meAvatar) d.avatar=meAvatar;
-  d.car={...(d.car||{}),photo:meCar||(d.car&&d.car.photo)||'',model:v.mod,color:v.col,plate:v.num.toUpperCase()};
-  meAvatar=null; meCar=null; closeEditMe();
+  d.vtype=meType; d.cat=meType;
+  d.car={...d.cars[meType]};
+  meAvatar=null; meCar=null; meDraft={}; meDraftPhoto={};
+  closeEditMe();
   toast('اتحفظت بياناتك ✓'); commit();
 }
 function changeDriverAvatar(){
@@ -1651,7 +1732,7 @@ function adminBlockDriver(id){
   const until=days?Date.now()+days*864e5:0;
   const reason=(prompt('سبب الحظر (هيوصل للكابتن في رسالة):','المشكلة اللي حصلت')||'المشكلة اللي حصلت').trim();
   addNotice(d,days?'blocked':'banned',reason,days);
-  S.settings.blocks=(S.settings.blocks||[]).concat([{phone:d.phone,name:d.name,nid:d.nid||'',until,at:Date.now()}]);
+  S.settings.blocks=(S.settings.blocks||[]).concat([{phone:d.phone,name:d.name,nid:d.nid||'',idHash:d.idHash||'',until,at:Date.now()}]);
   S.drivers=S.drivers.filter(x=>x.id!==id);
   S.removedDrivers=(S.removedDrivers||[]).concat([id]);
   toast(days?'اتحظر لمدة '+days+' يوم':'اتحظر نهائياً');commit();
@@ -1696,6 +1777,7 @@ function adminView(){
     <div class="row"><button class="btn green" onclick="reviewDriver(${d.id},true)">قبول</button><button class="btn red" onclick="reviewDriver(${d.id},false)">رفض</button></div></div>`).join(''):'<p class="small">مفيش طلبات.</p>'}</div>
   <div class="card"><h2>اشتراكات محتاجة تأكيد (${pays.length})</h2>${pays.length?pays.map(p=>{const d=S.drivers.find(x=>x.id===p.driverId);return `<div class="trip"><b>${esc(d?.name)}</b>
     <div class="small">${WALLET[p.method]} • ${esc(p.ref)} • ${money(p.amount)}</div>
+    ${p.receipt?`<img class="rcptA" src="${p.receipt}" alt="إيصال التحويل">`:'<div class="small">مفيش صورة إيصال</div>'}
     <div class="row"><button class="btn green" onclick="reviewPay(${p.id},true)">وصلت – فعّل</button><button class="btn red" onclick="reviewPay(${p.id},false)">ماوصلتش</button></div></div>`}).join(''):'<p class="small">مفيش اشتراكات معلّقة.</p>'}</div>
   <div class="card"><h2>متابعة الكباتن</h2>${S.drivers.filter(d=>d.status==='approved').map(d=>{const s=dstat(d);return `<div class="trip"><b>${esc(d.name)}</b> <span class="badge ${s.cls}">${s.label}</span>
     <div class="small">${esc(d.phone)} • ${esc(catOf(d.cat).name)} • النهارده: ${s.today} رحلة • الإجمالي: ${s.total}</div>
@@ -1704,7 +1786,6 @@ function adminView(){
   <div class="card"><h2>الرحلات</h2>${S.trips.length?S.trips.slice().sort((a,b)=>b.at-a.at).map(t=>`<div class="trip"><b>${esc(t.from)} ← ${esc(t.to)}</b> <span class="badge">${ST[t.status]}</span><div class="small">${esc(catOf(t.cat).name)} • ${money(price(t))}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelTrip(${t.id})">🗑 امسح الرحلة</button></div></div>`).join(''):'<p class="small">لسه مفيش رحلات.</p>'}</div>
   ${driversCard}
   <div class="card"><h2>الركاب (${S.riders.length})</h2>${S.riders.length?S.riders.slice().map(r=>`<div class="trip"><b>${esc(r.name)}</b><div class="small">${esc(r.phone)} • ${esc(r.email||'')}</div><div class="row"><button class="btn red" style="margin:4px 0 0" onclick="adminDelRider(${r.id})">🗑 امسح الراكب</button></div></div>`).join(''):'<p class="small">مفيش ركاب لسه.</p>'}</div>
-  ${driversCard}
   <div class="card"><h2>📣 رسالة للكل</h2>
     <p class="small">اكتب الرسالة، وحط لينك التحديث لو فيه. الكل هيشوفها في صفحة التحديثات.</p>
     <label for="annText">الرسالة (اكتب الرسالة، ولو فيه لينك حطه جوه الرسالة)</label>
@@ -1715,17 +1796,23 @@ function adminView(){
   </div>
   ${cancelCard}
   ${missCard}
-  <div class="card"><h2>الأسعار</h2><div class="row"><div><label for="sb">سعر الرحلة</label><input id="sb" type="number" value="${S.settings.base}"></div>
-    <div><label for="ss">سعر الوقفة</label><input id="ss" type="number" value="${S.settings.stop}"></div>
-    <div><label for="su">الاشتراك</label><input id="su" type="number" value="${S.settings.sub}"></div></div>
-    <h3>أسعار الرحلات (الحد الأدنى والأقصى)</h3>
+  <div class="card"><h2>💰 الاشتراكات والفترة المجانية</h2>
+    <p class="small">الاشتراك بيتحسب شهر بشهر، والفترة المجانية للكباتن الجداد مرة واحدة.</p>
+    <div class="row"><div><label for="smo">اشتراك كابتن الموتوسيكل (جنيه / شهر)</label><input id="smo" type="number" value="${S.settings.subMoto||80}"></div></div>
+    <div class="row"><div><label for="sca">اشتراك كابتن العربية (جنيه / شهر)</label><input id="sca" type="number" value="${S.settings.subCar||S.settings.sub||100}"></div></div>
+    <div class="row"><div><label for="tmo">الفترة المجانية للكباتن الجداد (شهور)</label><input id="tmo" type="number" value="${S.settings.trialMonths??3}"></div></div>
+    <label style="display:flex;align-items:center;gap:8px"><input id="toff" type="checkbox" style="width:auto" ${S.settings.trialOff?'checked':''}> إلغاء الفترة المجانية خالص</label>
+    <button class="btn" onclick="saveSettings()">حفظ الاشتراكات</button></div>
+  <div class="card"><h2>🚗 أسعار الرحلات</h2><div class="row"><div><label for="sb">سعر الرحلة</label><input id="sb" type="number" value="${S.settings.base}"></div>
+    <div><label for="ss">سعر الوقفة</label><input id="ss" type="number" value="${S.settings.stop}"></div></div>
+    <h3>حدود سعر الرحلة (الحد الأدنى والأقصى)</h3>
     <div class="row"><div><label for="sSmin">قصيرة: أدنى</label><input id="sSmin" type="number" value="${limitsOf('short').min}"></div><div><label for="sSmax">قصيرة: أقصى</label><input id="sSmax" type="number" value="${limitsOf('short').max}"></div></div>
     <div class="row"><div><label for="sLmin">طويلة: أدنى</label><input id="sLmin" type="number" value="${limitsOf('long').min}"></div><div><label for="sLmax">طويلة: أقصى</label><input id="sLmax" type="number" value="${limitsOf('long').max}"></div></div>
     <h3>فئات العربيات (الزيادة على سعر الرحلة)</h3>
     ${cats().map((c,i)=>`<div class="row"><div><label for="cn-${i}">الاسم</label><input id="cn-${i}" value="${esc(c.name)}"></div><div><label for="cx-${i}">زيادة جنيه</label><input id="cx-${i}" type="number" value="${c.extra||0}"></div></div>`).join('')}
     <h3>أرقام استلام الاشتراك</h3>
     ${PAY_KEYS.map(k=>`<label for="w-${k}">${WALLET[k]}</label><input id="w-${k}" value="${esc(w[k]||'')}" dir="ltr">`).join('')}
-    <button class="btn" onclick="saveSettings()">حفظ</button></div>
+    <button class="btn" onclick="saveSettings()">حفظ الأسعار</button></div>
   <div class="card"><h2>أماكن إضافية</h2><p class="small">الأماكن الأساسية متظبطة. هنا تضيف مكان جديد يظهر للركاب في المنطقة اللي تختارها.</p>
     <div class="row"><select id="npz">${ZONES.map(z=>`<option value="${z.id}">${z.n}</option>`).join('')}</select><input id="npn" placeholder="اسم المكان"></div>
     <button class="btn" onclick="addPlace()">إضافة مكان</button>
@@ -1763,7 +1850,8 @@ function reviewDriver(id,ok){const d=S.drivers.find(x=>x.id===id);if(ok&&d.faceM
   d.status=ok?'approved':'rejected';
   if(ok){
     // الـ 3 شهور المجانية بتبدأ من يوم التسجيل (مرة واحدة بس)
-    const trialEnd=(d.signupAt||Date.now())+90*864e5;
+    const tm=S.settings.trialOff?0:(S.settings.trialMonths??3);
+    const trialEnd=tm?addMonths(d.signupAt||Date.now(),tm):0;
     if(!d.trialUsed && trialEnd>Date.now()){d.subUntil=trialEnd;d.trialMsg=true}
     else if(!d.trialUsed){d.subUntil=0}
     d.trialUsed=true;
@@ -1772,14 +1860,20 @@ function reviewDriver(id,ok){const d=S.drivers.find(x=>x.id===id);if(ok&&d.faceM
 function ackTrial(){const d=S.drivers.find(x=>x.id===driverId);if(d){localStorage.setItem('tw-trial-'+d.phone,'1');d.trialMsg=false;commit()}}
 function reviewPay(id,ok){
   const p=S.payments.find(x=>x.id===id);p.status=ok?'paid':'rejected';
-  if(ok){const d=S.drivers.find(x=>x.id===p.driverId);d.subUntil=Math.max(Date.now(),d.subUntil||0)+30*864e5}
+  // التجديد شهر من يوم ما الأدمن يأكد الدفع
+  if(ok){const d=S.drivers.find(x=>x.id===p.driverId);d.subUntil=Date.now()+30*864e5}
   commit();
 }
 function saveSettings(){
-  const s=S.settings;s.base=+val('sb')||30;s.stop=+val('ss')||5;s.sub=+val('su')||100;
-  s.trip={short:{min:+val('sSmin')||20,max:+val('sSmax')||45},long:{min:+val('sLmin')||35,max:+val('sLmax')||50}};
-  s.cats=cats().map((c,i)=>({...c,name:val('cn-'+i)||c.name,extra:Math.max(0,+val('cx-'+i)||0)}));
-  Object.keys(WALLET).forEach(k=>s.wallets[k]=val('w-'+k));toast('تم الحفظ');commit();
+  // كل كارت بيحفظ خاناته بس، والخانات اللي مش على الشاشة ماتتغيرش
+  const has=id=>!!document.getElementById(id);
+  const s=S.settings;
+  if(has('smo')){s.subMoto=+val('smo')||80;s.subCar=+val('sca')||100;s.sub=s.subCar;s.trialMonths=Math.max(0,+val('tmo')||0);s.trialOff=!!(document.getElementById('toff')||{}).checked;}
+  if(has('sb')){s.base=+val('sb')||30;s.stop=+val('ss')||5;}
+  if(has('sSmin')) s.trip={short:{min:+val('sSmin')||20,max:+val('sSmax')||45},long:{min:+val('sLmin')||35,max:+val('sLmax')||50}};
+  if(has('cn-0')) s.cats=cats().map((c,i)=>({...c,name:val('cn-'+i)||c.name,extra:Math.max(0,+val('cx-'+i)||0)}));
+  if(has('w-vodafone')) Object.keys(WALLET).forEach(k=>{if(has('w-'+k)) s.wallets[k]=val('w-'+k)});
+  toast('تم الحفظ');commit();
 }
 function addPlace(){
   const z=val('npz'),n=val('npn');
