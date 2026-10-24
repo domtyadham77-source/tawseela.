@@ -365,18 +365,6 @@ body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-e
 .otp input{width:44px;height:54px;text-align:center;font:800 24px Cairo;padding:0;margin:0}
 .otp input.pop{animation:otpPop .22s ease}
 @keyframes otpPop{0%{transform:scale(.7);opacity:.4}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
-.refresh{position:relative;margin-inline-start:8px;width:44px;height:44px;border-radius:50%;border:0;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(124,58,237,.35) 45%,rgba(192,38,211,.5));box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 10px 26px rgba(76,29,149,.55);margin-top:0;transition:transform .15s}
-.refresh:active{transform:scale(.94)}
-.refresh:disabled{cursor:default}
-.refresh svg.route{position:absolute;inset:-7px;width:58px;height:58px;overflow:visible;pointer-events:none}
-.refresh .ring{fill:none;stroke:rgba(196,181,253,.4);stroke-width:2;stroke-dasharray:4 5}
-.refresh .carwrap{position:absolute;inset:-7px;width:58px;height:58px;pointer-events:none;opacity:0;transition:opacity .25s}
-.refresh .carwrap .car{position:absolute;top:-6px;left:50%;width:16px;height:9px;margin-left:-8px}
-.refresh .carwrap .car svg{width:16px;height:9px;display:block}
-.refresh .rsym{position:relative;font:700 20px/1 Cairo;color:#fff}
-.refresh.spin .carwrap{opacity:1;animation:rdrive 1.1s cubic-bezier(.45,.05,.55,.95) infinite}
-.refresh.spin .rsym{opacity:.5}
-@keyframes rdrive{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -397,7 +385,7 @@ body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-e
     <g style="color:rgba(244,114,182,.22)" transform="translate(40 66)"><use href="#ic-car" width="70" height="35"/></g>
     <g style="color:rgba(255,255,255,.12)" transform="translate(150 6) scale(.8)"><use href="#ic-pin" width="32" height="40"/></g>
   </svg>
-  <div class="brand"><span class="sign"><svg class="ic"><use href="#ic-pin"/></svg>توصيلة</span><span id="sub">توصيل داخل المدينة</span><span id="conn" class="conn"></span><button id="refreshBtn" class="refresh" onclick="refreshNow()" aria-label="حدّث البيانات" title="حدّث البيانات"><svg class="route" viewBox="0 0 70 70"><circle class="ring" cx="35" cy="35" r="32"/></svg><span class="carwrap"><span class="car"><svg viewBox="0 0 64 32"><use href="#ic-car"/></svg></span></span><span class="rsym">⟳</span></button></div>
+  <div class="brand"><span class="sign"><svg class="ic"><use href="#ic-pin"/></svg>توصيلة</span><span id="sub">توصيل داخل المدينة</span><span id="conn" class="conn"></span></div>
   <div id="heroText" class="heroText"></div>
   <div class="tabs" id="tabs"></div>
   <div class="downrow"><button class="down" id="down" onclick="scrollDown()" aria-label="انزل لصفحة التسجيل"><span>انزل للتسجيل</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><button class="down dv vtog" id="vtog" onclick="toggleVehicle()" aria-label="سجّل كابتن"><span class="vlabel">عربية</span></button></div>
@@ -582,14 +570,6 @@ async function save(){
   if(dirty){dirty=false;return save()}
   applyRemote(st);setConn('ok');
   const cbs=post;post=[];cbs.forEach(f=>f());
-}
-// زرار التحديث: بيجيب أحدث بيانات من السيرفر فوراً (للأدمن وللراكب)
-async function refreshNow(){
-  const btn=document.getElementById('refreshBtn');
-  if(btn){btn.classList.add('spin');btn.disabled=true}
-  try{ await pull(); toast('اتحدّثت البيانات ✓'); }
-  catch(e){ toast('مفيش اتصال، جرّب تاني',1); }
-  finally{ if(btn){btn.classList.remove('spin');btn.disabled=false} }
 }
 async function pull(){
   const r=await fetch('/api/state',{headers:hdrs()});
