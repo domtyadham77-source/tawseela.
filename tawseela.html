@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>window.APP_MODE="rider";</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tawseela</title>
@@ -359,12 +360,24 @@ body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-e
 .rcpt img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#2a1560;flex:none}
 .rcpt .chip{margin:0}
 .rcptA{margin-top:8px;max-height:220px;width:100%;object-fit:contain;border-radius:12px;border:1px solid rgba(196,181,253,.3);background:#0F0920}
+
+.otp{display:flex;gap:8px;justify-content:center;direction:ltr;margin:14px 0}
+.otp input{width:44px;height:54px;text-align:center;font:800 24px Cairo;padding:0;margin:0}
+.otp input.pop{animation:otpPop .22s ease}
+@keyframes otpPop{0%{transform:scale(.7);opacity:.4}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+.refresh{position:relative;margin-inline-start:8px;width:44px;height:44px;border-radius:50%;border:0;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(124,58,237,.35) 45%,rgba(192,38,211,.5));box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 10px 26px rgba(76,29,149,.55);margin-top:0;transition:transform .15s}
+.refresh:active{transform:scale(.94)}
+.refresh:disabled{cursor:default}
+.refresh svg.route{position:absolute;inset:-7px;width:58px;height:58px;overflow:visible;pointer-events:none}
+.refresh .ring{fill:none;stroke:rgba(196,181,253,.4);stroke-width:2;stroke-dasharray:4 5}
+.refresh .carwrap{position:absolute;inset:-7px;width:58px;height:58px;pointer-events:none;opacity:0;transition:opacity .25s}
+.refresh .carwrap .car{position:absolute;top:-6px;left:50%;width:16px;height:9px;margin-left:-8px}
+.refresh .carwrap .car svg{width:16px;height:9px;display:block}
+.refresh .rsym{position:relative;font:700 20px/1 Cairo;color:#fff}
+.refresh.spin .carwrap{opacity:1;animation:rdrive 1.1s cubic-bezier(.45,.05,.55,.95) infinite}
+.refresh.spin .rsym{opacity:.5}
+@keyframes rdrive{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#7C3AED">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="tawseela">
-<link rel="apple-touch-icon" href="/icon-192.png">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -384,7 +397,7 @@ body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-e
     <g style="color:rgba(244,114,182,.22)" transform="translate(40 66)"><use href="#ic-car" width="70" height="35"/></g>
     <g style="color:rgba(255,255,255,.12)" transform="translate(150 6) scale(.8)"><use href="#ic-pin" width="32" height="40"/></g>
   </svg>
-  <div class="brand"><span class="sign"><svg class="ic"><use href="#ic-pin"/></svg>توصيلة</span><span id="sub">توصيل داخل المدينة</span><span id="conn" class="conn"></span></div>
+  <div class="brand"><span class="sign"><svg class="ic"><use href="#ic-pin"/></svg>توصيلة</span><span id="sub">توصيل داخل المدينة</span><span id="conn" class="conn"></span><button id="refreshBtn" class="refresh" onclick="refreshNow()" aria-label="حدّث البيانات" title="حدّث البيانات"><svg class="route" viewBox="0 0 70 70"><circle class="ring" cx="35" cy="35" r="32"/></svg><span class="carwrap"><span class="car"><svg viewBox="0 0 64 32"><use href="#ic-car"/></svg></span></span><span class="rsym">⟳</span></button></div>
   <div id="heroText" class="heroText"></div>
   <div class="tabs" id="tabs"></div>
   <div class="downrow"><button class="down" id="down" onclick="scrollDown()" aria-label="انزل لصفحة التسجيل"><span>انزل للتسجيل</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><button class="down dv vtog" id="vtog" onclick="toggleVehicle()" aria-label="سجّل كابتن"><span class="vlabel">عربية</span></button></div>
@@ -416,6 +429,10 @@ body.hasUpd .fab-menu::after{content:'';position:absolute;top:4px;inset-inline-e
 <input type="file" id="fgal" class="vh" accept="image/*" multiple aria-hidden="true" tabindex="-1">
 
 
+
+
+<script src="/push.js" defer></script>
+<div id="updPage" class="upd-page" aria-hidden="true"></div>
 <script>
 // ---------- ثوابت ----------
 // غيّر الكود ده لكود سري بتاعك. رابط الأدمن: الرابط + هذا الكود
@@ -426,7 +443,7 @@ const tr=x=>LANG==='en'&&T_EN[x]?T_EN[x]:x;
 function toggleLang(){LANG=LANG==='en'?'ar':'en';localStorage.setItem('tw-lang',LANG);document.documentElement.dir=LANG==='en'?'ltr':'rtl';closeDrawer();render()}
 const SUPPORT_PHONE='01031730512'; // رقم الدعم وخدمة العملاء (هيتغيّر للرقم الحقيقي)
 const WALLET={vodafone:'فودافون كاش',orange:'أورنج كاش',etisalat:'اتصالات كاش',instapay:'إنستا باي'};
-const ST={requested:'في انتظار كابتن',accepted:'الكابتن أكّد وجاي لك',arrived:'الكابتن وصل',started:'الرحلة بدأت',done:'انتهت',cancelled:'اتلغت'};
+const ST={requested:'في انتظار كابتن',accepted:'الكابتن أكّد وجاي لك',arrived:'الكابتن وصل',started:'الرحلة بدأت',done:'انتهت',cancelled:'اتلغت',expired:'انتهى الطلب'};
 const LIVE=['accepted','arrived','started'];
 const COLL=['riders','drivers','trips','payments','msgs','announcements'];
 const uid=()=>Date.now()*1000+Math.floor(Math.random()*1000);
@@ -486,7 +503,7 @@ const fdate=ts=>new Date(ts).toLocaleDateString('ar-EG');
 const hhmm=ts=>new Date(ts).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
 const okPhone=p=>/^01[0125]\d{8}$/.test(p);
 const okMail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-const isAdmin=()=>window.FORCE_ADMIN===true||location.hash===ADMIN_KEY;
+const isAdmin=()=>window.APP_MODE==='admin'||window.FORCE_ADMIN===true||location.hash===ADMIN_KEY;
 const bkey=s=>String(s||'').split(' – ')[0];
 function toast(m,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
 const ls={g(k){try{return localStorage.getItem(k)}catch(e){return null}},s(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -525,7 +542,7 @@ function applyRemote(st){
   if(updOpen) renderUpdates();
   document.body.classList.toggle('hasUpd',unreadCount()>0);
 }
-let REFUSED_CL=[];
+let REFUSED_CL=[];let pendingPwVal=null;let regPendingId=null;
 function showNote(title,text){modalFn=null;$('#modalIn').innerHTML=`<div class="pk-h"><h3>${title}</h3><button class="x" onclick="closeModal()" aria-label="إغلاق">×</button></div><p style="line-height:1.8">${text}</p><button class="btn" onclick="closeModal()">تمام</button>`;$('#modal').classList.add('on')}
 function refuseText(why){
   if(why==='blocked') return 'الحساب ده محظور من التطبيق. لو فاكر إن ده غلط، كلم الدعم على '+SUPPORT_PHONE+'.';
@@ -553,6 +570,7 @@ async function save(){
     const r=await fetch('/api/sync',{method:'POST',headers:hdrs(),body:JSON.stringify(d)});
     if(!r.ok)throw new Error('http '+r.status);
     st=await r.json();REFUSED_CL=st.refused||[];
+    for(const ns of (st.newSessions||[])){const nd=(st.drivers||[]).find(x=>x.id===ns.id);if(nd){regPendingId=null;localStorage.setItem('tw-auth',JSON.stringify({phone:nd.phone,token:ns.token}));if(pendingPwVal){fetch('/api/pw/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:ns.token,password:pendingPwVal})}).catch(()=>{});pendingPwVal=null;}}}
   }catch(e){sending=false;setConn('bad');if(Date.now()-lastErr>8000){lastErr=Date.now();toast('مفيش اتصال بالسيرفر، هنحاول تاني',1)}return}
   for(const c of COLL)for(const it of d.upserts[c]||[])snap[keyOf(c,it)]=JSON.stringify(it);
   if(d.settings)snap._s=JSON.stringify(d.settings);
@@ -564,6 +582,14 @@ async function save(){
   if(dirty){dirty=false;return save()}
   applyRemote(st);setConn('ok');
   const cbs=post;post=[];cbs.forEach(f=>f());
+}
+// زرار التحديث: بيجيب أحدث بيانات من السيرفر فوراً (للأدمن وللراكب)
+async function refreshNow(){
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.classList.add('spin');btn.disabled=true}
+  try{ await pull(); toast('اتحدّثت البيانات ✓'); }
+  catch(e){ toast('مفيش اتصال، جرّب تاني',1); }
+  finally{ if(btn){btn.classList.remove('spin');btn.disabled=false} }
 }
 async function pull(){
   const r=await fetch('/api/state',{headers:hdrs()});
@@ -888,6 +914,8 @@ document.addEventListener('click',e=>{
 });
 function render(){
   const adm=isAdmin(),role=adm?null:curRole();
+  // الكابتن بيتعرض عليه الجلسة بس لما يكون حسابه موجود عندنا (في لحظة التسجيل لسه بيتبعت)
+  if(!adm&&driverId&&regPendingId!==driverId){const dd=S.drivers.find(x=>x.id===driverId);if(dd){const ss=JSON.parse(localStorage.getItem('tw-auth')||'null');if(!ss||ss.phone!==dd.phone)driverId=null;}}
   const pgIn=animNext;animNext=false;
   const dirCls=animDir?' dir-'+animDir:'';animDir=null;
   const ml=document.querySelector('link[rel=manifest]');if(ml)ml.href=adm?'/manifest-admin.json':'/manifest.json';
@@ -1029,9 +1057,11 @@ function riderLogin(){
     <button class="btn ghost" onclick="toggleReg()">ماعنديش حساب – حساب جديد</button>`;
 }
 function driverLogin(){
+  if(otpPhone) return otpScreen();
   if(regMode) return `<div class="card"><h2>${editingDriverId?'✏️ صحّح بياناتك':(driverVehicle==='moto'?'سجّل كابتن موتوسيكل':'سجّل كابتن عربية')}</h2>
     <label for="dn">الاسم ثلاثي</label><input id="dn" autocomplete="name">
     <label for="dp">رقم التليفون</label><input id="dp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx">
+    <label for="dpw">الباسورد (8 حروف على الأقل، حروف وأرقام)</label><input id="dpw" type="password" autocomplete="new-password">
     <label for="dpl">نمرة المركبة (حروف وأرقام)</label><input id="dpl" placeholder="مثلاً: أ ب ج 1234" autocomplete="off">
     <label for="dcm">نوع المركبة (موديل)</label><input id="dcm" placeholder="مثلاً: هيونداي إلنترا 2018 أو هوندا 2020" autocomplete="off">
     <label for="dcol">لون المركبة</label><input id="dcol" placeholder="مثلاً: أبيض" autocomplete="off">
@@ -1045,8 +1075,10 @@ function driverLogin(){
     <button class="btn" onclick="regDriver()">ابعت للمراجعة</button></div>
     <button class="btn ghost" onclick="toggleReg()">عندي حساب – تسجيل الدخول</button>`;
   return `<div class="card"><h2>${driverVehicle==='moto'?'تسجيل دخول الموتوسيكل':'تسجيل دخول العربية'}</h2>
-    <label for="lp">رقم التليفون</label><input id="lp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx" onkeydown="if(event.key==='Enter')loginDriver()">
-    <button class="btn" onclick="loginDriver()">دخول</button></div>
+    <label for="lp">رقم التليفون</label><input id="lp" type="tel" inputmode="tel" placeholder="01xxxxxxxxx">
+    <label for="lpw">الباسورد</label><input id="lpw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginDriver()">
+    <button class="btn" onclick="loginDriver()">دخول</button>
+    <p class="small" style="text-align:center;margin-top:10px"><a href="#" onclick="resetPw();return false">نسيت الباسورد؟</a></p></div>
     <div class="vpair"><button class="vbtn moto" onclick="pickVehicle('moto')"><span>🏍️</span><b>موتوسيكل</b></button><button class="vbtn car" onclick="pickVehicle('car')"><span>🚗</span><b>عربية</b></button></div>
     <p class="small" style="text-align:center;margin:4px 0 0">كابتن جديد؟ اختار مركبتك</p>`;
 }
@@ -1098,10 +1130,70 @@ function downloadDriverMaps(){
   setTimeout(closeModal,DRIVER_MAPS.length*600+200);
   toast('بتتنزّل الخرائط');
 }
-function loginDriver(){
-  const d=S.drivers.find(x=>x.phone===val('lp'));
-  if(!d){const n=noticeFor(val('lp'));if(n) return openNotice(n.text);return toast('الرقم ده مش مسجّل',1)}
-  driverId=d.id;persist();render();
+let otpPhone=null,otpSentAt=0,otpDevCode='';
+// تسجيل دخول الكابتن: كود على واتساب كل مرة يدخل فيها (بعد تسجيل الخروج أو من جهاز جديد)
+async function loginDriver(){
+  const phone=val('lp'), pw=val('lpw');
+  if(!phone||!pw) return toast('اكتب الرقم والباسورد',1);
+  try{
+    const r=await fetch('/api/pw/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,password:pw})});
+    const j=await r.json().catch(()=>({}));
+    if(!j.ok) return toast(j.error||'الرقم أو الباسورد غلط',1);
+    localStorage.setItem('tw-auth',JSON.stringify({phone,token:j.token}));
+    const d=S.drivers.find(x=>x.phone===phone);
+    if(!d) return toast('الحساب ده مش موجود',1);
+    driverId=d.id;persist();render();
+  }catch(e){toast('مفيش اتصال بالسيرفر',1)}
+}
+let resetPhone=null;
+async function resetPw(){
+  const phone=val('lp');
+  if(!phone) return toast('اكتب رقم الموبايل الأول',1);
+  try{
+    const r=await fetch('/api/pw/reset-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone})});
+    const j=await r.json().catch(()=>({}));
+    if(!j.ok) return toast(j.error||'مش قادرين نبعت الكود دلوقتي',1);
+    resetPhone=phone;otpPhone=phone;otpSentAt=Date.now();render();
+  }catch(e){toast('مفيش اتصال بالسيرفر',1)}
+}
+
+function otpScreen(){
+  return `<div class="card"><h2>نسيت الباسورد</h2>
+    <p class="small">بعتنالك كود من 6 أرقام على تليجرام <b dir="ltr">${esc(otpPhone)}</b> (صالح 5 دقايق)</p>
+    <div class="otp" dir="ltr">${[0,1,2,3,4,5].map(i=>`<input id="o${i}" inputmode="numeric" maxlength="1" oninput="otpNext(${i})" onkeydown="otpBack(event,${i})">`).join('')}</div>
+    <label for="opw">الباسورد الجديد</label><input id="opw" type="password" autocomplete="new-password" placeholder="8 حروف على الأقل، حروف وأرقام">
+    <button class="btn" onclick="verifyOtp()">احفظ الباسورد وادخل</button>
+    <p class="small" style="text-align:center;margin-top:10px"><a href="#" onclick="otpResend();return false">ابعت الكود تاني</a> · <a href="#" onclick="otpPhone=null;render();return false">رجوع</a></p></div>`;
+}
+function otpNext(i){const el=document.getElementById('o'+i);if(el.value){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}if(el.value&&i<5)document.getElementById('o'+(i+1)).focus();if(i===5&&el.value)verifyOtp()}
+function otpBack(e,i){if(e.key==='Backspace'&&!document.getElementById('o'+i).value&&i>0)document.getElementById('o'+(i-1)).focus()}
+async function otpResend(){
+  if(!otpPhone) return;
+  if(Date.now()-otpSentAt<60000) return toast('استنى دقيقة قبل ما تطلب كود تاني',1);
+  try{
+    const r=await fetch('/api/otp/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:otpPhone})});
+    const j=await r.json().catch(()=>({}));
+    if(r.status===429) return toast('استنى دقيقة قبل ما تطلب كود تاني',1);
+    if(!j.ok) return toast(j.error||'مش قادرين نبعت الكود دلوقتي',1);
+    otpSentAt=Date.now();otpDevCode=j.devCode||'';
+    if(otpDevCode) toast('كود التجربة: '+otpDevCode);
+    toast('اتبعت كود جديد');
+  }catch(e){toast('مفيش اتصال بالسيرفر',1)}
+}
+async function verifyOtp(){
+  const code=[0,1,2,3,4,5].map(i=>document.getElementById('o'+i).value).join('');
+  const pw=val('opw');
+  if(code.length!==6) return toast('اكتب الكود كامل',1);
+  try{
+    const r=await fetch('/api/pw/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:otpPhone,code,password:pw})});
+    const j=await r.json().catch(()=>({}));
+    if(!j.ok) return toast(j.error||'الكود غلط',1);
+    localStorage.setItem('tw-auth',JSON.stringify({phone:otpPhone,token:j.token}));
+    const d=S.drivers.find(x=>x.phone===otpPhone);
+    otpPhone=null;resetPhone=null;
+    if(d){driverId=d.id;persist();}
+    render();
+  }catch(e){toast('مفيش اتصال بالسيرفر',1)}
 }
 let editingDriverId=null,lastDS=null;
 function startEditDriver(){
@@ -1187,10 +1279,10 @@ function requestNotif(){
 }
 function regDriver(){
   const n=val('dn'),p=val('dp'),nid='',l='';
+  const pw=val('dpw');
+  if(!/^(?=.*[A-Za-z])(?=.*\d).{8,64}$/.test(pw)) return toast('الباسورد لازم يكون 8 حروف على الأقل، فيه حروف وأرقام',1);
   if(n.split(/\s+/).length<3) return toast('اكتب الاسم ثلاثي',1);
   if(!okPhone(p)) return toast('رقم التليفون مش صحيح',1);
-  if(!/^[23]\d{13}$/.test(nid)) return toast('الرقم القومي لازم يكون 14 رقم',1);
-  if(l.length<4) return toast('اكتب رقم الرخصة',1);
   if(!tmp.front||!tmp.back) return toast('لازم تضيف صورة البطاقة وش وضهر',1);
   if(!tmp.licFront||!tmp.licBack) return toast('لازم تضيف صورة الرخصة وش وضهر',1);
   if(!tmp.avatar) return toast('لازم تضيف صورتك الشخصية',1);
@@ -1206,7 +1298,8 @@ function regDriver(){
     driverId=ed.id;editingDriverId=null;tmp={};regMode=false;persist();toast('اتبعتت للمراجعة تاني');commit();return;
   }
   const d={id:uid(),name:n,phone:p,nid,license:l,cat:driverVehicle==='moto'?'moto':'car',photos:{...tmp},idHash:tmp.idHash||'',avatar:tmp.avatar,car:{photo:tmp.car,model:val('dcm'),color:val('dcol'),plate:val('dpl').toUpperCase()},pay:{wallet:val('dwal'),insta:val('dinsta')},vtype:driverVehicle,status:'pending',subUntil:0};
-  S.drivers.push(d);driverId=d.id;tmp={};regMode=false;persist();
+  S.drivers.push(d);driverId=d.id;regPendingId=d.id;tmp={};regMode=false;pendingPwVal=pw;
+  persist();
   post.push(()=>{if(!S.drivers.find(x=>x.id===d.id)){const rf=(REFUSED_CL||[]).find(x=>x.id===d.id);driverId=null;persist();showNote('الحساب مش هيتسجل',refuseText(rf?rf.why:'phone'));render()}});
   commit();
 }
@@ -1236,9 +1329,9 @@ function compress(file){return new Promise((ok,no)=>{
   const fr=new FileReader();
   fr.onerror=no;
   fr.onload=()=>{const img=new Image();img.onerror=no;
-    img.onload=()=>{const sc2=Math.min(1,800/Math.max(img.width,img.height));const c=document.createElement('canvas');
+    img.onload=()=>{const sc2=Math.min(1,560/Math.max(img.width,img.height));const c=document.createElement('canvas');
       c.width=Math.max(1,Math.round(img.width*sc2));c.height=Math.max(1,Math.round(img.height*sc2));
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.55))};
     img.src=fr.result};
   fr.readAsDataURL(file)})}
 // بصمة الصورة (dHash): نفس البطاقة بتطلع نفس البصمة تقريباً، حتى لو الصورة اتصورت تاني
@@ -1358,6 +1451,8 @@ function rateTrip(id,n){const t=S.trips.find(x=>x.id===id);t.rating=n;t.comment=
 // ---------- الكابتن ----------
 function driverSheet(){
   const d=S.drivers.find(x=>x.id===driverId);
+  // لحظة التسجيل: البيانات لسه بتتبعت للسيرفر، فالشاشة بتستنى من غير ما تقع
+  if(!d) return '<div class="grab"></div><div class="card"><h2>لحظة</h2><p class="small">بنسجّل بياناتك… استنى ثواني.</p></div>';
   let h=`<div class="grab"></div><div class="sh-t"><b>أهلاً ${esc(d.name)}</b><span class="badge">${esc(catOf(d.cat).name)}</span></div>`;
   if(d.status==='pending') return h+`<div class="card"><h2>⏳ بياناتك تحت المراجعة</h2><p>الأدمن بيراجع بياناتك ومطابقة الصورة. ده ممكن ياخد <b>يوم أو يومين</b> بحد أقصى.</p><p class="small">هيوصلك إشعار على الموبايل أول ما الأدمن يخلّص، وتقدر تكمّل بعدها.</p><button class="btn ghost" onclick="requestNotif()">🔔 فعّل الإشعارات</button></div>`;
   if(d.status==='rejected') return h+`<div class="card"><h2>⚠️ محتاجين تصحيح في بياناتك</h2><p>${esc(d.reason||'البيانات أو الصور مش واضحة.')}</p><p class="small">صحّح البيانات اللي غلط، وابعتها تاني للمراجعة.</p><button class="btn" onclick="startEditDriver()">✏️ صحّح بياناتي</button></div>`;
@@ -1606,6 +1701,7 @@ function openDrawer(){
     <button class="dr-i" onclick="openUpdates()">🔔 التحديثات${updBadge()}</button>
     <button class="dr-i" onclick="toggleLang()">🌐 ${LANG==='en'?'عربي':'English'}</button>
     ${role==='driver'?'<button class="dr-i" onclick="openEditMe()">✏️ تعديل بياناتي</button>':''}
+    ${role==='driver'?'<button class="dr-i" onclick="linkTelegram()">🔗 ربط تليجرام</button>':''}
     ${role==='driver'?'<button class="dr-i" onclick="closeDrawer();downloadDriverMaps()">⬇️ نزّل خريطة المدينة</button>':''}
     <button class="dr-i" onclick="closeDrawer();showInstallPrompt(true)">📲 ثبّت التطبيق على تليفوني</button>
     <a class="dr-i" href="tel:${SUPPORT_PHONE}">📞 تواصل مع خدمة العملاء</a>
@@ -1614,7 +1710,11 @@ function openDrawer(){
 }
 function closeDrawer(){$('#drawer').classList.remove('on')}
 function logout(){
-  if(curRole()==='rider')riderId=null;else driverId=null;
+  if(curRole()==='rider')riderId=null;else{
+    const ss=JSON.parse(localStorage.getItem('tw-auth')||'null');
+    if(ss&&ss.token) fetch('/api/otp/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:ss.token})}).catch(()=>{});
+    localStorage.removeItem('tw-auth');driverId=null;
+  }
   openChat=null;reqOpen=false;sel={f:null,t:null};closePicker();lastSig='';closeDrawer();closeModal();persist();render();window.scrollTo(0,0);
 }
 function openModal(fn){modalFn=fn;$('#modalIn').innerHTML=fn();$('#modal').classList.add('on')}
@@ -1966,13 +2066,12 @@ function maybeInstallPrompt(){
 window.addEventListener('hashchange',()=>{window.scrollTo(0,0);render()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll()});
 init();
-</script>
-<script>
+
+// تسجيل الـ service worker (الإشعارات والتثبيت)
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});
 }
+
 </script>
-<script src="/push.js" defer></script>
-<div id="updPage" class="upd-page" aria-hidden="true"></div>
 </body>
 </html>
